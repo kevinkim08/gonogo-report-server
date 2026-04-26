@@ -456,20 +456,7 @@ async function generateDeepReportJson(input) {
     return normalizeDeepReport(JSON.parse(raw), input)
 }
 
-    const completion = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-    })
 
-    const raw = completion.choices?.[0]?.message?.content
-    if (!raw) throw new Error("Empty OpenAI response.")
-
-    return normalizeDeepReport(JSON.parse(raw), input)
-}
 
 async function generateFreeReportJson(input) {
     const deep = await generateDeepReportJson(input)
