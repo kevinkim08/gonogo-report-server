@@ -86,87 +86,65 @@ app.get("/api/test-pdf", async (req, res) => {
 })
 
 app.post("/api/generate-report", async (req, res) => {
-  try {
-    const {
-      brandName = "",
-      productService = "",
-      targetCustomer = "",
-      language = "ko",
-      reportType = "free",
-    } = req.body || {};
+    try {
+        const {
+            brandName = "",
+            productService = "",
+            targetCustomer = "",
+            language = "ko",
+            reportType = "free",
+        } = req.body || {}
 
-    if (!brandName || !productService || !targetCustomer) {
-      return res.status(400).json({
-        ok: false,
-        error: "brandName, productService, targetCustomer are required.",
-      });
-    }
+        if (!brandName || !productService || !targetCustomer) {
+            return res.status(400).json({
+                ok: false,
+                error: "brandName, productService, targetCustomer are required.",
+            })
+        }
 
-    const normalizedReportType =
-      reportType === "paid" || reportType === "deep" ? "paid" : "free";
+        const normalizedLanguage = normalizeLanguage(language)
+        const locale = loadLocale(normalizedLanguage)
 
-    const prompt = buildPaidReportPrompt({
-      brandName,
-      productService,
-      targetCustomer,
-      language,
-    });
+        const normalizedReportType =
+            reportType === "paid" || reportType === "deep" ? "paid" : "free"
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      temperature: 0.25,
-      response_format: { type: "json_object" },
-      messages: [
-        {
-          role: "system",
-          content: prompt,
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
+        const paidReport = await generateDeepReportJson({
             brandName,
             productService,
             targetCustomer,
-            language,
-            reportType: normalizedReportType,
-          }),
-        },
-      ],
-    });
+            language: normalizedLanguage,
+        })
 
-    const rawText = completion.choices?.[0]?.message?.content || "{}";
-    const paidReport = JSON.parse(rawText);
+        const finalReport =
+            normalizedReportType === "paid"
+                ? paidReport
+                : buildFreeReportFromPaidReport(paidReport)
 
-    const finalReport =
-      normalizedReportType === "paid"
-        ? paidReport
-        : buildFreeReportFromPaidReport(paidReport);
+        const html = buildHtmlFromTemplate(finalReport, locale)
+        const pdfBuffer = await htmlToPdf(html)
 
-    const html = renderReportHtml({
-      report: finalReport,
-      language,
-      reportType: normalizedReportType,
-    });
+        const safeBrand = sanitizeFileName(brandName)
 
-    const pdfBuffer = await createPdfFromHtml(html);
+        const fileName =
+            normalizedReportType === "free"
+                ? `GoNoGo_Free_Report_${safeBrand}_${normalizedLanguage}.pdf`
+                : `GoNoGo_Paid_Report_${safeBrand}_${normalizedLanguage}.pdf`
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="${normalizedReportType}-business-report.pdf"`
-    );
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Length", pdfBuffer.length)
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
 
-    return res.send(pdfBuffer);
-  } catch (err) {
-    console.error("[GENERATE_REPORT_ERROR]", err);
+        return res.end(pdfBuffer)
+    } catch (error) {
+        console.error("[GENERATE_REPORT_ERROR]", error)
 
-    return res.status(500).json({
-      ok: false,
-      error: "REPORT_GENERATION_FAILED",
-      message: err?.message || "Unknown error",
-    });
-  }
-});
+        return res.status(500).json({
+            ok: false,
+            error: "Failed to generate report.",
+            detail: String(error?.message || error),
+        })
+    }
+})
 
 function buildPaidReportPrompt({ brandName, productService, targetCustomer, language }) {
   return `
@@ -447,192 +425,36 @@ function buildFreeReportFromPaidReport(fullReport) {
 
 async function generateDeepReportJson(input) {
     const { brandName, productService, targetCustomer, language } = input
-    const languageName = getLanguageName(language)
 
-const systemPrompt = buildPaidReportPrompt({
-    brandName,
-    productService,
-    targetCustomer,
-    language,
-})
+    const systemPrompt = buildPaidReportPrompt({
+        brandName,
+        productService,
+        targetCustomer,
+        language,
+    })
 
-const userPrompt = JSON.stringify({
-    brandName,
-    productService,
-    targetCustomer,
-    language,
-    reportType: "paid",
-})
+    const userPrompt = JSON.stringify({
+        brandName,
+        productService,
+        targetCustomer,
+        language,
+        reportType: "paid",
+    })
 
-Brand Name: ${brandName}
-Product / Service: ${productService}
-Target Customer: ${targetCustomer}
+    const completion = await openai.chat.completions.create({
+        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+    })
 
-Return this exact JSON shape:
+    const raw = completion.choices?.[0]?.message?.content
+    if (!raw) throw new Error("Empty OpenAI response.")
 
-{
-  "cover": {
-    "brandName": string,
-    "decision": "GO" | "HOLD" | "NO GO",
-    "score": number,
-    "subtitle": string,
-    "oneLineVerdict": string
-  },
-
-  "visualScores": {
-    "market": number,
-    "profitability": number,
-    "execution": number,
-    "risk": number
-  },
-
-  "decisionMatrix": [
-    ["MARKET", "LOW" | "MEDIUM" | "HIGH"],
-    ["PROFITABILITY", "LOW" | "MEDIUM" | "HIGH"],
-    ["EXECUTION", "LOW" | "MEDIUM" | "HIGH"],
-    ["RISK", "LOW" | "MEDIUM" | "HIGH"]
-  ],
-
-  "executiveDecision": [
-    ["Why this works", string],
-    ["Why this fails", string],
-    ["What to do now", string]
-  ],
-
-  "founderDecision": string,
-
-  "marketCards": [
-    ["TAM", string],
-    ["SAM", string],
-    ["SOM", string],
-    ["GROWTH", string]
-  ],
-
-  "marketFunnel": [
-    { "label": "TAM", "value": string, "score": number },
-    { "label": "SAM", "value": string, "score": number },
-    { "label": "SOM", "value": string, "score": number }
-  ],
-
-  "tamSamSom": [
-    ["TAM", string, string, string],
-    ["SAM", string, string, string],
-    ["SOM", string, string, string]
-  ],
-
-  "marketInsight": string,
-
-  "customerTruth": [
-    [string, string, string],
-    [string, string, string],
-    [string, string, string]
-  ],
-
-  "buyingTrigger": string,
-
-  "competitionMap": [
-    [string, string, string, string],
-    [string, string, string, string],
-    [string, string, string, string],
-    [string, string, string, string]
-  ],
-
-  "competitionConclusion": string,
-
-  "unitEconomicsCards": [
-    ["CAC", string],
-    ["LTV", string],
-    ["AOV", string],
-    ["REPEAT", string]
-  ],
-
-  "unitEconomicsScore": {
-    "ltvToCac": string,
-    "payback": string,
-    "margin": string,
-    "status": "PASS" | "WATCH" | "FAIL"
-  },
-
-  "unitEconomicsTable": [
-    [string, string, string, string],
-    [string, string, string, string],
-    [string, string, string, string],
-    [string, string, string, string]
-  ],
-
-  "economicsJudgment": string,
-
-  "marketingStrategy": {
-    "channelFit": [
-      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
-      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
-      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
-      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string]
-    ],
-    "contentPlaybook": [string, string, string, string, string],
-    "thirtyDayMarketingTest": [
-      [string, string, string],
-      [string, string, string],
-      [string, string, string]
-    ]
-  },
-
-  "businessModel": {
-    "revenueLayers": [
-      [string, string, string],
-      [string, string, string],
-      [string, string, string]
-    ],
-    "modelJudgment": string
-  },
-
-  "riskSystem": [
-    [string, string, string],
-    [string, string, string],
-    [string, string, string]
-  ],
-
-  "executionPlan": [
-    [string, string, string],
-    [string, string, string],
-    [string, string, string]
-  ],
-
-  "operatingRule": string,
-
-  "goThreshold": [
-    [string, string, string],
-    [string, string, string],
-    [string, string, string],
-    [string, string, string]
-  ],
-
-  "goChecklist": [
-    { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
-    { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
-    { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
-    { "label": string, "status": "PASS" | "WATCH" | "FAIL" }
-  ],
-
-  "finalRule": string,
-
-  "appendix": {
-    "dataSources": [
-      [string, string, string],
-      [string, string, string],
-      [string, string, string]
-    ],
-    "assumptions": [string, string, string, string]
-  }
+    return normalizeDeepReport(JSON.parse(raw), input)
 }
-
-Quality rules:
-- visualScores must be numbers from 0 to 100.
-- marketFunnel scores must be numbers from 0 to 100.
-- Numbers must include logic or assumptions.
-- Keep table cell text concise.
-- Do not use placeholders such as "...".
-`
 
     const completion = await openai.chat.completions.create({
         model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
