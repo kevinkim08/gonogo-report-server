@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
     res.json({
         ok: true,
         service: "GoNoGo Report Server",
-        version: "1.3.0-deep-report-layout",
+        version: "1.4.0-template-layout",
     })
 })
 
@@ -88,8 +88,8 @@ app.post("/api/generate-report", async (req, res) => {
 
         const buffer =
             reportType === "deep"
-                ? await buildDeepDocx(report, { brandName, language })
-                : await buildFreeDocx(report, { brandName, language })
+                ? await buildDeepDocx(report)
+                : await buildFreeDocx(report)
 
         const safeBrand = sanitizeFileName(brandName)
         const fileName =
@@ -119,21 +119,22 @@ async function generateDeepReportJson(input) {
     const languageName = getLanguageName(language)
 
     const systemPrompt = `
-You are GoNoGo, a ruthless business strategy report engine.
+You are GoNoGo, a paid business decision report engine.
 
 You do not write generic advice.
-You produce a paid business decision report.
+You create structured founder decision reports.
 
 Final report language: ${languageName}
 
 Rules:
 - Return only valid JSON.
 - No markdown.
-- No vague language.
-- Every section must be judgment-driven.
+- Use short judgment blocks.
+- Do not put long paragraphs inside wide tables.
 - Use conservative estimates when exact data is unavailable.
-- Use simple, readable business language.
-- The report must help a founder decide whether to start, pause, or reject the business.
+- Always include marketing strategy.
+- Always include threshold metrics.
+- Every section must help a founder decide GO, HOLD, or NO GO.
 `
 
     const userPrompt = `
@@ -147,36 +148,70 @@ Target Customer: ${targetCustomer}
 Return this exact JSON shape:
 
 {
-  "brandName": string,
-  "decision": "GO" | "HOLD" | "NO GO",
-  "score": number,
-  "oneLineVerdict": string,
-
-  "decisionMatrix": {
-    "market": "LOW" | "MEDIUM" | "HIGH",
-    "profitability": "LOW" | "MEDIUM" | "HIGH",
-    "executionDifficulty": "LOW" | "MEDIUM" | "HIGH",
-    "risk": "LOW" | "MEDIUM" | "HIGH"
+  "cover": {
+    "brandName": string,
+    "decision": "GO" | "HOLD" | "NO GO",
+    "score": number,
+    "subtitle": string,
+    "oneLineVerdict": string
   },
 
-  "executiveDecision": {
-    "whyItWorks": string,
-    "whyItFails": string,
-    "whatToDoNow": string
-  },
+  "decisionMatrix": [
+    { "label": "MARKET", "value": "LOW" | "MEDIUM" | "HIGH" },
+    { "label": "PROFITABILITY", "value": "LOW" | "MEDIUM" | "HIGH" },
+    { "label": "EXECUTION", "value": "LOW" | "MEDIUM" | "HIGH" },
+    { "label": "RISK", "value": "LOW" | "MEDIUM" | "HIGH" }
+  ],
 
-  "marketReality": {
-    "tam": string,
-    "sam": string,
-    "som": string,
-    "growthRate": string,
-    "marketInsight": string
-  },
+  "reportPromise": string,
 
-  "customerTruth": {
-    "behaviors": string[],
-    "buyingTrigger": string
-  },
+  "executiveDecision": [
+    { "question": "Why this works", "judgment": string },
+    { "question": "Why this fails", "judgment": string },
+    { "question": "What to do now", "judgment": string }
+  ],
+
+  "founderDecision": string,
+
+  "marketCards": [
+    { "label": string, "value": string },
+    { "label": string, "value": string },
+    { "label": string, "value": string },
+    { "label": string, "value": string }
+  ],
+
+  "tamSamSom": [
+    {
+      "layer": "TAM",
+      "estimate": string,
+      "formula": string,
+      "interpretation": string
+    },
+    {
+      "layer": "SAM",
+      "estimate": string,
+      "formula": string,
+      "interpretation": string
+    },
+    {
+      "layer": "SOM",
+      "estimate": string,
+      "formula": string,
+      "interpretation": string
+    }
+  ],
+
+  "marketInsight": string,
+
+  "customerTruth": [
+    {
+      "problem": string,
+      "behaviorEvidence": string,
+      "businessMeaning": string
+    }
+  ],
+
+  "buyingTrigger": string,
 
   "competitionMap": [
     {
@@ -189,88 +224,102 @@ Return this exact JSON shape:
 
   "competitionConclusion": string,
 
-  "unitEconomics": {
-    "cac": string,
-    "ltv": string,
-    "aov": string,
-    "repeatRate": string,
-    "conclusion": string
-  },
+  "unitEconomicsCards": [
+    { "label": "CAC", "value": string },
+    { "label": "LTV", "value": string },
+    { "label": "AOV", "value": string },
+    { "label": "PAYBACK", "value": string }
+  ],
+
+  "unitEconomicsTable": [
+    {
+      "metric": string,
+      "targetRange": string,
+      "passFailRule": string,
+      "reason": string
+    }
+  ],
+
+  "economicsJudgment": string,
 
   "marketingStrategy": {
     "channelFit": [
       {
         "channel": string,
-        "fit": "LOW" | "MEDIUM" | "HIGH",
-        "reason": string
+        "fit": "LOW" | "MEDIUM" | "HIGH" | "WATCH",
+        "role": string,
+        "why": string
       }
     ],
-    "contentStrategy": string[],
-    "cacStrategy": {
-      "earlyStage": string,
-      "growthStage": string
-    },
-    "thirtyDayPlan": {
-      "weekOneTwo": string[],
-      "weekThreeFour": string[],
-      "goal": string
-    }
+    "contentPlaybook": string[],
+    "thirtyDayMarketingTest": [
+      {
+        "period": string,
+        "action": string,
+        "successMetric": string
+      }
+    ]
   },
 
   "businessModel": {
-    "revenueSources": [
+    "revenueLayers": [
       {
-        "source": string,
-        "description": string
+        "layer": string,
+        "example": string,
+        "purpose": string
       }
     ],
-    "pricingStructure": [
-      {
-        "plan": string,
-        "price": string
-      }
-    ],
-    "conclusion": string
+    "modelJudgment": string
   },
 
   "riskSystem": [
     {
       "risk": string,
       "impact": string,
-      "solution": string
+      "countermeasure": string
     }
   ],
 
-  "executionPlan": {
-    "days0to30": string[],
-    "days30to60": string[],
-    "days60to90": string[],
-    "keyKpis": string[]
-  },
+  "executionPlan": [
+    {
+      "phase": string,
+      "actions": string,
+      "primaryKpi": string
+    }
+  ],
+
+  "operatingRule": string,
 
   "goThreshold": [
     {
       "metric": string,
-      "condition": string,
-      "decision": "PASS" | "FAIL" | "WATCH"
+      "passCondition": string,
+      "decisionMeaning": string
     }
   ],
 
   "finalRule": string,
 
   "appendix": {
-    "assumptions": string[],
-    "sources": string[]
+    "dataSources": [
+      {
+        "dataPoint": string,
+        "sourceBasis": string,
+        "usage": string
+      }
+    ],
+    "assumptions": string[]
   }
 }
 
 Quality requirements:
-- competitionMap must contain at least 4 competitors or alternatives.
-- channelFit must contain at least 4 marketing channels.
-- contentStrategy must contain at least 4 content ideas.
-- riskSystem must contain at least 3 risks.
-- goThreshold must contain at least 3 threshold metrics.
-- Score must be 0 to 100.
+- competitionMap must contain 4 to 6 competitors or alternatives.
+- marketingStrategy.channelFit must contain 4 to 6 channels.
+- contentPlaybook must contain 5 items.
+- thirtyDayMarketingTest must contain 3 periods.
+- riskSystem must contain 3 to 5 risks.
+- goThreshold must contain 4 to 5 metrics.
+- Keep each table cell concise.
 `
 
     const completion = await openai.chat.completions.create({
@@ -293,7 +342,7 @@ async function generateFreeReportJson(input) {
     const languageName = getLanguageName(language)
 
     const systemPrompt = `
-You are GoNoGo, a ruthless business decision analyst.
+You are GoNoGo, a business decision analyst.
 Final report language: ${languageName}
 Return only valid JSON.
 `
@@ -336,50 +385,57 @@ Return JSON:
 }
 
 function normalizeDeepReport(report, input) {
+    const cover = report.cover || {}
+
     return {
-        brandName: report.brandName || input.brandName,
-        decision: report.decision || "HOLD",
-        score: Number.isFinite(report.score) ? report.score : 50,
-        oneLineVerdict:
-            report.oneLineVerdict ||
-            "This business requires deeper validation before scaling.",
-
-        decisionMatrix: report.decisionMatrix || {
-            market: "MEDIUM",
-            profitability: "MEDIUM",
-            executionDifficulty: "MEDIUM",
-            risk: "MEDIUM",
+        cover: {
+            brandName: cover.brandName || input.brandName,
+            decision: cover.decision || "HOLD",
+            score: Number.isFinite(cover.score) ? cover.score : 50,
+            subtitle: cover.subtitle || input.productService,
+            oneLineVerdict:
+                cover.oneLineVerdict ||
+                "This business requires validation before scaling.",
         },
-
-        executiveDecision: report.executiveDecision || {},
-        marketReality: report.marketReality || {},
-        customerTruth: report.customerTruth || { behaviors: [], buyingTrigger: "" },
-        competitionMap: Array.isArray(report.competitionMap)
-            ? report.competitionMap
-            : [],
+        decisionMatrix: safeArray(report.decisionMatrix, [
+            { label: "MARKET", value: "MEDIUM" },
+            { label: "PROFITABILITY", value: "MEDIUM" },
+            { label: "EXECUTION", value: "MEDIUM" },
+            { label: "RISK", value: "MEDIUM" },
+        ]),
+        reportPromise:
+            report.reportPromise ||
+            "This report shows decision first, data second, and execution third.",
+        executiveDecision: safeArray(report.executiveDecision, []),
+        founderDecision: report.founderDecision || "",
+        marketCards: safeArray(report.marketCards, []),
+        tamSamSom: safeArray(report.tamSamSom, []),
+        marketInsight: report.marketInsight || "",
+        customerTruth: safeArray(report.customerTruth, []),
+        buyingTrigger: report.buyingTrigger || "",
+        competitionMap: safeArray(report.competitionMap, []),
         competitionConclusion: report.competitionConclusion || "",
-        unitEconomics: report.unitEconomics || {},
+        unitEconomicsCards: safeArray(report.unitEconomicsCards, []),
+        unitEconomicsTable: safeArray(report.unitEconomicsTable, []),
+        economicsJudgment: report.economicsJudgment || "",
         marketingStrategy: report.marketingStrategy || {
             channelFit: [],
-            contentStrategy: [],
-            cacStrategy: {},
-            thirtyDayPlan: {},
+            contentPlaybook: [],
+            thirtyDayMarketingTest: [],
         },
         businessModel: report.businessModel || {
-            revenueSources: [],
-            pricingStructure: [],
-            conclusion: "",
+            revenueLayers: [],
+            modelJudgment: "",
         },
-        riskSystem: Array.isArray(report.riskSystem) ? report.riskSystem : [],
-        executionPlan: report.executionPlan || {
-            days0to30: [],
-            days30to60: [],
-            days60to90: [],
-            keyKpis: [],
-        },
-        goThreshold: Array.isArray(report.goThreshold) ? report.goThreshold : [],
+        riskSystem: safeArray(report.riskSystem, []),
+        executionPlan: safeArray(report.executionPlan, []),
+        operatingRule: report.operatingRule || "",
+        goThreshold: safeArray(report.goThreshold, []),
         finalRule: report.finalRule || "",
-        appendix: report.appendix || { assumptions: [], sources: [] },
+        appendix: report.appendix || {
+            dataSources: [],
+            assumptions: [],
+        },
     }
 }
 
@@ -393,7 +449,7 @@ function normalizeFreeReport(report, input) {
             "This business requires validation before launch.",
         whyItWorks: report.whyItWorks || "",
         whyItFails: report.whyItFails || "",
-        topRisks: Array.isArray(report.topRisks) ? report.topRisks : [],
+        topRisks: safeArray(report.topRisks, []),
         firstAction: report.firstAction || "",
         upgradeHook:
             report.upgradeHook ||
@@ -401,78 +457,119 @@ function normalizeFreeReport(report, input) {
     }
 }
 
-async function buildDeepDocx(report, meta) {
+async function buildDeepDocx(report) {
     const children = []
 
-    // PAGE 1
-    addTitle(children, "GONOGO™")
-    addBigDecision(children, report.decision)
-    addScore(children, `Score: ${report.score} / 100`)
-    addTitle(children, report.brandName)
-    addNormal(children, report.oneLineVerdict)
-
-    addSpace(children)
+    addBrand(children)
+    addDecision(children, report.cover.decision)
+    addScore(children, `Score: ${report.cover.score} / 100`)
+    addTitle(children, `${report.cover.brandName} Deep Business Decision Report`)
+    addNormal(children, report.cover.subtitle)
 
     children.push(
-        safeTable([
-            ["Market", "Profitability", "Execution Difficulty", "Risk"],
-            [
-                report.decisionMatrix.market,
-                report.decisionMatrix.profitability,
-                report.decisionMatrix.executionDifficulty,
-                report.decisionMatrix.risk,
-            ],
-        ])
+        twoColumnCards(
+            report.decisionMatrix.map((item) => [
+                item.label || "",
+                item.value || "",
+            ])
+        )
     )
 
-    addPageBreak(children)
+    addNormal(children, `One-line verdict: ${report.cover.oneLineVerdict}`)
+    addSection(children, "Report Promise")
+    addNormal(children, report.reportPromise)
 
-    // PAGE 2
+    addDivider(children)
+
+    addSection(children, "REPORT MAP")
+    addSubTitle(children, "Table of Contents")
+    ;[
+        "1. Executive Decision",
+        "2. Market Reality",
+        "3. Customer Truth",
+        "4. Competition Map",
+        "5. Unit Economics",
+        "6. Marketing Strategy",
+        "7. Business Model",
+        "8. Risk System",
+        "9. Execution Plan",
+        "10. GO Threshold",
+        "11. Appendix",
+    ].forEach((item) => addBullet(children, item))
+
+    addNormal(
+        children,
+        "Design note: Each section uses compact tables, short judgment blocks, and clear thresholds. Long paragraphs are intentionally avoided."
+    )
+
+    addDivider(children)
+
+    addPageLabel(children, "PAGE 1")
     addSection(children, "1. Executive Decision")
     children.push(
-        safeTable([
-            ["Why this works", report.executiveDecision.whyItWorks || ""],
-            ["Why this fails", report.executiveDecision.whyItFails || ""],
-            ["What to do now", report.executiveDecision.whatToDoNow || ""],
+        basicTable([
+            ["Question", "Judgment"],
+            ...report.executiveDecision.map((item) => [
+                item.question || "",
+                item.judgment || "",
+            ]),
         ])
     )
+    addSubTitle(children, "Founder Decision")
+    addNormal(children, report.founderDecision)
 
-    addPageBreak(children)
+    addDivider(children)
 
-    // PAGE 3
+    addPageLabel(children, "PAGE 2")
     addSection(children, "2. Market Reality")
     children.push(
-        safeTable([
-            ["TAM", "SAM", "SOM", "Growth Rate"],
-            [
-                report.marketReality.tam || "",
-                report.marketReality.sam || "",
-                report.marketReality.som || "",
-                report.marketReality.growthRate || "",
-            ],
+        twoColumnCards(
+            report.marketCards.map((item) => [
+                item.label || "",
+                item.value || "",
+            ])
+        )
+    )
+
+    addSubTitle(children, "TAM / SAM / SOM")
+    children.push(
+        basicTable([
+            ["Layer", "Estimate", "Formula / Logic", "Interpretation"],
+            ...report.tamSamSom.map((item) => [
+                item.layer || "",
+                item.estimate || "",
+                item.formula || "",
+                item.interpretation || "",
+            ]),
         ])
     )
-    addSubSection(children, "Market Insight")
-    addNormal(children, report.marketReality.marketInsight || "")
+    addSubTitle(children, "Market Insight")
+    addNormal(children, report.marketInsight)
 
-    addPageBreak(children)
+    addDivider(children)
 
-    // PAGE 4
+    addPageLabel(children, "PAGE 3")
     addSection(children, "3. Customer Truth")
-    addSubSection(children, "Customer Behaviors")
-    ;(report.customerTruth.behaviors || []).forEach((item) =>
-        addBullet(children, item)
+    children.push(
+        basicTable([
+            ["Customer Problem", "Behavior Evidence", "Business Meaning"],
+            ...report.customerTruth.map((item) => [
+                item.problem || "",
+                item.behaviorEvidence || "",
+                item.businessMeaning || "",
+            ]),
+        ])
     )
-    addSubSection(children, "Buying Trigger")
-    addNormal(children, report.customerTruth.buyingTrigger || "")
+    addSubTitle(children, "Buying Trigger")
+    addNormal(children, report.buyingTrigger)
 
-    addPageBreak(children)
+    addDivider(children)
 
-    // PAGE 5
+    addPageLabel(children, "PAGE 4")
     addSection(children, "4. Competition Map")
     children.push(
-        safeTable([
-            ["Competitor", "Type", "Strength", "Weakness"],
+        basicTable([
+            ["Competitor / Alternative", "Type", "Strength", "Weakness"],
             ...report.competitionMap.map((item) => [
                 item.competitor || "",
                 item.type || "",
@@ -481,190 +578,179 @@ async function buildDeepDocx(report, meta) {
             ]),
         ])
     )
-    addSubSection(children, "Conclusion")
-    addNormal(children, report.competitionConclusion || "")
+    addSubTitle(children, "Competitive Conclusion")
+    addNormal(children, report.competitionConclusion)
 
-    addPageBreak(children)
+    addDivider(children)
 
-    // PAGE 6
+    addPageLabel(children, "PAGE 5")
     addSection(children, "5. Unit Economics")
     children.push(
-        safeTable([
-            ["Metric", "Value"],
-            ["CAC", report.unitEconomics.cac || ""],
-            ["LTV", report.unitEconomics.ltv || ""],
-            ["AOV", report.unitEconomics.aov || ""],
-            ["Repeat Rate", report.unitEconomics.repeatRate || ""],
-        ])
+        twoColumnCards(
+            report.unitEconomicsCards.map((item) => [
+                item.label || "",
+                item.value || "",
+            ])
+        )
     )
-    addSubSection(children, "Conclusion")
-    addNormal(children, report.unitEconomics.conclusion || "")
-
-    addPageBreak(children)
-
-    // PAGE 7
-    addSection(children, "6. Marketing Strategy")
-    addSubSection(children, "Channel Fit Analysis")
     children.push(
-        safeTable([
-            ["Channel", "Fit", "Reason"],
-            ...(report.marketingStrategy.channelFit || []).map((item) => [
-                item.channel || "",
-                item.fit || "",
+        basicTable([
+            ["Metric", "Target Range", "Pass / Fail Rule", "Reason"],
+            ...report.unitEconomicsTable.map((item) => [
+                item.metric || "",
+                item.targetRange || "",
+                item.passFailRule || "",
                 item.reason || "",
             ]),
         ])
     )
+    addSubTitle(children, "Economics Judgment")
+    addNormal(children, report.economicsJudgment)
 
-    addSubSection(children, "Content Strategy")
-    ;(report.marketingStrategy.contentStrategy || []).forEach((item) =>
+    addDivider(children)
+
+    addPageLabel(children, "PAGE 6")
+    addSection(children, "6. Marketing Strategy")
+    addSubTitle(children, "Channel Fit Analysis")
+    children.push(
+        basicTable([
+            ["Channel", "Fit", "Role", "Why"],
+            ...(report.marketingStrategy.channelFit || []).map((item) => [
+                item.channel || "",
+                item.fit || "",
+                item.role || "",
+                item.why || "",
+            ]),
+        ])
+    )
+
+    addSubTitle(children, "Content Playbook")
+    ;(report.marketingStrategy.contentPlaybook || []).forEach((item) =>
         addBullet(children, item)
     )
 
-    addSubSection(children, "CAC Strategy")
-    addNormal(
-        children,
-        `Early Stage: ${
-            report.marketingStrategy.cacStrategy?.earlyStage || ""
-        }`
-    )
-    addNormal(
-        children,
-        `Growth Stage: ${
-            report.marketingStrategy.cacStrategy?.growthStage || ""
-        }`
-    )
-
-    addSubSection(children, "30-Day Marketing Plan")
-    addNormal(children, "Week 1–2")
-    ;(report.marketingStrategy.thirtyDayPlan?.weekOneTwo || []).forEach((item) =>
-        addBullet(children, item)
-    )
-    addNormal(children, "Week 3–4")
-    ;(report.marketingStrategy.thirtyDayPlan?.weekThreeFour || []).forEach(
-        (item) => addBullet(children, item)
-    )
-    addNormal(
-        children,
-        `Goal: ${report.marketingStrategy.thirtyDayPlan?.goal || ""}`
+    addSubTitle(children, "30-Day Marketing Test")
+    children.push(
+        basicTable([
+            ["Period", "Action", "Success Metric"],
+            ...(report.marketingStrategy.thirtyDayMarketingTest || []).map(
+                (item) => [
+                    item.period || "",
+                    item.action || "",
+                    item.successMetric || "",
+                ]
+            ),
+        ])
     )
 
-    addPageBreak(children)
+    addDivider(children)
 
-    // PAGE 8
+    addPageLabel(children, "PAGE 7")
     addSection(children, "7. Business Model")
-    addSubSection(children, "Revenue Model")
     children.push(
-        safeTable([
-            ["Source", "Description"],
-            ...(report.businessModel.revenueSources || []).map((item) => [
-                item.source || "",
-                item.description || "",
+        basicTable([
+            ["Revenue Layer", "Example", "Purpose"],
+            ...(report.businessModel.revenueLayers || []).map((item) => [
+                item.layer || "",
+                item.example || "",
+                item.purpose || "",
             ]),
         ])
     )
+    addSubTitle(children, "Model Judgment")
+    addNormal(children, report.businessModel.modelJudgment)
 
-    addSubSection(children, "Pricing Structure")
-    children.push(
-        safeTable([
-            ["Plan", "Price"],
-            ...(report.businessModel.pricingStructure || []).map((item) => [
-                item.plan || "",
-                item.price || "",
-            ]),
-        ])
-    )
-    addSubSection(children, "Conclusion")
-    addNormal(children, report.businessModel.conclusion || "")
+    addDivider(children)
 
-    addPageBreak(children)
-
-    // PAGE 9
+    addPageLabel(children, "PAGE 8")
     addSection(children, "8. Risk System")
     children.push(
-        safeTable([
-            ["Risk", "Impact", "Solution"],
+        basicTable([
+            ["Risk", "Impact", "Countermeasure"],
             ...report.riskSystem.map((item) => [
                 item.risk || "",
                 item.impact || "",
-                item.solution || "",
+                item.countermeasure || "",
             ]),
         ])
     )
 
-    addPageBreak(children)
+    addDivider(children)
 
-    // PAGE 10
+    addPageLabel(children, "PAGE 9")
     addSection(children, "9. Execution Plan")
-    addSubSection(children, "0–30 Days")
-    ;(report.executionPlan.days0to30 || []).forEach((item) =>
-        addBullet(children, item)
+    children.push(
+        basicTable([
+            ["Phase", "Actions", "Primary KPI"],
+            ...report.executionPlan.map((item) => [
+                item.phase || "",
+                item.actions || "",
+                item.primaryKpi || "",
+            ]),
+        ])
     )
+    addSubTitle(children, "Operating Rule")
+    addNormal(children, report.operatingRule)
 
-    addSubSection(children, "30–60 Days")
-    ;(report.executionPlan.days30to60 || []).forEach((item) =>
-        addBullet(children, item)
-    )
+    addDivider(children)
 
-    addSubSection(children, "60–90 Days")
-    ;(report.executionPlan.days60to90 || []).forEach((item) =>
-        addBullet(children, item)
-    )
-
-    addSubSection(children, "Key KPIs")
-    ;(report.executionPlan.keyKpis || []).forEach((item) =>
-        addBullet(children, item)
-    )
-
-    addPageBreak(children)
-
-    // PAGE 11
+    addPageLabel(children, "PAGE 10")
     addSection(children, "10. GO Threshold")
     children.push(
-        safeTable([
-            ["Metric", "Condition", "Decision"],
+        basicTable([
+            ["Metric", "Pass Condition", "Decision Meaning"],
             ...report.goThreshold.map((item) => [
                 item.metric || "",
-                item.condition || "",
-                item.decision || "",
+                item.passCondition || "",
+                item.decisionMeaning || "",
+            ]),
+        ])
+    )
+    addSubTitle(children, "Final Rule")
+    addNormal(children, report.finalRule)
+
+    addDivider(children)
+
+    addSection(children, "APPENDIX")
+    addSubTitle(children, "Appendix: Data Sources & Assumptions")
+    children.push(
+        basicTable([
+            ["Data Point", "Source / Basis", "Usage"],
+            ...(report.appendix.dataSources || []).map((item) => [
+                item.dataPoint || "",
+                item.sourceBasis || "",
+                item.usage || "",
             ]),
         ])
     )
 
-    addSubSection(children, "Final Rule")
-    addNormal(children, report.finalRule || "")
-
-    addPageBreak(children)
-
-    // APPENDIX
-    addSection(children, "Appendix. Assumptions")
+    addSubTitle(children, "Assumptions")
     ;(report.appendix.assumptions || []).forEach((item) =>
         addBullet(children, item)
     )
 
-    addSection(children, "Appendix. Sources")
-    ;(report.appendix.sources || []).forEach((item) =>
-        addBullet(children, item)
-    )
+    addFooter(children)
 
     const doc = new Document({
         creator: "GoNoGo",
-        title: `GoNoGo Deep Report - ${report.brandName}`,
-        description: report.oneLineVerdict,
+        title: `GoNoGo Deep Report - ${report.cover.brandName}`,
+        description: report.cover.oneLineVerdict,
         sections: [{ children }],
     })
 
     return await Packer.toBuffer(doc)
 }
 
-async function buildFreeDocx(report, meta) {
+async function buildFreeDocx(report) {
     const children = []
 
-    addTitle(children, "GONOGO™")
-    addBigDecision(children, report.decision)
+    addBrand(children)
+    addDecision(children, report.decision)
     addScore(children, `Score: ${report.score} / 100`)
-    addTitle(children, report.brandName)
+    addTitle(children, `${report.brandName} Free Decision Report`)
     addNormal(children, report.oneLineVerdict)
+
+    addDivider(children)
 
     addSection(children, "1. Why This Works")
     addNormal(children, report.whyItWorks)
@@ -681,6 +767,8 @@ async function buildFreeDocx(report, meta) {
     addSection(children, "5. Unlock Deep Report")
     addNormal(children, report.upgradeHook)
 
+    addFooter(children)
+
     const doc = new Document({
         creator: "GoNoGo",
         title: `GoNoGo Free Report - ${report.brandName}`,
@@ -691,32 +779,26 @@ async function buildFreeDocx(report, meta) {
     return await Packer.toBuffer(doc)
 }
 
-function addTitle(children, text) {
+function addBrand(children) {
     children.push(
         new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 32,
-                }),
-            ],
-            spacing: { after: 240 },
+            children: [new TextRun({ text: "GONOGO™", bold: true, size: 28 })],
+            spacing: { after: 220 },
         })
     )
 }
 
-function addBigDecision(children, text) {
+function addDecision(children, text) {
     children.push(
         new Paragraph({
             children: [
                 new TextRun({
                     text: String(text || ""),
                     bold: true,
-                    size: 58,
+                    size: 64,
                 }),
             ],
-            spacing: { after: 160 },
+            spacing: { after: 120 },
         })
     )
 }
@@ -736,6 +818,21 @@ function addScore(children, text) {
     )
 }
 
+function addTitle(children, text) {
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 30,
+                }),
+            ],
+            spacing: { after: 160 },
+        })
+    )
+}
+
 function addSection(children, text) {
     children.push(
         new Paragraph({
@@ -743,25 +840,40 @@ function addSection(children, text) {
                 new TextRun({
                     text: String(text || ""),
                     bold: true,
-                    size: 28,
+                    size: 26,
                 }),
             ],
-            spacing: { before: 420, after: 180 },
+            spacing: { before: 360, after: 160 },
         })
     )
 }
 
-function addSubSection(children, text) {
+function addSubTitle(children, text) {
     children.push(
         new Paragraph({
             children: [
                 new TextRun({
                     text: String(text || ""),
                     bold: true,
-                    size: 23,
+                    size: 22,
                 }),
             ],
-            spacing: { before: 260, after: 120 },
+            spacing: { before: 220, after: 120 },
+        })
+    )
+}
+
+function addPageLabel(children, text) {
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 18,
+                }),
+            ],
+            spacing: { before: 260, after: 80 },
         })
     )
 }
@@ -772,10 +884,10 @@ function addNormal(children, text) {
             children: [
                 new TextRun({
                     text: String(text || ""),
-                    size: 22,
+                    size: 21,
                 }),
             ],
-            spacing: { after: 160 },
+            spacing: { after: 140 },
         })
     )
 }
@@ -786,34 +898,48 @@ function addBullet(children, text) {
             children: [
                 new TextRun({
                     text: `• ${String(text || "")}`,
-                    size: 22,
+                    size: 21,
                 }),
             ],
-            spacing: { after: 120 },
+            spacing: { after: 90 },
         })
     )
 }
 
-function addSpace(children) {
+function addDivider(children) {
     children.push(
         new Paragraph({
-            children: [new TextRun({ text: "", size: 12 })],
-            spacing: { after: 260 },
+            children: [
+                new TextRun({
+                    text: "────────────────────────────────────────",
+                    size: 14,
+                }),
+            ],
+            spacing: { before: 220, after: 220 },
         })
     )
 }
 
-function addPageBreak(children) {
-    addSpace(children)
-    addSpace(children)
+function addFooter(children) {
+    addDivider(children)
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: "GoNoGo™ Business Decision Report",
+                    size: 18,
+                }),
+            ],
+        })
+    )
 }
 
-function safeTable(rows) {
+function basicTable(rows) {
     const safeRows = Array.isArray(rows) ? rows : []
 
     return new Table({
         width: { size: 100, type: WidthType.PERCENTAGE },
-        rows: safeRows.map((row) => {
+        rows: safeRows.map((row, rowIndex) => {
             const cells = Array.isArray(row) ? row : [String(row || "")]
             return new TableRow({
                 children: cells.map((cell) => {
@@ -823,7 +949,8 @@ function safeTable(rows) {
                                 children: [
                                     new TextRun({
                                         text: String(cell || ""),
-                                        size: 20,
+                                        bold: rowIndex === 0,
+                                        size: rowIndex === 0 ? 19 : 18,
                                     }),
                                 ],
                             }),
@@ -833,6 +960,26 @@ function safeTable(rows) {
             })
         }),
     })
+}
+
+function twoColumnCards(items) {
+    const rows = []
+
+    for (let i = 0; i < items.length; i += 2) {
+        const left = items[i] || ["", ""]
+        const right = items[i + 1] || ["", ""]
+
+        rows.push([
+            `${left[0]}\n${left[1]}`,
+            `${right[0]}\n${right[1]}`,
+        ])
+    }
+
+    return basicTable(rows)
+}
+
+function safeArray(value, fallback) {
+    return Array.isArray(value) ? value : fallback
 }
 
 function getLanguageName(code) {
