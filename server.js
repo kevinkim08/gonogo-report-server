@@ -31,7 +31,6 @@ app.use(
                 origin === "https://big-evidence-039433.framer.app"
 
             if (allowed) return callback(null, true)
-
             return callback(new Error("Not allowed by CORS"))
         },
         methods: ["GET", "POST", "OPTIONS"],
@@ -47,15 +46,12 @@ app.get("/", (req, res) => {
     res.json({
         ok: true,
         service: "GoNoGo Report Server",
-        version: "1.2.0-safe-docx",
+        version: "1.3.0-deep-report-layout",
     })
 })
 
 app.get("/api/health", (req, res) => {
-    res.json({
-        ok: true,
-        status: "healthy",
-    })
+    res.json({ ok: true, status: "healthy" })
 })
 
 app.post("/api/generate-report", async (req, res) => {
@@ -82,21 +78,18 @@ app.post("/api/generate-report", async (req, res) => {
                       productService,
                       targetCustomer,
                       language,
-                      reportType,
                   })
                 : await generateFreeReportJson({
                       brandName,
                       productService,
                       targetCustomer,
                       language,
-                      reportType: "free",
                   })
 
-        const buffer = await buildDocx(report, {
-            brandName,
-            language,
-            reportType,
-        })
+        const buffer =
+            reportType === "deep"
+                ? await buildDeepDocx(report, { brandName, language })
+                : await buildFreeDocx(report, { brandName, language })
 
         const safeBrand = sanitizeFileName(brandName)
         const fileName =
@@ -108,15 +101,11 @@ app.post("/api/generate-report", async (req, res) => {
             "Content-Type",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${fileName}"`
-        )
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
 
         return res.send(buffer)
     } catch (error) {
         console.error("[GENERATE_REPORT_ERROR]", error)
-
         return res.status(500).json({
             ok: false,
             error: "Failed to generate report.",
@@ -125,31 +114,30 @@ app.post("/api/generate-report", async (req, res) => {
     }
 })
 
-async function generateFreeReportJson(input) {
+async function generateDeepReportJson(input) {
     const { brandName, productService, targetCustomer, language } = input
     const languageName = getLanguageName(language)
 
     const systemPrompt = `
-You are GoNoGo, a ruthless business decision analyst.
+You are GoNoGo, a ruthless business strategy report engine.
 
-Your job is NOT to explain.
-Your job is to decide whether this business should GO, HOLD, or NO GO.
+You do not write generic advice.
+You produce a paid business decision report.
+
+Final report language: ${languageName}
 
 Rules:
-- Final report language: ${languageName}
-- No vague language.
-- Avoid "might", "could", "possibly", "seems".
-- Every sentence must be judgment-based.
-- Use conservative estimates where exact data is unavailable.
-- This is a FREE SAMPLE REPORT.
-- It must be sharp, valuable, and conversion-oriented.
-- Do not provide full execution strategy.
-- Do not provide full detailed financial modeling.
 - Return only valid JSON.
+- No markdown.
+- No vague language.
+- Every section must be judgment-driven.
+- Use conservative estimates when exact data is unavailable.
+- Use simple, readable business language.
+- The report must help a founder decide whether to start, pause, or reject the business.
 `
 
     const userPrompt = `
-Create a FREE GoNoGo sample report.
+Create a DEEP PAID GoNoGo report.
 
 Business Input:
 Brand Name: ${brandName}
@@ -159,55 +147,134 @@ Target Customer: ${targetCustomer}
 Return this exact JSON shape:
 
 {
-  "title": string,
-  "subtitle": string,
-  "reportType": "free",
-  "language": string,
+  "brandName": string,
   "decision": "GO" | "HOLD" | "NO GO",
   "score": number,
   "oneLineVerdict": string,
-  "killShot": {
+
+  "decisionMatrix": {
+    "market": "LOW" | "MEDIUM" | "HIGH",
+    "profitability": "LOW" | "MEDIUM" | "HIGH",
+    "executionDifficulty": "LOW" | "MEDIUM" | "HIGH",
+    "risk": "LOW" | "MEDIUM" | "HIGH"
+  },
+
+  "executiveDecision": {
     "whyItWorks": string,
     "whyItFails": string,
     "whatToDoNow": string
   },
-  "decisionReasons": string[],
-  "marketSnapshot": {
-    "estimatedTAM": string,
-    "entryDifficulty": "LOW" | "MEDIUM" | "HIGH",
-    "marketJudgment": string
+
+  "marketReality": {
+    "tam": string,
+    "sam": string,
+    "som": string,
+    "growthRate": string,
+    "marketInsight": string
   },
-  "topRisks": [
+
+  "customerTruth": {
+    "behaviors": string[],
+    "buyingTrigger": string
+  },
+
+  "competitionMap": [
+    {
+      "competitor": string,
+      "type": string,
+      "strength": string,
+      "weakness": string
+    }
+  ],
+
+  "competitionConclusion": string,
+
+  "unitEconomics": {
+    "cac": string,
+    "ltv": string,
+    "aov": string,
+    "repeatRate": string,
+    "conclusion": string
+  },
+
+  "marketingStrategy": {
+    "channelFit": [
+      {
+        "channel": string,
+        "fit": "LOW" | "MEDIUM" | "HIGH",
+        "reason": string
+      }
+    ],
+    "contentStrategy": string[],
+    "cacStrategy": {
+      "earlyStage": string,
+      "growthStage": string
+    },
+    "thirtyDayPlan": {
+      "weekOneTwo": string[],
+      "weekThreeFour": string[],
+      "goal": string
+    }
+  },
+
+  "businessModel": {
+    "revenueSources": [
+      {
+        "source": string,
+        "description": string
+      }
+    ],
+    "pricingStructure": [
+      {
+        "plan": string,
+        "price": string
+      }
+    ],
+    "conclusion": string
+  },
+
+  "riskSystem": [
     {
       "risk": string,
       "impact": string,
-      "reason": string
+      "solution": string
     }
   ],
-  "unitEconomics": {
-    "estimatedCAC": string,
-    "estimatedLTV": string,
-    "judgment": string
+
+  "executionPlan": {
+    "days0to30": string[],
+    "days30to60": string[],
+    "days60to90": string[],
+    "keyKpis": string[]
   },
-  "firstAction": string,
-  "upgradeHook": string,
+
+  "goThreshold": [
+    {
+      "metric": string,
+      "condition": string,
+      "decision": "PASS" | "FAIL" | "WATCH"
+    }
+  ],
+
+  "finalRule": string,
+
   "appendix": {
     "assumptions": string[],
     "sources": string[]
   }
 }
 
-Quality rules:
-- Score must be between 0 and 100.
-- topRisks must contain exactly 3 risks.
-- decisionReasons must contain exactly 3 reasons.
-- estimatedTAM must include a rough number or range.
-- estimatedCAC and estimatedLTV must include rough estimates.
-- upgradeHook must clearly explain what the paid deep report unlocks.
+Quality requirements:
+- competitionMap must contain at least 4 competitors or alternatives.
+- channelFit must contain at least 4 marketing channels.
+- contentStrategy must contain at least 4 content ideas.
+- riskSystem must contain at least 3 risks.
+- goThreshold must contain at least 3 threshold metrics.
+- Score must be 0 to 100.
 `
 
     const completion = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || "gpt-5.4-mini",
+        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
         messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
@@ -218,22 +285,21 @@ Quality rules:
     const raw = completion.choices?.[0]?.message?.content
     if (!raw) throw new Error("Empty OpenAI response.")
 
-    const parsed = JSON.parse(raw)
-    return normalizeFreeReport(parsed, input)
+    return normalizeDeepReport(JSON.parse(raw), input)
 }
 
-async function generateDeepReportJson(input) {
+async function generateFreeReportJson(input) {
     const { brandName, productService, targetCustomer, language } = input
     const languageName = getLanguageName(language)
 
     const systemPrompt = `
-You are GoNoGo, a business strategy consultant.
-Final report language: ${languageName}.
+You are GoNoGo, a ruthless business decision analyst.
+Final report language: ${languageName}
 Return only valid JSON.
 `
 
     const userPrompt = `
-Create a DEEP GoNoGo business report.
+Create a FREE GoNoGo sample report.
 
 Brand Name: ${brandName}
 Product / Service: ${productService}
@@ -242,34 +308,20 @@ Target Customer: ${targetCustomer}
 Return JSON:
 
 {
-  "title": string,
-  "subtitle": string,
-  "reportType": "deep",
-  "language": string,
+  "brandName": string,
   "decision": "GO" | "HOLD" | "NO GO",
   "score": number,
-  "summaryBullets": string[],
-  "sections": [
-    {
-      "heading": string,
-      "body": string,
-      "bullets": string[],
-      "table": {
-        "title": string,
-        "headers": string[],
-        "rows": string[][]
-      } | null
-    }
-  ],
-  "appendix": {
-    "assumptions": string[],
-    "sources": string[]
-  }
+  "oneLineVerdict": string,
+  "whyItWorks": string,
+  "whyItFails": string,
+  "topRisks": string[],
+  "firstAction": string,
+  "upgradeHook": string
 }
 `
 
     const completion = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || "gpt-5.4-mini",
+        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
         messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
@@ -280,238 +332,360 @@ Return JSON:
     const raw = completion.choices?.[0]?.message?.content
     if (!raw) throw new Error("Empty OpenAI response.")
 
-    const parsed = JSON.parse(raw)
-    return normalizeDeepReport(parsed, input)
-}
-
-function normalizeFreeReport(report, input) {
-    return {
-        title: report.title || `GoNoGo Free Report: ${input.brandName}`,
-        subtitle:
-            report.subtitle ||
-            "A fast decision report designed to test whether this business deserves deeper analysis.",
-        reportType: "free",
-        language: report.language || input.language,
-        decision: report.decision || "HOLD",
-        score: Number.isFinite(report.score) ? report.score : 50,
-        oneLineVerdict:
-            report.oneLineVerdict ||
-            "This business requires validation before serious launch investment.",
-        killShot: {
-            whyItWorks: report?.killShot?.whyItWorks || "",
-            whyItFails: report?.killShot?.whyItFails || "",
-            whatToDoNow: report?.killShot?.whatToDoNow || "",
-        },
-        decisionReasons: Array.isArray(report.decisionReasons)
-            ? report.decisionReasons.slice(0, 3)
-            : [],
-        marketSnapshot: {
-            estimatedTAM: report?.marketSnapshot?.estimatedTAM || "Unknown",
-            entryDifficulty:
-                report?.marketSnapshot?.entryDifficulty || "MEDIUM",
-            marketJudgment: report?.marketSnapshot?.marketJudgment || "",
-        },
-        topRisks: Array.isArray(report.topRisks)
-            ? report.topRisks.slice(0, 3)
-            : [],
-        unitEconomics: {
-            estimatedCAC: report?.unitEconomics?.estimatedCAC || "Unknown",
-            estimatedLTV: report?.unitEconomics?.estimatedLTV || "Unknown",
-            judgment: report?.unitEconomics?.judgment || "",
-        },
-        firstAction: report.firstAction || "",
-        upgradeHook:
-            report.upgradeHook ||
-            "The paid deep report unlocks full market sizing, CAC/LTV modeling, competitor analysis, and execution roadmap.",
-        appendix: {
-            assumptions: Array.isArray(report?.appendix?.assumptions)
-                ? report.appendix.assumptions
-                : ["Generated from user-provided business input."],
-            sources: Array.isArray(report?.appendix?.sources)
-                ? report.appendix.sources
-                : [
-                      "User input assumption.",
-                      "Public market data required for full paid analysis.",
-                  ],
-        },
-    }
+    return normalizeFreeReport(JSON.parse(raw), input)
 }
 
 function normalizeDeepReport(report, input) {
     return {
-        title: report.title || `GoNoGo Deep Report: ${input.brandName}`,
-        subtitle:
-            report.subtitle ||
-            "A structured business decision report generated by GoNoGo.",
-        reportType: "deep",
-        language: report.language || input.language,
+        brandName: report.brandName || input.brandName,
         decision: report.decision || "HOLD",
         score: Number.isFinite(report.score) ? report.score : 50,
-        summaryBullets: Array.isArray(report.summaryBullets)
-            ? report.summaryBullets
-            : [],
-        sections: Array.isArray(report.sections) ? report.sections : [],
-        appendix: {
-            assumptions: Array.isArray(report?.appendix?.assumptions)
-                ? report.appendix.assumptions
-                : ["Generated from user-provided business input."],
-            sources: Array.isArray(report?.appendix?.sources)
-                ? report.appendix.sources
-                : ["User input assumption."],
+        oneLineVerdict:
+            report.oneLineVerdict ||
+            "This business requires deeper validation before scaling.",
+
+        decisionMatrix: report.decisionMatrix || {
+            market: "MEDIUM",
+            profitability: "MEDIUM",
+            executionDifficulty: "MEDIUM",
+            risk: "MEDIUM",
         },
+
+        executiveDecision: report.executiveDecision || {},
+        marketReality: report.marketReality || {},
+        customerTruth: report.customerTruth || { behaviors: [], buyingTrigger: "" },
+        competitionMap: Array.isArray(report.competitionMap)
+            ? report.competitionMap
+            : [],
+        competitionConclusion: report.competitionConclusion || "",
+        unitEconomics: report.unitEconomics || {},
+        marketingStrategy: report.marketingStrategy || {
+            channelFit: [],
+            contentStrategy: [],
+            cacStrategy: {},
+            thirtyDayPlan: {},
+        },
+        businessModel: report.businessModel || {
+            revenueSources: [],
+            pricingStructure: [],
+            conclusion: "",
+        },
+        riskSystem: Array.isArray(report.riskSystem) ? report.riskSystem : [],
+        executionPlan: report.executionPlan || {
+            days0to30: [],
+            days30to60: [],
+            days60to90: [],
+            keyKpis: [],
+        },
+        goThreshold: Array.isArray(report.goThreshold) ? report.goThreshold : [],
+        finalRule: report.finalRule || "",
+        appendix: report.appendix || { assumptions: [], sources: [] },
     }
 }
 
-async function buildDocx(report, meta) {
-    if (report.reportType === "free") {
-        return await buildSafeFreeDocx(report, meta)
+function normalizeFreeReport(report, input) {
+    return {
+        brandName: report.brandName || input.brandName,
+        decision: report.decision || "HOLD",
+        score: Number.isFinite(report.score) ? report.score : 50,
+        oneLineVerdict:
+            report.oneLineVerdict ||
+            "This business requires validation before launch.",
+        whyItWorks: report.whyItWorks || "",
+        whyItFails: report.whyItFails || "",
+        topRisks: Array.isArray(report.topRisks) ? report.topRisks : [],
+        firstAction: report.firstAction || "",
+        upgradeHook:
+            report.upgradeHook ||
+            "The deep report unlocks full market, marketing, unit economics, and execution strategy.",
     }
-
-    return await buildSafeDeepDocx(report, meta)
 }
 
-async function buildSafeFreeDocx(report, meta) {
+async function buildDeepDocx(report, meta) {
     const children = []
 
+    // PAGE 1
     addTitle(children, "GONOGO™")
     addBigDecision(children, report.decision)
-    addScore(children, `${report.score}/100`)
-    addTitle(children, report.title)
+    addScore(children, `Score: ${report.score} / 100`)
+    addTitle(children, report.brandName)
     addNormal(children, report.oneLineVerdict)
 
-    addSpacer(children)
+    addSpace(children)
 
     children.push(
         safeTable([
-            ["Report Type", "FREE SAMPLE"],
-            ["Decision", report.decision],
-            ["Score", `${report.score}/100`],
-            ["Language", meta.language],
-            ["Generated For", meta.brandName],
+            ["Market", "Profitability", "Execution Difficulty", "Risk"],
+            [
+                report.decisionMatrix.market,
+                report.decisionMatrix.profitability,
+                report.decisionMatrix.executionDifficulty,
+                report.decisionMatrix.risk,
+            ],
         ])
     )
 
-    addSection(children, "1. Executive Kill Shot")
+    addPageBreak(children)
 
+    // PAGE 2
+    addSection(children, "1. Executive Decision")
     children.push(
         safeTable([
-            ["Why this works", report.killShot.whyItWorks],
-            ["Why this fails", report.killShot.whyItFails],
-            ["What to do now", report.killShot.whatToDoNow],
+            ["Why this works", report.executiveDecision.whyItWorks || ""],
+            ["Why this fails", report.executiveDecision.whyItFails || ""],
+            ["What to do now", report.executiveDecision.whatToDoNow || ""],
         ])
     )
 
-    addSection(children, "2. Core Decision Logic")
-    report.decisionReasons.forEach((item, index) => {
-        addBullet(children, `${index + 1}. ${item}`)
-    })
+    addPageBreak(children)
 
-    addSection(children, "3. Market Snapshot")
+    // PAGE 3
+    addSection(children, "2. Market Reality")
     children.push(
         safeTable([
-            ["Estimated TAM", report.marketSnapshot.estimatedTAM],
-            ["Entry Difficulty", report.marketSnapshot.entryDifficulty],
-            ["Market Judgment", report.marketSnapshot.marketJudgment],
+            ["TAM", "SAM", "SOM", "Growth Rate"],
+            [
+                report.marketReality.tam || "",
+                report.marketReality.sam || "",
+                report.marketReality.som || "",
+                report.marketReality.growthRate || "",
+            ],
         ])
     )
+    addSubSection(children, "Market Insight")
+    addNormal(children, report.marketReality.marketInsight || "")
 
-    addSection(children, "4. Top 3 Risks")
-    report.topRisks.forEach((item, index) => {
-        addSubSection(children, `Risk ${index + 1}: ${item.risk || ""}`)
-        addNormal(children, `Impact: ${item.impact || ""}`)
-        addNormal(children, `Reason: ${item.reason || ""}`)
-    })
+    addPageBreak(children)
 
-    addSection(children, "5. Unit Economics Estimate")
+    // PAGE 4
+    addSection(children, "3. Customer Truth")
+    addSubSection(children, "Customer Behaviors")
+    ;(report.customerTruth.behaviors || []).forEach((item) =>
+        addBullet(children, item)
+    )
+    addSubSection(children, "Buying Trigger")
+    addNormal(children, report.customerTruth.buyingTrigger || "")
+
+    addPageBreak(children)
+
+    // PAGE 5
+    addSection(children, "4. Competition Map")
     children.push(
         safeTable([
-            ["Estimated CAC", report.unitEconomics.estimatedCAC],
-            ["Estimated LTV", report.unitEconomics.estimatedLTV],
-            ["Judgment", report.unitEconomics.judgment],
+            ["Competitor", "Type", "Strength", "Weakness"],
+            ...report.competitionMap.map((item) => [
+                item.competitor || "",
+                item.type || "",
+                item.strength || "",
+                item.weakness || "",
+            ]),
+        ])
+    )
+    addSubSection(children, "Conclusion")
+    addNormal(children, report.competitionConclusion || "")
+
+    addPageBreak(children)
+
+    // PAGE 6
+    addSection(children, "5. Unit Economics")
+    children.push(
+        safeTable([
+            ["Metric", "Value"],
+            ["CAC", report.unitEconomics.cac || ""],
+            ["LTV", report.unitEconomics.ltv || ""],
+            ["AOV", report.unitEconomics.aov || ""],
+            ["Repeat Rate", report.unitEconomics.repeatRate || ""],
+        ])
+    )
+    addSubSection(children, "Conclusion")
+    addNormal(children, report.unitEconomics.conclusion || "")
+
+    addPageBreak(children)
+
+    // PAGE 7
+    addSection(children, "6. Marketing Strategy")
+    addSubSection(children, "Channel Fit Analysis")
+    children.push(
+        safeTable([
+            ["Channel", "Fit", "Reason"],
+            ...(report.marketingStrategy.channelFit || []).map((item) => [
+                item.channel || "",
+                item.fit || "",
+                item.reason || "",
+            ]),
         ])
     )
 
-    addSection(children, "6. First Action")
-    addNormal(children, report.firstAction)
+    addSubSection(children, "Content Strategy")
+    ;(report.marketingStrategy.contentStrategy || []).forEach((item) =>
+        addBullet(children, item)
+    )
 
-    addSection(children, "7. Unlock Deep Report")
-    addNormal(children, report.upgradeHook)
+    addSubSection(children, "CAC Strategy")
+    addNormal(
+        children,
+        `Early Stage: ${
+            report.marketingStrategy.cacStrategy?.earlyStage || ""
+        }`
+    )
+    addNormal(
+        children,
+        `Growth Stage: ${
+            report.marketingStrategy.cacStrategy?.growthStage || ""
+        }`
+    )
 
+    addSubSection(children, "30-Day Marketing Plan")
+    addNormal(children, "Week 1–2")
+    ;(report.marketingStrategy.thirtyDayPlan?.weekOneTwo || []).forEach((item) =>
+        addBullet(children, item)
+    )
+    addNormal(children, "Week 3–4")
+    ;(report.marketingStrategy.thirtyDayPlan?.weekThreeFour || []).forEach(
+        (item) => addBullet(children, item)
+    )
+    addNormal(
+        children,
+        `Goal: ${report.marketingStrategy.thirtyDayPlan?.goal || ""}`
+    )
+
+    addPageBreak(children)
+
+    // PAGE 8
+    addSection(children, "7. Business Model")
+    addSubSection(children, "Revenue Model")
+    children.push(
+        safeTable([
+            ["Source", "Description"],
+            ...(report.businessModel.revenueSources || []).map((item) => [
+                item.source || "",
+                item.description || "",
+            ]),
+        ])
+    )
+
+    addSubSection(children, "Pricing Structure")
+    children.push(
+        safeTable([
+            ["Plan", "Price"],
+            ...(report.businessModel.pricingStructure || []).map((item) => [
+                item.plan || "",
+                item.price || "",
+            ]),
+        ])
+    )
+    addSubSection(children, "Conclusion")
+    addNormal(children, report.businessModel.conclusion || "")
+
+    addPageBreak(children)
+
+    // PAGE 9
+    addSection(children, "8. Risk System")
+    children.push(
+        safeTable([
+            ["Risk", "Impact", "Solution"],
+            ...report.riskSystem.map((item) => [
+                item.risk || "",
+                item.impact || "",
+                item.solution || "",
+            ]),
+        ])
+    )
+
+    addPageBreak(children)
+
+    // PAGE 10
+    addSection(children, "9. Execution Plan")
+    addSubSection(children, "0–30 Days")
+    ;(report.executionPlan.days0to30 || []).forEach((item) =>
+        addBullet(children, item)
+    )
+
+    addSubSection(children, "30–60 Days")
+    ;(report.executionPlan.days30to60 || []).forEach((item) =>
+        addBullet(children, item)
+    )
+
+    addSubSection(children, "60–90 Days")
+    ;(report.executionPlan.days60to90 || []).forEach((item) =>
+        addBullet(children, item)
+    )
+
+    addSubSection(children, "Key KPIs")
+    ;(report.executionPlan.keyKpis || []).forEach((item) =>
+        addBullet(children, item)
+    )
+
+    addPageBreak(children)
+
+    // PAGE 11
+    addSection(children, "10. GO Threshold")
+    children.push(
+        safeTable([
+            ["Metric", "Condition", "Decision"],
+            ...report.goThreshold.map((item) => [
+                item.metric || "",
+                item.condition || "",
+                item.decision || "",
+            ]),
+        ])
+    )
+
+    addSubSection(children, "Final Rule")
+    addNormal(children, report.finalRule || "")
+
+    addPageBreak(children)
+
+    // APPENDIX
     addSection(children, "Appendix. Assumptions")
-    report.appendix.assumptions.forEach((item) => addBullet(children, item))
+    ;(report.appendix.assumptions || []).forEach((item) =>
+        addBullet(children, item)
+    )
 
     addSection(children, "Appendix. Sources")
-    report.appendix.sources.forEach((item) => addBullet(children, item))
+    ;(report.appendix.sources || []).forEach((item) =>
+        addBullet(children, item)
+    )
 
     const doc = new Document({
         creator: "GoNoGo",
-        title: report.title,
-        description: report.subtitle,
-        sections: [
-            {
-                children,
-            },
-        ],
+        title: `GoNoGo Deep Report - ${report.brandName}`,
+        description: report.oneLineVerdict,
+        sections: [{ children }],
     })
 
     return await Packer.toBuffer(doc)
 }
 
-async function buildSafeDeepDocx(report, meta) {
+async function buildFreeDocx(report, meta) {
     const children = []
 
     addTitle(children, "GONOGO™")
-    addTitle(children, report.title)
-    addNormal(children, report.subtitle)
+    addBigDecision(children, report.decision)
+    addScore(children, `Score: ${report.score} / 100`)
+    addTitle(children, report.brandName)
+    addNormal(children, report.oneLineVerdict)
 
-    children.push(
-        safeTable([
-            ["Report Type", "DEEP REPORT"],
-            ["Decision", report.decision],
-            ["Score", `${report.score}/100`],
-            ["Language", meta.language],
-            ["Generated For", meta.brandName],
-        ])
-    )
+    addSection(children, "1. Why This Works")
+    addNormal(children, report.whyItWorks)
 
-    addSection(children, "0. Executive Summary")
-    report.summaryBullets.forEach((item) => addBullet(children, item))
+    addSection(children, "2. Why This Fails")
+    addNormal(children, report.whyItFails)
 
-    report.sections.forEach((section, index) => {
-        addSection(children, `${index + 1}. ${section.heading || "Untitled"}`)
+    addSection(children, "3. Top Risks")
+    ;(report.topRisks || []).forEach((item) => addBullet(children, item))
 
-        if (section.body) addNormal(children, section.body)
+    addSection(children, "4. First Action")
+    addNormal(children, report.firstAction)
 
-        if (Array.isArray(section.bullets)) {
-            section.bullets.forEach((bullet) => addBullet(children, bullet))
-        }
-
-        if (section.table && Array.isArray(section.table.rows)) {
-            addSubSection(children, section.table.title || "Analysis Table")
-            children.push(
-                safeTable([
-                    section.table.headers || [],
-                    ...section.table.rows,
-                ])
-            )
-        }
-    })
-
-    addSection(children, "Appendix. Assumptions")
-    report.appendix.assumptions.forEach((item) => addBullet(children, item))
-
-    addSection(children, "Appendix. Sources")
-    report.appendix.sources.forEach((item) => addBullet(children, item))
+    addSection(children, "5. Unlock Deep Report")
+    addNormal(children, report.upgradeHook)
 
     const doc = new Document({
         creator: "GoNoGo",
-        title: report.title,
-        description: report.subtitle,
-        sections: [
-            {
-                children,
-            },
-        ],
+        title: `GoNoGo Free Report - ${report.brandName}`,
+        description: report.oneLineVerdict,
+        sections: [{ children }],
     })
 
     return await Packer.toBuffer(doc)
@@ -539,7 +713,7 @@ function addBigDecision(children, text) {
                 new TextRun({
                     text: String(text || ""),
                     bold: true,
-                    size: 56,
+                    size: 58,
                 }),
             ],
             spacing: { after: 160 },
@@ -569,10 +743,10 @@ function addSection(children, text) {
                 new TextRun({
                     text: String(text || ""),
                     bold: true,
-                    size: 26,
+                    size: 28,
                 }),
             ],
-            spacing: { before: 360, after: 180 },
+            spacing: { before: 420, after: 180 },
         })
     )
 }
@@ -584,10 +758,10 @@ function addSubSection(children, text) {
                 new TextRun({
                     text: String(text || ""),
                     bold: true,
-                    size: 22,
+                    size: 23,
                 }),
             ],
-            spacing: { before: 220, after: 120 },
+            spacing: { before: 260, after: 120 },
         })
     )
 }
@@ -601,7 +775,7 @@ function addNormal(children, text) {
                     size: 22,
                 }),
             ],
-            spacing: { after: 180 },
+            spacing: { after: 160 },
         })
     )
 }
@@ -620,11 +794,20 @@ function addBullet(children, text) {
     )
 }
 
-function addSpacer(children) {
+function addSpace(children) {
     children.push(
         new Paragraph({
             children: [new TextRun({ text: "", size: 12 })],
             spacing: { after: 260 },
+        })
+    )
+}
+
+function addPageBreak(children) {
+    children.push(
+        new Paragraph({
+            children: [new TextRun({ text: "\n", break: 1 })],
+            spacing: { after: 320 },
         })
     )
 }
@@ -663,7 +846,6 @@ function getLanguageName(code) {
         ja: "Japanese",
         zh: "Chinese",
     }
-
     return map[code] || "English"
 }
 
