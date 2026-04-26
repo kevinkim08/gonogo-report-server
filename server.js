@@ -27,11 +27,12 @@ app.use(
             if (!origin) return callback(null, true)
 
             const allowed =
-                origin.includes("framer.app") ||
-                origin.includes("framer.website") ||
-                origin.includes("localhost") ||
-                origin.includes("127.0.0.1") ||
-                origin === "https://big-evidence-039433.framer.app"
+    origin.includes("framer.app") ||
+    origin.includes("framer.website") ||
+    origin.includes("onrender.com") ||
+    origin.includes("localhost") ||
+    origin.includes("127.0.0.1") ||
+    origin === "https://big-evidence-039433.framer.app"
 
             if (allowed) return callback(null, true)
 
