@@ -1,1 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GoNoGo Deep Report</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f4f1;
+      color: #111;
+    }
 
+    .page {
+      width: 794px;
+      min-height: 1123px;
+      margin: 40px auto;
+      padding: 56px;
+      background: #fff;
+      box-sizing: border-box;
+      page-break-after: always;
+    }
+
+    .brand {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .decision {
+      font-size: 84px;
+      font-weight: 900;
+      margin-top: 80px;
+      letter-spacing: -0.07em;
+    }
+
+    .score {
+      font-size: 28px;
+      font-weight: 800;
+      margin-top: 12px;
+    }
+
+    .title {
+      font-size: 34px;
+      font-weight: 900;
+      margin-top: 40px;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #555;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+
+    .section-title {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      margin-bottom: 28px;
+    }
+
+    .label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #777;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 40px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      padding: 18px;
+      min-height: 80px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      color: #666;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .card-value {
+      font-size: 24px;
+      font-weight: 900;
+      margin-top: 12px;
+    }
+
+    .verdict {
+      margin-top: 36px;
+      padding: 24px;
+      background: #111;
+      color: #fff;
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 13px;
+    }
+
+    th {
+      background: #111;
+      color: #fff;
+      text-align: left;
+      padding: 12px;
+      font-size: 12px;
+    }
+
+    td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    .text-block {
+      font-size: 16px;
+      line-height: 1.65;
+      margin-top: 18px;
+    }
+
+    .bullet-list {
+      margin-top: 20px;
+      padding-left: 20px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .footer {
+      margin-top: 60px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .page {
+        margin: 0;
+        width: 210mm;
+        min-height: 297mm;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1 -->
+  <section class="page">
+    <div class="brand">GONOGO™</div>
+
+    <div class="decision">{{decision}}</div>
+    <div class="score">Score: {{score}} / 100</div>
+
+    <div class="title">{{brandName}} Deep Business Decision Report</div>
+    <div class="subtitle">{{subtitle}}</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Market</div>
+        <div class="card-value">{{marketLevel}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Profitability</div>
+        <div class="card-value">{{profitabilityLevel}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Execution</div>
+        <div class="card-value">{{executionLevel}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Risk</div>
+        <div class="card-value">{{riskLevel}}</div>
+      </div>
+    </div>
+
+    <div class="verdict">
+      {{oneLineVerdict}}
+    </div>
+
+    <div class="footer">GoNoGo™ Business Decision Report</div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section class="page">
+    <div class="section-title">1. Executive Decision</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Judgment</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Why this works</td>
+          <td>{{whyItWorks}}</td>
+        </tr>
+        <tr>
+          <td>Why this fails</td>
+          <td>{{whyItFails}}</td>
+        </tr>
+        <tr>
+          <td>What to do now</td>
+          <td>{{whatToDoNow}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:40px;">Founder Decision</div>
+    <div class="text-block">{{founderDecision}}</div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section class="page">
+    <div class="section-title">2. Market Reality</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">TAM</div>
+        <div class="card-value">{{tamValue}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">SAM</div>
+        <div class="card-value">{{samValue}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">SOM</div>
+        <div class="card-value">{{somValue}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Growth</div>
+        <div class="card-value">{{growthValue}}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>Estimate</th>
+          <th>Formula / Logic</th>
+          <th>Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{tamSamSomRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Market Insight</div>
+    <div class="text-block">{{marketInsight}}</div>
+  </section>
+
+  <!-- PAGE 4 -->
+  <section class="page">
+    <div class="section-title">3. Customer Truth</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Customer Problem</th>
+          <th>Behavior Evidence</th>
+          <th>Business Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{customerTruthRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Buying Trigger</div>
+    <div class="text-block">{{buyingTrigger}}</div>
+  </section>
+
+  <!-- PAGE 5 -->
+  <section class="page">
+    <div class="section-title">4. Competition Map</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Competitor / Alternative</th>
+          <th>Type</th>
+          <th>Strength</th>
+          <th>Weakness</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{competitionRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Competitive Conclusion</div>
+    <div class="text-block">{{competitionConclusion}}</div>
+  </section>
+
+  <!-- PAGE 6 -->
+  <section class="page">
+    <div class="section-title">5. Unit Economics</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">CAC</div>
+        <div class="card-value">{{cacValue}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">LTV</div>
+        <div class="card-value">{{ltvValue}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">AOV</div>
+        <div class="card-value">{{aovValue}}</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Repeat</div>
+        <div class="card-value">{{repeatValue}}</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Target Range</th>
+          <th>Pass / Fail Rule</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{unitEconomicsRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Economics Judgment</div>
+    <div class="text-block">{{economicsJudgment}}</div>
+  </section>
+
+  <!-- PAGE 7 -->
+  <section class="page">
+    <div class="section-title">6. Marketing Strategy</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th>Fit</th>
+          <th>Role</th>
+          <th>Why</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{marketingChannelRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Content Playbook</div>
+    <ul class="bullet-list">
+      {{contentPlaybookItems}}
+    </ul>
+
+    <div class="label" style="margin-top:36px;">30-Day Marketing Test</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Action</th>
+          <th>Success Metric</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{marketingTestRows}}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- PAGE 8 -->
+  <section class="page">
+    <div class="section-title">7. Business Model</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Revenue Layer</th>
+          <th>Example</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{businessModelRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Model Judgment</div>
+    <div class="text-block">{{modelJudgment}}</div>
+  </section>
+
+  <!-- PAGE 9 -->
+  <section class="page">
+    <div class="section-title">8. Risk System</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Risk</th>
+          <th>Impact</th>
+          <th>Countermeasure</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{riskRows}}
+      </tbody>
+    </table>
+  </section>
+
+  <!-- PAGE 10 -->
+  <section class="page">
+    <div class="section-title">9. Execution Plan</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Phase</th>
+          <th>Actions</th>
+          <th>Primary KPI</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{executionRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Operating Rule</div>
+    <div class="text-block">{{operatingRule}}</div>
+  </section>
+
+  <!-- PAGE 11 -->
+  <section class="page">
+    <div class="section-title">10. GO Threshold</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Pass Condition</th>
+          <th>Decision Meaning</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{goThresholdRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Final Rule</div>
+    <div class="verdict">{{finalRule}}</div>
+  </section>
+
+  <!-- PAGE 12 -->
+  <section class="page">
+    <div class="section-title">11. Appendix</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data Point</th>
+          <th>Source / Basis</th>
+          <th>Usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{dataSourceRows}}
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:36px;">Assumptions</div>
+    <ul class="bullet-list">
+      {{assumptionItems}}
+    </ul>
+  </section>
+
+</body>
+</html>
