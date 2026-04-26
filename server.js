@@ -86,88 +86,383 @@ app.get("/api/test-pdf", async (req, res) => {
 })
 
 app.post("/api/generate-report", async (req, res) => {
-    try {
-        const {
+  try {
+    const {
+      brandName = "",
+      productService = "",
+      targetCustomer = "",
+      language = "ko",
+      reportType = "free",
+    } = req.body || {};
+
+    if (!brandName || !productService || !targetCustomer) {
+      return res.status(400).json({
+        ok: false,
+        error: "brandName, productService, targetCustomer are required.",
+      });
+    }
+
+    const normalizedReportType =
+      reportType === "paid" || reportType === "deep" ? "paid" : "free";
+
+    const prompt = buildPaidReportPrompt({
+      brandName,
+      productService,
+      targetCustomer,
+      language,
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      temperature: 0.25,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content: prompt,
+        },
+        {
+          role: "user",
+          content: JSON.stringify({
             brandName,
             productService,
             targetCustomer,
-            language = "ko",
-            reportType = "deep",
-        } = req.body || {}
+            language,
+            reportType: normalizedReportType,
+          }),
+        },
+      ],
+    });
 
-        if (!brandName || !productService || !targetCustomer) {
-            return res.status(400).json({
-                ok: false,
-                error: "brandName, productService, targetCustomer are required.",
-            })
-        }
+    const rawText = completion.choices?.[0]?.message?.content || "{}";
+    const paidReport = JSON.parse(rawText);
 
-        const normalizedLanguage = normalizeLanguage(language)
-        const locale = loadLocale(normalizedLanguage)
+    const finalReport =
+      normalizedReportType === "paid"
+        ? paidReport
+        : buildFreeReportFromPaidReport(paidReport);
 
-        const report =
-            reportType === "free"
-                ? await generateFreeReportJson({
-                      brandName,
-                      productService,
-                      targetCustomer,
-                      language: normalizedLanguage,
-                  })
-                : await generateDeepReportJson({
-                      brandName,
-                      productService,
-                      targetCustomer,
-                      language: normalizedLanguage,
-                  })
+    const html = renderReportHtml({
+      report: finalReport,
+      language,
+      reportType: normalizedReportType,
+    });
 
-        const html = buildHtmlFromTemplate(report, locale)
-        const pdfBuffer = await htmlToPdf(html)
+    const pdfBuffer = await createPdfFromHtml(html);
 
-        const safeBrand = sanitizeFileName(brandName)
-        const fileName =
-            reportType === "free"
-                ? `GoNoGo_Free_Report_${safeBrand}_${normalizedLanguage}.pdf`
-                : `GoNoGo_Deep_Report_${safeBrand}_${normalizedLanguage}.pdf`
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${normalizedReportType}-business-report.pdf"`
+    );
 
-        res.setHeader("Content-Type", "application/pdf")
-        res.setHeader("Content-Length", pdfBuffer.length)
-        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
+    return res.send(pdfBuffer);
+  } catch (err) {
+    console.error("[GENERATE_REPORT_ERROR]", err);
 
-        return res.end(pdfBuffer)
-    } catch (error) {
-        console.error("[GENERATE_REPORT_ERROR]", error)
-        return res.status(500).json({
-            ok: false,
-            error: "Failed to generate report.",
-            detail: String(error?.message || error),
-        })
+    return res.status(500).json({
+      ok: false,
+      error: "REPORT_GENERATION_FAILED",
+      message: err?.message || "Unknown error",
+    });
+  }
+});
+
+function buildPaidReportPrompt({ brandName, productService, targetCustomer, language }) {
+  return `
+You are a business decision engine, market analyst, investor, and execution strategist.
+
+Your job is NOT to write a nice report.
+Your job is to judge whether this business should be started, improved, or stopped.
+
+You must produce a premium paid business decision report.
+
+INPUT:
+Brand Name: ${brandName}
+Product/Service: ${productService}
+Target Customer: ${targetCustomer}
+Language: ${language}
+
+CRITICAL RULES:
+1. Output valid JSON only.
+2. Do not include markdown.
+3. Do not include text outside JSON.
+4. Be realistic, not optimistic.
+5. If exact data is unavailable, use reasonable assumptions and clearly state them.
+6. All numbers must be internally consistent.
+7. Every conclusion must connect to execution.
+8. Do not avoid negative conclusions.
+9. Think like an investor.
+10. Think by country and market behavior.
+
+LANGUAGE / COUNTRY STRATEGY:
+- If language is "ko", assume Korea-first strategy.
+- If language is "en", assume global / English-speaking market.
+- If language is "ja", assume Japan-first strategy.
+- If language is "zh", assume Chinese-speaking market strategy.
+- If language is "mn", assume Mongolia-first strategy.
+- For Mongolia, strongly consider Facebook commerce, bank transfer behavior, local trust, offline-online hybrid sales, and low-friction payment behavior.
+
+REPORT PURPOSE:
+The reader must be able to decide:
+- Should I start this business?
+- How much money do I need to test it?
+- What should I test first?
+- What can kill this business?
+- What exact action should I take tomorrow?
+
+OUTPUT JSON STRUCTURE:
+
+{
+  "meta": {
+    "brandName": "",
+    "productService": "",
+    "targetCustomer": "",
+    "language": "",
+    "reportType": "paid",
+    "reportTitle": "",
+    "generatedFor": ""
+  },
+
+  "executiveDecision": {
+    "decision": "GO | CONDITIONAL_GO | NO_GO",
+    "oneLineConclusion": "",
+    "decisionReason": "",
+    "confidenceScore": 0,
+    "whyNow": "",
+    "mainWarning": ""
+  },
+
+  "scorecard": {
+    "marketScore": 0,
+    "profitScore": 0,
+    "executionScore": 0,
+    "competitionScore": 0,
+    "timingScore": 0,
+    "totalScore": 0,
+    "scoreExplanation": ""
+  },
+
+  "marketAnalysis": {
+    "marketDefinition": "",
+    "tam": {
+      "value": 0,
+      "currency": "USD",
+      "calculation": "",
+      "assumptions": []
+    },
+    "sam": {
+      "value": 0,
+      "currency": "USD",
+      "calculation": "",
+      "assumptions": []
+    },
+    "som": {
+      "value": 0,
+      "currency": "USD",
+      "calculation": "",
+      "assumptions": []
+    },
+    "marketTrend": "",
+    "marketTiming": "",
+    "marketRisks": []
+  },
+
+  "customerAnalysis": {
+    "primaryPersona": {
+      "name": "",
+      "ageRange": "",
+      "incomeLevel": "",
+      "behavior": "",
+      "buyingTrigger": "",
+      "mainObjection": ""
+    },
+    "painPoints": [],
+    "desiredOutcomes": [],
+    "willingnessToPay": "",
+    "purchaseFrequency": "",
+    "trustBarriers": []
+  },
+
+  "productStrategy": {
+    "coreValueProposition": "",
+    "mustHaveFeatures": [],
+    "niceToHaveFeatures": [],
+    "minimumSellableOffer": "",
+    "pricingRecommendation": {
+      "lowPrice": 0,
+      "midPrice": 0,
+      "premiumPrice": 0,
+      "currency": "",
+      "reason": ""
+    },
+    "positioningStatement": ""
+  },
+
+  "unitEconomics": {
+    "aov": 0,
+    "grossMarginRate": 0,
+    "estimatedCAC": 0,
+    "estimatedLTV": 0,
+    "ltvToCacRatio": 0,
+    "paybackPeriod": "",
+    "profitabilityStatus": "PROFITABLE | RISKY | NOT_PROFITABLE",
+    "calculationAssumptions": [],
+    "unitEconomicsWarning": ""
+  },
+
+  "competition": {
+    "competitionLevel": "LOW | MEDIUM | HIGH",
+    "directCompetitors": [],
+    "indirectCompetitors": [],
+    "substituteBehaviors": [],
+    "differentiationStrategy": "",
+    "unfairAdvantageNeeded": ""
+  },
+
+  "goToMarket": {
+    "primaryChannels": [],
+    "channelReasoning": "",
+    "firstCampaign": {
+      "campaignName": "",
+      "message": "",
+      "targetAudience": "",
+      "budget": 0,
+      "expectedResult": ""
+    },
+    "countrySpecificStrategy": "",
+    "salesFunnel": {
+      "step1": "",
+      "step2": "",
+      "step3": "",
+      "step4": ""
     }
-})
+  },
+
+  "executionPlan": {
+    "day1": "",
+    "day3": "",
+    "day7": "",
+    "day14": "",
+    "day30": "",
+    "minimumTestBudget": 0,
+    "mustMeasureKPIs": [],
+    "killCriteria": [],
+    "scaleCriteria": []
+  },
+
+  "riskAnalysis": {
+    "topRisks": [
+      {
+        "risk": "",
+        "impact": "HIGH | MEDIUM | LOW",
+        "probability": "HIGH | MEDIUM | LOW",
+        "mitigation": ""
+      }
+    ],
+    "biggestFailureScenario": "",
+    "legalOrOperationalConcerns": []
+  },
+
+  "finalRecommendation": {
+    "finalDecision": "GO | CONDITIONAL_GO | NO_GO",
+    "recommendedNextMove": "",
+    "whatNotToDo": [],
+    "founderMessage": ""
+  }
+}
+
+SCORING RULES:
+- 80-100: Strong GO
+- 65-79: Conditional GO
+- 50-64: High risk, test only
+- Below 50: NO_GO
+
+IMPORTANT:
+If the business idea is weak, say it clearly.
+If the idea can work only in a narrow condition, explain that condition.
+Do not write generic business advice.
+Generate the JSON now.
+`;
+}
+
+function buildFreeReportFromPaidReport(fullReport) {
+  return {
+    meta: {
+      brandName: fullReport?.meta?.brandName || "",
+      productService: fullReport?.meta?.productService || "",
+      targetCustomer: fullReport?.meta?.targetCustomer || "",
+      language: fullReport?.meta?.language || "ko",
+      reportType: "free",
+      reportTitle: fullReport?.meta?.reportTitle || "Free Business Report",
+    },
+
+    executiveDecision: {
+      decision: fullReport?.executiveDecision?.decision || "CONDITIONAL_GO",
+      oneLineConclusion: fullReport?.executiveDecision?.oneLineConclusion || "",
+      confidenceScore: fullReport?.executiveDecision?.confidenceScore || 0,
+      mainWarning: fullReport?.executiveDecision?.mainWarning || "",
+    },
+
+    scorecard: {
+      marketScore: fullReport?.scorecard?.marketScore || 0,
+      profitScore: fullReport?.scorecard?.profitScore || 0,
+      executionScore: fullReport?.scorecard?.executionScore || 0,
+      totalScore: fullReport?.scorecard?.totalScore || 0,
+    },
+
+    marketAnalysis: {
+      marketDefinition: fullReport?.marketAnalysis?.marketDefinition || "",
+      marketTrend: fullReport?.marketAnalysis?.marketTrend || "",
+      marketTiming: fullReport?.marketAnalysis?.marketTiming || "",
+    },
+
+    customerAnalysis: {
+      painPoints: fullReport?.customerAnalysis?.painPoints?.slice(0, 3) || [],
+      desiredOutcomes: fullReport?.customerAnalysis?.desiredOutcomes?.slice(0, 3) || [],
+      willingnessToPay: fullReport?.customerAnalysis?.willingnessToPay || "",
+    },
+
+    productStrategy: {
+      coreValueProposition: fullReport?.productStrategy?.coreValueProposition || "",
+      minimumSellableOffer: fullReport?.productStrategy?.minimumSellableOffer || "",
+    },
+
+    finalRecommendation: {
+      finalDecision: fullReport?.finalRecommendation?.finalDecision || "CONDITIONAL_GO",
+      recommendedNextMove: fullReport?.finalRecommendation?.recommendedNextMove || "",
+    },
+
+    lockedSections: {
+      tamSamSom: true,
+      unitEconomics: true,
+      competition: true,
+      goToMarket: true,
+      executionPlan: true,
+      riskAnalysis: true,
+      message: "전체 시장 규모, 수익성 계산, 실행 전략은 유료 보고서에서 확인할 수 있습니다."
+    }
+  };
+}
 
 async function generateDeepReportJson(input) {
     const { brandName, productService, targetCustomer, language } = input
     const languageName = getLanguageName(language)
 
-    const systemPrompt = `
-You are GoNoGo, a ruthless business decision system.
+const systemPrompt = buildPaidReportPrompt({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+})
 
-You are NOT a writer.
-You are a business decision engine used by founders to decide whether to start, pause, or reject a business.
-
-Absolute rules:
-- Output VALID JSON only.
-- No markdown.
-- No extra explanation.
-- Final report language: ${languageName}
-- Every statement must be judgment-based.
-- Use conservative estimates when uncertain.
-- The report must be actionable in the real world.
-- This is a PAID REPORT.
-- Include market size, probability of success, unit economics, marketing strategy, execution plan, and GO threshold.
-`
-
-    const userPrompt = `
-Create a GoNoGo DEEP PAID REPORT.
+const userPrompt = JSON.stringify({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+    reportType: "paid",
+})
 
 Brand Name: ${brandName}
 Product / Service: ${productService}
