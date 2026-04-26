@@ -102,8 +102,8 @@ app.post("/api/generate-report", async (req, res) => {
             })
         }
 
-        const safeLanguage = normalizeLanguage(language)
-        const locale = loadLocale(safeLanguage)
+        const normalizedLanguage = normalizeLanguage(language)
+        const locale = loadLocale(normalizedLanguage)
 
         const report =
             reportType === "free"
@@ -111,13 +111,13 @@ app.post("/api/generate-report", async (req, res) => {
                       brandName,
                       productService,
                       targetCustomer,
-                      language: safeLanguage,
+                      language: normalizedLanguage,
                   })
                 : await generateDeepReportJson({
                       brandName,
                       productService,
                       targetCustomer,
-                      language: safeLanguage,
+                      language: normalizedLanguage,
                   })
 
         const html = buildHtmlFromTemplate(report, locale)
@@ -126,8 +126,8 @@ app.post("/api/generate-report", async (req, res) => {
         const safeBrand = sanitizeFileName(brandName)
         const fileName =
             reportType === "free"
-                ? `GoNoGo_Free_Report_${safeBrand}_${safeLanguage}.pdf`
-                : `GoNoGo_Deep_Report_${safeBrand}_${safeLanguage}.pdf`
+                ? `GoNoGo_Free_Report_${safeBrand}_${normalizedLanguage}.pdf`
+                : `GoNoGo_Deep_Report_${safeBrand}_${normalizedLanguage}.pdf`
 
         res.setHeader("Content-Type", "application/pdf")
         res.setHeader("Content-Length", pdfBuffer.length)
@@ -152,17 +152,18 @@ async function generateDeepReportJson(input) {
 You are GoNoGo, a ruthless business decision system.
 
 You are NOT a writer.
-You are a decision engine used by founders to decide whether to start, pause, or reject a business.
+You are a business decision engine used by founders to decide whether to start, pause, or reject a business.
 
 Absolute rules:
 - Output VALID JSON only.
 - No markdown.
-- No vague language.
+- No extra explanation.
+- Final report language: ${languageName}
 - Every statement must be judgment-based.
 - Use conservative estimates when uncertain.
 - The report must be actionable in the real world.
 - This is a PAID REPORT.
-- Final language: ${languageName}
+- Include market size, probability of success, unit economics, marketing strategy, execution plan, and GO threshold.
 `
 
     const userPrompt = `
@@ -182,73 +183,90 @@ Return this exact JSON shape:
     "subtitle": string,
     "oneLineVerdict": string
   },
+
   "visualScores": {
     "market": number,
     "profitability": number,
     "execution": number,
     "risk": number
   },
+
   "decisionMatrix": [
     ["MARKET", "LOW" | "MEDIUM" | "HIGH"],
     ["PROFITABILITY", "LOW" | "MEDIUM" | "HIGH"],
     ["EXECUTION", "LOW" | "MEDIUM" | "HIGH"],
     ["RISK", "LOW" | "MEDIUM" | "HIGH"]
   ],
+
   "executiveDecision": [
     ["Why this works", string],
     ["Why this fails", string],
     ["What to do now", string]
   ],
+
   "founderDecision": string,
+
   "marketCards": [
     ["TAM", string],
     ["SAM", string],
     ["SOM", string],
     ["GROWTH", string]
   ],
+
   "marketFunnel": [
     { "label": "TAM", "value": string, "score": number },
     { "label": "SAM", "value": string, "score": number },
     { "label": "SOM", "value": string, "score": number }
   ],
+
   "tamSamSom": [
     ["TAM", string, string, string],
     ["SAM", string, string, string],
     ["SOM", string, string, string]
   ],
+
   "marketInsight": string,
+
   "customerTruth": [
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "buyingTrigger": string,
+
   "competitionMap": [
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string]
   ],
+
   "competitionConclusion": string,
+
   "unitEconomicsCards": [
     ["CAC", string],
     ["LTV", string],
     ["AOV", string],
     ["REPEAT", string]
   ],
+
   "unitEconomicsScore": {
     "ltvToCac": string,
     "payback": string,
     "margin": string,
     "status": "PASS" | "WATCH" | "FAIL"
   },
+
   "unitEconomicsTable": [
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string]
   ],
+
   "economicsJudgment": string,
+
   "marketingStrategy": {
     "channelFit": [
       [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
@@ -263,6 +281,7 @@ Return this exact JSON shape:
       [string, string, string]
     ]
   },
+
   "businessModel": {
     "revenueLayers": [
       [string, string, string],
@@ -271,30 +290,37 @@ Return this exact JSON shape:
     ],
     "modelJudgment": string
   },
+
   "riskSystem": [
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "executionPlan": [
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "operatingRule": string,
+
   "goThreshold": [
     [string, string, string],
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "goChecklist": [
     { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
     { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
     { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
     { "label": string, "status": "PASS" | "WATCH" | "FAIL" }
   ],
+
   "finalRule": string,
+
   "appendix": {
     "dataSources": [
       [string, string, string],
@@ -306,11 +332,11 @@ Return this exact JSON shape:
 }
 
 Quality rules:
-- Include objective market size, success probability, unit economics, marketing strategy, and execution plan.
 - visualScores must be numbers from 0 to 100.
 - marketFunnel scores must be numbers from 0 to 100.
 - Numbers must include logic or assumptions.
 - Keep table cell text concise.
+- Do not use placeholders such as "...".
 `
 
     const completion = await openai.chat.completions.create({
@@ -353,8 +379,9 @@ function normalizeDeepReport(report, input) {
             subtitle: report?.cover?.subtitle || input.productService,
             oneLineVerdict:
                 report?.cover?.oneLineVerdict ||
-                "This business requires validation before scaling.",
+                sample.cover.oneLineVerdict,
         },
+
         visualScores: {
             market: toScore(report?.visualScores?.market, sample.visualScores.market),
             profitability: toScore(
@@ -367,28 +394,36 @@ function normalizeDeepReport(report, input) {
             ),
             risk: toScore(report?.visualScores?.risk, sample.visualScores.risk),
         },
+
         decisionMatrix: safeArray(report?.decisionMatrix, sample.decisionMatrix),
+
         executiveDecision: safeArray(
             report?.executiveDecision,
             sample.executiveDecision
         ),
+
         founderDecision: report?.founderDecision || sample.founderDecision,
+
         marketCards: safeArray(report?.marketCards, sample.marketCards),
         marketFunnel: safeArray(report?.marketFunnel, sample.marketFunnel),
         tamSamSom: safeArray(report?.tamSamSom, sample.tamSamSom),
         marketInsight: report?.marketInsight || sample.marketInsight,
+
         customerTruth: safeArray(report?.customerTruth, sample.customerTruth),
         buyingTrigger: report?.buyingTrigger || sample.buyingTrigger,
+
         competitionMap: safeArray(
             report?.competitionMap,
             sample.competitionMap
         ),
         competitionConclusion:
             report?.competitionConclusion || sample.competitionConclusion,
+
         unitEconomicsCards: safeArray(
             report?.unitEconomicsCards,
             sample.unitEconomicsCards
         ),
+
         unitEconomicsScore: {
             ltvToCac:
                 report?.unitEconomicsScore?.ltvToCac ||
@@ -403,12 +438,15 @@ function normalizeDeepReport(report, input) {
                 report?.unitEconomicsScore?.status ||
                 sample.unitEconomicsScore.status,
         },
+
         unitEconomicsTable: safeArray(
             report?.unitEconomicsTable,
             sample.unitEconomicsTable
         ),
+
         economicsJudgment:
             report?.economicsJudgment || sample.economicsJudgment,
+
         marketingStrategy: {
             channelFit: safeArray(
                 report?.marketingStrategy?.channelFit,
@@ -423,7 +461,7 @@ function normalizeDeepReport(report, input) {
                 sample.marketingStrategy.thirtyDayMarketingTest
             ),
         },
-        businessModel: {
+                businessModel: {
             revenueLayers: safeArray(
                 report?.businessModel?.revenueLayers,
                 sample.businessModel.revenueLayers
@@ -432,12 +470,15 @@ function normalizeDeepReport(report, input) {
                 report?.businessModel?.modelJudgment ||
                 sample.businessModel.modelJudgment,
         },
+
         riskSystem: safeArray(report?.riskSystem, sample.riskSystem),
         executionPlan: safeArray(report?.executionPlan, sample.executionPlan),
         operatingRule: report?.operatingRule || sample.operatingRule,
+
         goThreshold: safeArray(report?.goThreshold, sample.goThreshold),
         goChecklist: safeArray(report?.goChecklist, sample.goChecklist),
         finalRule: report?.finalRule || sample.finalRule,
+
         appendix: {
             dataSources: safeArray(
                 report?.appendix?.dataSources,
@@ -458,16 +499,21 @@ function buildHtmlFromTemplate(report, locale) {
     const matrix = objectFromPairs(report.decisionMatrix)
     const market = objectFromPairs(report.marketCards)
     const unit = objectFromPairs(report.unitEconomicsCards)
-    const executiveMap = objectFromPairs(report.executiveDecision)
+    const execMap = objectFromPairs(report.executiveDecision)
+
     const funnel = normalizeFunnel(report.marketFunnel)
 
     const data = {
-        lang: locale.lang || "en",
-        fontFamily: locale.fontFamily || "Arial, sans-serif",
+        lang: locale.lang,
+        fontFamily: locale.fontFamily,
 
-        reportTitleSuffix: locale.reportTitleSuffix || "Deep Business Decision Report",
-        scoreLabel: locale.scoreLabel || "Score",
-        footerLeft: locale.footer?.left || "GoNoGo™ Business Decision Report",
+        reportTitleSuffix: locale.reportTitleSuffix,
+        scoreLabel: locale.scoreLabel,
+
+        footerLeft: locale.footer?.left || "GoNoGo™",
+
+        ...flattenLabels(locale.labels),
+        ...flattenNotes(locale.fixedNotes),
 
         brandName: report.cover.brandName,
         decision: report.cover.decision,
@@ -481,4 +527,288 @@ function buildHtmlFromTemplate(report, locale) {
         riskLevel: matrix.RISK || "",
 
         marketScore: report.visualScores.market,
-        profitabilityScore:
+        profitabilityScore: report.visualScores.profitability,
+        executionScore: report.visualScores.execution,
+        riskScore: report.visualScores.risk,
+
+        ltvToCac: report.unitEconomicsScore.ltvToCac,
+        unitEconomicsStatus: report.unitEconomicsScore.status,
+        paybackValue: report.unitEconomicsScore.payback,
+
+        whyItWorks: execMap["Why this works"] || "",
+        whyItFails: execMap["Why this fails"] || "",
+        whatToDoNow: execMap["What to do now"] || "",
+        founderDecision: report.founderDecision,
+
+        tamValue: market.TAM || funnel.tam.value,
+        samValue: market.SAM || funnel.sam.value,
+        somValue: market.SOM || funnel.som.value,
+        growthValue: market.GROWTH || "",
+
+        tamScore: funnel.tam.score,
+        samScore: funnel.sam.score,
+        somScore: funnel.som.score,
+
+        marketInsight: report.marketInsight,
+        buyingTrigger: report.buyingTrigger,
+
+        cacValue: unit.CAC || "",
+        ltvValue: unit.LTV || "",
+        aovValue: unit.AOV || "",
+        repeatValue: unit.REPEAT || "",
+
+        economicsJudgment: report.economicsJudgment,
+        modelJudgment: report.businessModel.modelJudgment,
+        operatingRule: report.operatingRule,
+        finalRule: report.finalRule,
+    }
+
+    html = replacePlaceholders(html, data)
+
+    html = html
+        .replace("{{tamSamSomRows}}", rows(report.tamSamSom))
+        .replace("{{customerTruthRows}}", rows(report.customerTruth))
+        .replace("{{competitionRows}}", rows(report.competitionMap))
+        .replace("{{competitionConclusion}}", esc(report.competitionConclusion))
+        .replace("{{unitEconomicsRows}}", rows(report.unitEconomicsTable))
+        .replace(
+            "{{marketingChannelRows}}",
+            rows(report.marketingStrategy.channelFit)
+        )
+        .replace(
+            "{{contentPlaybookItems}}",
+            listItems(report.marketingStrategy.contentPlaybook)
+        )
+        .replace(
+            "{{marketingTestRows}}",
+            rows(report.marketingStrategy.thirtyDayMarketingTest)
+        )
+        .replace(
+            "{{businessModelRows}}",
+            rows(report.businessModel.revenueLayers)
+        )
+        .replace("{{riskRows}}", rows(report.riskSystem))
+        .replace("{{executionRows}}", rows(report.executionPlan))
+        .replace("{{goThresholdRows}}", rows(report.goThreshold))
+        .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
+        .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
+        .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
+
+    html = html.replace(/{{[^}]+}}/g, "")
+
+    return html
+}
+
+async function htmlToPdf(html) {
+    const browser = await puppeteer.launch({
+        args: chromium.args,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+    })
+
+    try {
+        const page = await browser.newPage()
+        await page.setContent(html, { waitUntil: "networkidle0" })
+
+        const pdf = await page.pdf({
+            format: "A4",
+            printBackground: true,
+        })
+
+        return Buffer.from(pdf)
+    } finally {
+        await browser.close()
+    }
+}
+
+function loadLocale(lang) {
+    const filePath = path.join(__dirname, "locales", `${lang}.json`)
+    return JSON.parse(fs.readFileSync(filePath, "utf8"))
+}
+
+function normalizeLanguage(lang) {
+    const supported = ["ko", "en", "ja", "zh", "mn"]
+    return supported.includes(lang) ? lang : "en"
+}
+
+function flattenLabels(labels) {
+    const flat = {}
+    Object.entries(labels || {}).forEach(([k, v]) => {
+        flat[`label.${k}`] = v
+    })
+    return flat
+}
+
+function flattenNotes(notes) {
+    const flat = {}
+    Object.entries(notes || {}).forEach(([k, v]) => {
+        flat[`note.${k}`] = v
+    })
+    return flat
+}
+
+function replacePlaceholders(html, data) {
+    let output = html
+    Object.entries(data).forEach(([key, value]) => {
+        output = output.replace(
+            new RegExp(`{{${key}}}`, "g"),
+            esc(String(value ?? ""))
+        )
+    })
+    return output
+}
+
+function rows(items) {
+    if (!Array.isArray(items)) return ""
+    return items
+        .map((row) => {
+            const cells = Array.isArray(row) ? row : Object.values(row)
+            return `<tr>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`
+        })
+        .join("")
+}
+
+function listItems(items) {
+    if (!Array.isArray(items)) return ""
+    return items.map((i) => `<li>${esc(i)}</li>`).join("")
+}
+
+function checklistItems(items) {
+    if (!Array.isArray(items)) return ""
+    return items
+        .map((i) => {
+            const s = i.status || "WATCH"
+            const cls =
+                s === "PASS" ? "status-pass" : s === "FAIL" ? "status-fail" : "status-watch"
+            return `<div class="check-item"><span>${esc(i.label)}</span><span class="${cls}">${s}</span></div>`
+        })
+        .join("")
+}
+
+function objectFromPairs(items) {
+    const out = {}
+    if (!Array.isArray(items)) return out
+    items.forEach((i) => {
+        if (Array.isArray(i)) out[i[0]] = i[1]
+    })
+    return out
+}
+
+function normalizeFunnel(items) {
+    const base = {
+        tam: { value: "", score: 100 },
+        sam: { value: "", score: 60 },
+        som: { value: "", score: 20 },
+    }
+
+    if (!Array.isArray(items)) return base
+
+    items.forEach((i) => {
+        const key = (i.label || "").toLowerCase()
+        if (key === "tam") base.tam = i
+        if (key === "sam") base.sam = i
+        if (key === "som") base.som = i
+    })
+
+    return base
+}
+
+function esc(v) {
+    return String(v || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+}
+
+function safeArray(v, fallback) {
+    return Array.isArray(v) ? v : fallback
+}
+
+function toScore(v, fallback = 50) {
+    const n = Number(v)
+    if (!Number.isFinite(n)) return fallback
+    return Math.max(0, Math.min(100, Math.round(n)))
+}
+
+function getLanguageName(code) {
+    return {
+        ko: "Korean",
+        en: "English",
+        ja: "Japanese",
+        zh: "Chinese",
+        mn: "Mongolian",
+    }[code] || "English"
+}
+
+function sanitizeFileName(v) {
+    return String(v || "report").replace(/[^\w]/g, "_")
+}
+
+function getSampleReport(lang = "ko") {
+    return {
+        cover: {
+            brandName: "샘플브랜드",
+            decision: "HOLD",
+            score: 60,
+            subtitle: "샘플 설명",
+            oneLineVerdict: "이 사업은 검증 후 진행해야 한다.",
+        },
+        visualScores: { market: 70, profitability: 55, execution: 60, risk: 65 },
+        decisionMatrix: [
+            ["MARKET", "HIGH"],
+            ["PROFITABILITY", "MEDIUM"],
+            ["EXECUTION", "HIGH"],
+            ["RISK", "HIGH"],
+        ],
+        executiveDecision: [
+            ["Why this works", "수요는 존재한다"],
+            ["Why this fails", "차별화 부족"],
+            ["What to do now", "소규모 테스트"],
+        ],
+        founderDecision: "확장 금지, 검증 먼저",
+        marketCards: [
+            ["TAM", "100B"],
+            ["SAM", "30B"],
+            ["SOM", "1K users"],
+            ["GROWTH", "5%"],
+        ],
+        marketFunnel: [
+            { label: "TAM", value: "100B", score: 100 },
+            { label: "SAM", value: "30B", score: 50 },
+            { label: "SOM", value: "1K", score: 20 },
+        ],
+        tamSamSom: [["TAM", "", "", ""], ["SAM", "", "", ""], ["SOM", "", "", ""]],
+        marketInsight: "시장 존재",
+        customerTruth: [["문제", "행동", "의미"]],
+        buyingTrigger: "문제 발생 시 구매",
+        competitionMap: [["경쟁", "유형", "강점", "약점"]],
+        competitionConclusion: "경쟁 존재",
+        unitEconomicsCards: [["CAC", "50"], ["LTV", "150"], ["AOV", "30"], ["REPEAT", "3"]],
+        unitEconomicsScore: { ltvToCac: "3x", payback: "2m", margin: "30%", status: "WATCH" },
+        unitEconomicsTable: [["", "", "", ""]],
+        economicsJudgment: "조건부 가능",
+        marketingStrategy: {
+            channelFit: [["SNS", "HIGH", "", ""]],
+            contentPlaybook: ["콘텐츠"],
+            thirtyDayMarketingTest: [["1주", "", ""]],
+        },
+        businessModel: {
+            revenueLayers: [["제품", "", ""]],
+            modelJudgment: "업셀 필요",
+        },
+        riskSystem: [["리스크", "", ""]],
+        executionPlan: [["1단계", "", ""]],
+        operatingRule: "검증 먼저",
+        goThreshold: [["CAC", "", ""]],
+        goChecklist: [{ label: "CAC", status: "PASS" }],
+        finalRule: "조건 충족 시 GO",
+        appendix: {
+            dataSources: [["데이터", "", ""]],
+            assumptions: ["가정"],
+        },
+    }
+}
+
+app.listen(PORT, () => {
+    console.log(`Server running on ${PORT}`)
+})
