@@ -1,21 +1,19 @@
 import express from "express"
 import cors from "cors"
 import OpenAI from "openai"
-import {
-    Document,
-    Packer,
-    Paragraph,
-    TextRun,
-    Table,
-    TableRow,
-    TableCell,
-    WidthType,
-} from "docx"
+import fs from "fs"
+import path from "path"
+import { fileURLToPath } from "url"
+import puppeteer from "puppeteer-core"
+import chromium from "@sparticuz/chromium"
 
 const app = express()
 const PORT = process.env.PORT || 3000
 
-app.use(express.json({ limit: "2mb" }))
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
+app.use(express.json({ limit: "5mb" }))
 
 app.use(
     cors({
@@ -46,12 +44,35 @@ app.get("/", (req, res) => {
     res.json({
         ok: true,
         service: "GoNoGo Report Server",
-        version: "1.4.0-template-layout",
+        version: "2.0.0-html-pdf",
     })
 })
 
 app.get("/api/health", (req, res) => {
     res.json({ ok: true, status: "healthy" })
+})
+
+app.get("/api/test-pdf", async (req, res) => {
+    try {
+        const sampleReport = getSampleReport()
+        const html = buildHtmlFromTemplate(sampleReport)
+        const pdfBuffer = await htmlToPdf(html)
+
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="GoNoGo_Test_Report.pdf"`
+        )
+
+        return res.send(pdfBuffer)
+    } catch (error) {
+        console.error("[TEST_PDF_ERROR]", error)
+        return res.status(500).json({
+            ok: false,
+            error: "Failed to generate test PDF.",
+            detail: String(error?.message || error),
+        })
+    }
 })
 
 app.post("/api/generate-report", async (req, res) => {
@@ -61,7 +82,7 @@ app.post("/api/generate-report", async (req, res) => {
             productService,
             targetCustomer,
             language = "en",
-            reportType = "free",
+            reportType = "deep",
         } = req.body || {}
 
         if (!brandName || !productService || !targetCustomer) {
@@ -72,38 +93,33 @@ app.post("/api/generate-report", async (req, res) => {
         }
 
         const report =
-            reportType === "deep"
-                ? await generateDeepReportJson({
+            reportType === "free"
+                ? await generateFreeReportJson({
                       brandName,
                       productService,
                       targetCustomer,
                       language,
                   })
-                : await generateFreeReportJson({
+                : await generateDeepReportJson({
                       brandName,
                       productService,
                       targetCustomer,
                       language,
                   })
 
-        const buffer =
-            reportType === "deep"
-                ? await buildDeepDocx(report)
-                : await buildFreeDocx(report)
+        const html = buildHtmlFromTemplate(report)
+        const pdfBuffer = await htmlToPdf(html)
 
         const safeBrand = sanitizeFileName(brandName)
         const fileName =
-            reportType === "deep"
-                ? `GoNoGo_Deep_Report_${safeBrand}_${language}.docx`
-                : `GoNoGo_Free_Report_${safeBrand}_${language}.docx`
+            reportType === "free"
+                ? `GoNoGo_Free_Report_${safeBrand}_${language}.pdf`
+                : `GoNoGo_Deep_Report_${safeBrand}_${language}.pdf`
 
-        res.setHeader(
-            "Content-Type",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        res.setHeader("Content-Type", "application/pdf")
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
 
-        return res.send(buffer)
+        return res.send(pdfBuffer)
     } catch (error) {
         console.error("[GENERATE_REPORT_ERROR]", error)
         return res.status(500).json({
@@ -119,28 +135,25 @@ async function generateDeepReportJson(input) {
     const languageName = getLanguageName(language)
 
     const systemPrompt = `
-You are GoNoGo, a paid business decision report engine.
+You are GoNoGo, a ruthless business decision system.
 
-You do not write generic advice.
-You create structured founder decision reports.
+You are NOT a writer.
+You are a decision engine used by founders to decide whether to start, pause, or reject a business.
 
-Final report language: ${languageName}
-
-Rules:
-- Return only valid JSON.
+Absolute rules:
+- Output VALID JSON only.
 - No markdown.
-- Use short judgment blocks.
-- Do not put long paragraphs inside wide tables.
-- Use conservative estimates when exact data is unavailable.
-- Always include marketing strategy.
-- Always include threshold metrics.
-- Every section must help a founder decide GO, HOLD, or NO GO.
+- No vague language.
+- Every statement must be judgment-based.
+- Use conservative estimates when uncertain.
+- The report must be actionable in the real world.
+- This is a PAID REPORT.
+- Final language: ${languageName}
 `
 
     const userPrompt = `
-Create a DEEP PAID GoNoGo report.
+Create a GoNoGo DEEP PAID REPORT.
 
-Business Input:
 Brand Name: ${brandName}
 Product / Service: ${productService}
 Target Customer: ${targetCustomer}
@@ -155,171 +168,110 @@ Return this exact JSON shape:
     "subtitle": string,
     "oneLineVerdict": string
   },
-
   "decisionMatrix": [
-    { "label": "MARKET", "value": "LOW" | "MEDIUM" | "HIGH" },
-    { "label": "PROFITABILITY", "value": "LOW" | "MEDIUM" | "HIGH" },
-    { "label": "EXECUTION", "value": "LOW" | "MEDIUM" | "HIGH" },
-    { "label": "RISK", "value": "LOW" | "MEDIUM" | "HIGH" }
+    ["MARKET", "LOW" | "MEDIUM" | "HIGH"],
+    ["PROFITABILITY", "LOW" | "MEDIUM" | "HIGH"],
+    ["EXECUTION", "LOW" | "MEDIUM" | "HIGH"],
+    ["RISK", "LOW" | "MEDIUM" | "HIGH"]
   ],
-
-  "reportPromise": string,
-
   "executiveDecision": [
-    { "question": "Why this works", "judgment": string },
-    { "question": "Why this fails", "judgment": string },
-    { "question": "What to do now", "judgment": string }
+    ["Why this works", string],
+    ["Why this fails", string],
+    ["What to do now", string]
   ],
-
   "founderDecision": string,
-
   "marketCards": [
-    { "label": string, "value": string },
-    { "label": string, "value": string },
-    { "label": string, "value": string },
-    { "label": string, "value": string }
+    [string, string],
+    [string, string],
+    [string, string],
+    [string, string]
   ],
-
   "tamSamSom": [
-    {
-      "layer": "TAM",
-      "estimate": string,
-      "formula": string,
-      "interpretation": string
-    },
-    {
-      "layer": "SAM",
-      "estimate": string,
-      "formula": string,
-      "interpretation": string
-    },
-    {
-      "layer": "SOM",
-      "estimate": string,
-      "formula": string,
-      "interpretation": string
-    }
+    ["TAM", string, string, string],
+    ["SAM", string, string, string],
+    ["SOM", string, string, string]
   ],
-
   "marketInsight": string,
-
   "customerTruth": [
-    {
-      "problem": string,
-      "behaviorEvidence": string,
-      "businessMeaning": string
-    }
+    [string, string, string],
+    [string, string, string],
+    [string, string, string]
   ],
-
   "buyingTrigger": string,
-
   "competitionMap": [
-    {
-      "competitor": string,
-      "type": string,
-      "strength": string,
-      "weakness": string
-    }
+    [string, string, string, string],
+    [string, string, string, string],
+    [string, string, string, string],
+    [string, string, string, string]
   ],
-
   "competitionConclusion": string,
-
   "unitEconomicsCards": [
-    { "label": "CAC", "value": string },
-    { "label": "LTV", "value": string },
-    { "label": "AOV", "value": string },
-    { "label": "PAYBACK", "value": string }
+    ["CAC", string],
+    ["LTV", string],
+    ["AOV", string],
+    ["REPEAT", string]
   ],
-
   "unitEconomicsTable": [
-    {
-      "metric": string,
-      "targetRange": string,
-      "passFailRule": string,
-      "reason": string
-    }
+    [string, string, string, string],
+    [string, string, string, string],
+    [string, string, string, string],
+    [string, string, string, string]
   ],
-
   "economicsJudgment": string,
-
   "marketingStrategy": {
     "channelFit": [
-      {
-        "channel": string,
-        "fit": "LOW" | "MEDIUM" | "HIGH" | "WATCH",
-        "role": string,
-        "why": string
-      }
+      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
+      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
+      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
+      [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string]
     ],
-    "contentPlaybook": string[],
+    "contentPlaybook": [string, string, string, string, string],
     "thirtyDayMarketingTest": [
-      {
-        "period": string,
-        "action": string,
-        "successMetric": string
-      }
+      [string, string, string],
+      [string, string, string],
+      [string, string, string]
     ]
   },
-
   "businessModel": {
     "revenueLayers": [
-      {
-        "layer": string,
-        "example": string,
-        "purpose": string
-      }
+      [string, string, string],
+      [string, string, string],
+      [string, string, string]
     ],
     "modelJudgment": string
   },
-
   "riskSystem": [
-    {
-      "risk": string,
-      "impact": string,
-      "countermeasure": string
-    }
+    [string, string, string],
+    [string, string, string],
+    [string, string, string]
   ],
-
   "executionPlan": [
-    {
-      "phase": string,
-      "actions": string,
-      "primaryKpi": string
-    }
+    [string, string, string],
+    [string, string, string],
+    [string, string, string]
   ],
-
   "operatingRule": string,
-
   "goThreshold": [
-    {
-      "metric": string,
-      "passCondition": string,
-      "decisionMeaning": string
-    }
+    [string, string, string],
+    [string, string, string],
+    [string, string, string],
+    [string, string, string]
   ],
-
   "finalRule": string,
-
   "appendix": {
     "dataSources": [
-      {
-        "dataPoint": string,
-        "sourceBasis": string,
-        "usage": string
-      }
+      [string, string, string],
+      [string, string, string],
+      [string, string, string]
     ],
-    "assumptions": string[]
+    "assumptions": [string, string, string, string]
   }
 }
 
-Quality requirements:
-- competitionMap must contain 4 to 6 competitors or alternatives.
-- marketingStrategy.channelFit must contain 4 to 6 channels.
-- contentPlaybook must contain 5 items.
-- thirtyDayMarketingTest must contain 3 periods.
-- riskSystem must contain 3 to 5 risks.
-- goThreshold must contain 4 to 5 metrics.
-- Keep each table cell concise.
+Quality rules:
+- Include market size, success probability, unit economics, marketing strategy, and execution plan.
+- Numbers must include logic or assumptions.
+- Keep table cell text concise.
 `
 
     const completion = await openai.chat.completions.create({
@@ -338,644 +290,264 @@ Quality requirements:
 }
 
 async function generateFreeReportJson(input) {
-    const { brandName, productService, targetCustomer, language } = input
-    const languageName = getLanguageName(language)
+    const deep = await generateDeepReportJson(input)
 
-    const systemPrompt = `
-You are GoNoGo, a business decision analyst.
-Final report language: ${languageName}
-Return only valid JSON.
-`
-
-    const userPrompt = `
-Create a FREE GoNoGo sample report.
-
-Brand Name: ${brandName}
-Product / Service: ${productService}
-Target Customer: ${targetCustomer}
-
-Return JSON:
-
-{
-  "brandName": string,
-  "decision": "GO" | "HOLD" | "NO GO",
-  "score": number,
-  "oneLineVerdict": string,
-  "whyItWorks": string,
-  "whyItFails": string,
-  "topRisks": string[],
-  "firstAction": string,
-  "upgradeHook": string
-}
-`
-
-    const completion = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-    })
-
-    const raw = completion.choices?.[0]?.message?.content
-    if (!raw) throw new Error("Empty OpenAI response.")
-
-    return normalizeFreeReport(JSON.parse(raw), input)
+    return {
+        ...deep,
+        cover: {
+            ...deep.cover,
+            subtitle: `${deep.cover.subtitle} — Free Decision Sample`,
+        },
+    }
 }
 
 function normalizeDeepReport(report, input) {
-    const cover = report.cover || {}
+    const sample = getSampleReport()
 
     return {
         cover: {
-            brandName: cover.brandName || input.brandName,
-            decision: cover.decision || "HOLD",
-            score: Number.isFinite(cover.score) ? cover.score : 50,
-            subtitle: cover.subtitle || input.productService,
+            brandName: report?.cover?.brandName || input.brandName,
+            decision: report?.cover?.decision || "HOLD",
+            score: Number.isFinite(report?.cover?.score)
+                ? report.cover.score
+                : 50,
+            subtitle: report?.cover?.subtitle || input.productService,
             oneLineVerdict:
-                cover.oneLineVerdict ||
+                report?.cover?.oneLineVerdict ||
                 "This business requires validation before scaling.",
         },
-        decisionMatrix: safeArray(report.decisionMatrix, [
-            { label: "MARKET", value: "MEDIUM" },
-            { label: "PROFITABILITY", value: "MEDIUM" },
-            { label: "EXECUTION", value: "MEDIUM" },
-            { label: "RISK", value: "MEDIUM" },
-        ]),
-        reportPromise:
-            report.reportPromise ||
-            "This report shows decision first, data second, and execution third.",
-        executiveDecision: safeArray(report.executiveDecision, []),
-        founderDecision: report.founderDecision || "",
-        marketCards: safeArray(report.marketCards, []),
-        tamSamSom: safeArray(report.tamSamSom, []),
-        marketInsight: report.marketInsight || "",
-        customerTruth: safeArray(report.customerTruth, []),
-        buyingTrigger: report.buyingTrigger || "",
-        competitionMap: safeArray(report.competitionMap, []),
-        competitionConclusion: report.competitionConclusion || "",
-        unitEconomicsCards: safeArray(report.unitEconomicsCards, []),
-        unitEconomicsTable: safeArray(report.unitEconomicsTable, []),
-        economicsJudgment: report.economicsJudgment || "",
-        marketingStrategy: report.marketingStrategy || {
-            channelFit: [],
-            contentPlaybook: [],
-            thirtyDayMarketingTest: [],
-        },
-        businessModel: report.businessModel || {
-            revenueLayers: [],
-            modelJudgment: "",
-        },
-        riskSystem: safeArray(report.riskSystem, []),
-        executionPlan: safeArray(report.executionPlan, []),
-        operatingRule: report.operatingRule || "",
-        goThreshold: safeArray(report.goThreshold, []),
-        finalRule: report.finalRule || "",
-        appendix: report.appendix || {
-            dataSources: [],
-            assumptions: [],
-        },
-    }
-}
-
-function normalizeFreeReport(report, input) {
-    return {
-        brandName: report.brandName || input.brandName,
-        decision: report.decision || "HOLD",
-        score: Number.isFinite(report.score) ? report.score : 50,
-        oneLineVerdict:
-            report.oneLineVerdict ||
-            "This business requires validation before launch.",
-        whyItWorks: report.whyItWorks || "",
-        whyItFails: report.whyItFails || "",
-        topRisks: safeArray(report.topRisks, []),
-        firstAction: report.firstAction || "",
-        upgradeHook:
-            report.upgradeHook ||
-            "The deep report unlocks full market, marketing, unit economics, and execution strategy.",
-    }
-}
-
-async function buildDeepDocx(report) {
-    const children = []
-
-    addBrand(children)
-    addDecision(children, report.cover.decision)
-    addScore(children, `Score: ${report.cover.score} / 100`)
-    addTitle(children, `${report.cover.brandName} Deep Business Decision Report`)
-    addNormal(children, report.cover.subtitle)
-
-    children.push(
-        twoColumnCards(
-            report.decisionMatrix.map((item) => [
-                item.label || "",
-                item.value || "",
-            ])
-        )
-    )
-
-    addNormal(children, `One-line verdict: ${report.cover.oneLineVerdict}`)
-    addSection(children, "Report Promise")
-    addNormal(children, report.reportPromise)
-
-    addDivider(children)
-
-    addSection(children, "REPORT MAP")
-    addSubTitle(children, "Table of Contents")
-    ;[
-        "1. Executive Decision",
-        "2. Market Reality",
-        "3. Customer Truth",
-        "4. Competition Map",
-        "5. Unit Economics",
-        "6. Marketing Strategy",
-        "7. Business Model",
-        "8. Risk System",
-        "9. Execution Plan",
-        "10. GO Threshold",
-        "11. Appendix",
-    ].forEach((item) => addBullet(children, item))
-
-    addNormal(
-        children,
-        "Design note: Each section uses compact tables, short judgment blocks, and clear thresholds. Long paragraphs are intentionally avoided."
-    )
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 1")
-    addSection(children, "1. Executive Decision")
-    children.push(
-        basicTable([
-            ["Question", "Judgment"],
-            ...report.executiveDecision.map((item) => [
-                item.question || "",
-                item.judgment || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Founder Decision")
-    addNormal(children, report.founderDecision)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 2")
-    addSection(children, "2. Market Reality")
-    children.push(
-        twoColumnCards(
-            report.marketCards.map((item) => [
-                item.label || "",
-                item.value || "",
-            ])
-        )
-    )
-
-    addSubTitle(children, "TAM / SAM / SOM")
-    children.push(
-        basicTable([
-            ["Layer", "Estimate", "Formula / Logic", "Interpretation"],
-            ...report.tamSamSom.map((item) => [
-                item.layer || "",
-                item.estimate || "",
-                item.formula || "",
-                item.interpretation || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Market Insight")
-    addNormal(children, report.marketInsight)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 3")
-    addSection(children, "3. Customer Truth")
-    children.push(
-        basicTable([
-            ["Customer Problem", "Behavior Evidence", "Business Meaning"],
-            ...report.customerTruth.map((item) => [
-                item.problem || "",
-                item.behaviorEvidence || "",
-                item.businessMeaning || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Buying Trigger")
-    addNormal(children, report.buyingTrigger)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 4")
-    addSection(children, "4. Competition Map")
-    children.push(
-        basicTable([
-            ["Competitor / Alternative", "Type", "Strength", "Weakness"],
-            ...report.competitionMap.map((item) => [
-                item.competitor || "",
-                item.type || "",
-                item.strength || "",
-                item.weakness || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Competitive Conclusion")
-    addNormal(children, report.competitionConclusion)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 5")
-    addSection(children, "5. Unit Economics")
-    children.push(
-        twoColumnCards(
-            report.unitEconomicsCards.map((item) => [
-                item.label || "",
-                item.value || "",
-            ])
-        )
-    )
-    children.push(
-        basicTable([
-            ["Metric", "Target Range", "Pass / Fail Rule", "Reason"],
-            ...report.unitEconomicsTable.map((item) => [
-                item.metric || "",
-                item.targetRange || "",
-                item.passFailRule || "",
-                item.reason || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Economics Judgment")
-    addNormal(children, report.economicsJudgment)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 6")
-    addSection(children, "6. Marketing Strategy")
-    addSubTitle(children, "Channel Fit Analysis")
-    children.push(
-        basicTable([
-            ["Channel", "Fit", "Role", "Why"],
-            ...(report.marketingStrategy.channelFit || []).map((item) => [
-                item.channel || "",
-                item.fit || "",
-                item.role || "",
-                item.why || "",
-            ]),
-        ])
-    )
-
-    addSubTitle(children, "Content Playbook")
-    ;(report.marketingStrategy.contentPlaybook || []).forEach((item) =>
-        addBullet(children, item)
-    )
-
-    addSubTitle(children, "30-Day Marketing Test")
-    children.push(
-        basicTable([
-            ["Period", "Action", "Success Metric"],
-            ...(report.marketingStrategy.thirtyDayMarketingTest || []).map(
-                (item) => [
-                    item.period || "",
-                    item.action || "",
-                    item.successMetric || "",
-                ]
+        decisionMatrix: safeArray(report?.decisionMatrix, sample.decisionMatrix),
+        executiveDecision: safeArray(
+            report?.executiveDecision,
+            sample.executiveDecision
+        ),
+        founderDecision: report?.founderDecision || sample.founderDecision,
+        marketCards: safeArray(report?.marketCards, sample.marketCards),
+        tamSamSom: safeArray(report?.tamSamSom, sample.tamSamSom),
+        marketInsight: report?.marketInsight || sample.marketInsight,
+        customerTruth: safeArray(report?.customerTruth, sample.customerTruth),
+        buyingTrigger: report?.buyingTrigger || sample.buyingTrigger,
+        competitionMap: safeArray(
+            report?.competitionMap,
+            sample.competitionMap
+        ),
+        competitionConclusion:
+            report?.competitionConclusion || sample.competitionConclusion,
+        unitEconomicsCards: safeArray(
+            report?.unitEconomicsCards,
+            sample.unitEconomicsCards
+        ),
+        unitEconomicsTable: safeArray(
+            report?.unitEconomicsTable,
+            sample.unitEconomicsTable
+        ),
+        economicsJudgment:
+            report?.economicsJudgment || sample.economicsJudgment,
+        marketingStrategy: {
+            channelFit: safeArray(
+                report?.marketingStrategy?.channelFit,
+                sample.marketingStrategy.channelFit
             ),
-        ])
-    )
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 7")
-    addSection(children, "7. Business Model")
-    children.push(
-        basicTable([
-            ["Revenue Layer", "Example", "Purpose"],
-            ...(report.businessModel.revenueLayers || []).map((item) => [
-                item.layer || "",
-                item.example || "",
-                item.purpose || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Model Judgment")
-    addNormal(children, report.businessModel.modelJudgment)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 8")
-    addSection(children, "8. Risk System")
-    children.push(
-        basicTable([
-            ["Risk", "Impact", "Countermeasure"],
-            ...report.riskSystem.map((item) => [
-                item.risk || "",
-                item.impact || "",
-                item.countermeasure || "",
-            ]),
-        ])
-    )
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 9")
-    addSection(children, "9. Execution Plan")
-    children.push(
-        basicTable([
-            ["Phase", "Actions", "Primary KPI"],
-            ...report.executionPlan.map((item) => [
-                item.phase || "",
-                item.actions || "",
-                item.primaryKpi || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Operating Rule")
-    addNormal(children, report.operatingRule)
-
-    addDivider(children)
-
-    addPageLabel(children, "PAGE 10")
-    addSection(children, "10. GO Threshold")
-    children.push(
-        basicTable([
-            ["Metric", "Pass Condition", "Decision Meaning"],
-            ...report.goThreshold.map((item) => [
-                item.metric || "",
-                item.passCondition || "",
-                item.decisionMeaning || "",
-            ]),
-        ])
-    )
-    addSubTitle(children, "Final Rule")
-    addNormal(children, report.finalRule)
-
-    addDivider(children)
-
-    addSection(children, "APPENDIX")
-    addSubTitle(children, "Appendix: Data Sources & Assumptions")
-    children.push(
-        basicTable([
-            ["Data Point", "Source / Basis", "Usage"],
-            ...(report.appendix.dataSources || []).map((item) => [
-                item.dataPoint || "",
-                item.sourceBasis || "",
-                item.usage || "",
-            ]),
-        ])
-    )
-
-    addSubTitle(children, "Assumptions")
-    ;(report.appendix.assumptions || []).forEach((item) =>
-        addBullet(children, item)
-    )
-
-    addFooter(children)
-
-    const doc = new Document({
-        creator: "GoNoGo",
-        title: `GoNoGo Deep Report - ${report.cover.brandName}`,
-        description: report.cover.oneLineVerdict,
-        sections: [{ children }],
-    })
-
-    return await Packer.toBuffer(doc)
+            contentPlaybook: safeArray(
+                report?.marketingStrategy?.contentPlaybook,
+                sample.marketingStrategy.contentPlaybook
+            ),
+            thirtyDayMarketingTest: safeArray(
+                report?.marketingStrategy?.thirtyDayMarketingTest,
+                sample.marketingStrategy.thirtyDayMarketingTest
+            ),
+        },
+        businessModel: {
+            revenueLayers: safeArray(
+                report?.businessModel?.revenueLayers,
+                sample.businessModel.revenueLayers
+            ),
+            modelJudgment:
+                report?.businessModel?.modelJudgment ||
+                sample.businessModel.modelJudgment,
+        },
+        riskSystem: safeArray(report?.riskSystem, sample.riskSystem),
+        executionPlan: safeArray(report?.executionPlan, sample.executionPlan),
+        operatingRule: report?.operatingRule || sample.operatingRule,
+        goThreshold: safeArray(report?.goThreshold, sample.goThreshold),
+        finalRule: report?.finalRule || sample.finalRule,
+        appendix: {
+            dataSources: safeArray(
+                report?.appendix?.dataSources,
+                sample.appendix.dataSources
+            ),
+            assumptions: safeArray(
+                report?.appendix?.assumptions,
+                sample.appendix.assumptions
+            ),
+        },
+    }
 }
 
-async function buildFreeDocx(report) {
-    const children = []
+function buildHtmlFromTemplate(report) {
+    const templatePath = path.join(__dirname, "templates", "deep-report.html")
+    let html = fs.readFileSync(templatePath, "utf8")
 
-    addBrand(children)
-    addDecision(children, report.decision)
-    addScore(children, `Score: ${report.score} / 100`)
-    addTitle(children, `${report.brandName} Free Decision Report`)
-    addNormal(children, report.oneLineVerdict)
+    const matrix = objectFromPairs(report.decisionMatrix)
+    const market = objectFromPairs(report.marketCards)
+    const unit = objectFromPairs(report.unitEconomicsCards)
 
-    addDivider(children)
+    const executiveMap = objectFromPairs(report.executiveDecision)
 
-    addSection(children, "1. Why This Works")
-    addNormal(children, report.whyItWorks)
+    const data = {
+        brandName: report.cover.brandName,
+        decision: report.cover.decision,
+        score: report.cover.score,
+        subtitle: report.cover.subtitle,
+        oneLineVerdict: report.cover.oneLineVerdict,
 
-    addSection(children, "2. Why This Fails")
-    addNormal(children, report.whyItFails)
+        marketLevel: matrix.MARKET || "",
+        profitabilityLevel: matrix.PROFITABILITY || "",
+        executionLevel: matrix.EXECUTION || "",
+        riskLevel: matrix.RISK || "",
 
-    addSection(children, "3. Top Risks")
-    ;(report.topRisks || []).forEach((item) => addBullet(children, item))
+        whyItWorks: executiveMap["Why this works"] || "",
+        whyItFails: executiveMap["Why this fails"] || "",
+        whatToDoNow: executiveMap["What to do now"] || "",
+        founderDecision: report.founderDecision,
 
-    addSection(children, "4. First Action")
-    addNormal(children, report.firstAction)
+        tamValue: market.TAM || market["GLOBAL PET FOOD"] || "",
+        samValue: market.SAM || market["U.S. PET FOOD"] || "",
+        somValue: market.SOM || market["U.S. PET SPEND"] || "",
+        growthValue: market.GROWTH || "",
 
-    addSection(children, "5. Unlock Deep Report")
-    addNormal(children, report.upgradeHook)
+        marketInsight: report.marketInsight,
+        buyingTrigger: report.buyingTrigger,
 
-    addFooter(children)
+        cacValue: unit.CAC || "",
+        ltvValue: unit.LTV || "",
+        aovValue: unit.AOV || "",
+        repeatValue: unit.REPEAT || unit.PAYBACK || "",
 
-    const doc = new Document({
-        creator: "GoNoGo",
-        title: `GoNoGo Free Report - ${report.brandName}`,
-        description: report.oneLineVerdict,
-        sections: [{ children }],
-    })
-
-    return await Packer.toBuffer(doc)
-}
-
-function addBrand(children) {
-    children.push(
-        new Paragraph({
-            children: [new TextRun({ text: "GONOGO™", bold: true, size: 28 })],
-            spacing: { after: 220 },
-        })
-    )
-}
-
-function addDecision(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 64,
-                }),
-            ],
-            spacing: { after: 120 },
-        })
-    )
-}
-
-function addScore(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 28,
-                }),
-            ],
-            spacing: { after: 240 },
-        })
-    )
-}
-
-function addTitle(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 30,
-                }),
-            ],
-            spacing: { after: 160 },
-        })
-    )
-}
-
-function addSection(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 26,
-                }),
-            ],
-            spacing: { before: 360, after: 160 },
-        })
-    )
-}
-
-function addSubTitle(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 22,
-                }),
-            ],
-            spacing: { before: 220, after: 120 },
-        })
-    )
-}
-
-function addPageLabel(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    bold: true,
-                    size: 18,
-                }),
-            ],
-            spacing: { before: 260, after: 80 },
-        })
-    )
-}
-
-function addNormal(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: String(text || ""),
-                    size: 21,
-                }),
-            ],
-            spacing: { after: 140 },
-        })
-    )
-}
-
-function addBullet(children, text) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: `• ${String(text || "")}`,
-                    size: 21,
-                }),
-            ],
-            spacing: { after: 90 },
-        })
-    )
-}
-
-function addDivider(children) {
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: "────────────────────────────────────────",
-                    size: 14,
-                }),
-            ],
-            spacing: { before: 220, after: 220 },
-        })
-    )
-}
-
-function addFooter(children) {
-    addDivider(children)
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: "GoNoGo™ Business Decision Report",
-                    size: 18,
-                }),
-            ],
-        })
-    )
-}
-
-function basicTable(rows) {
-    const safeRows = Array.isArray(rows) ? rows : []
-
-    return new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        rows: safeRows.map((row, rowIndex) => {
-            const cells = Array.isArray(row) ? row : [String(row || "")]
-            return new TableRow({
-                children: cells.map((cell) => {
-                    return new TableCell({
-                        children: [
-                            new Paragraph({
-                                children: [
-                                    new TextRun({
-                                        text: String(cell || ""),
-                                        bold: rowIndex === 0,
-                                        size: rowIndex === 0 ? 19 : 18,
-                                    }),
-                                ],
-                            }),
-                        ],
-                    })
-                }),
-            })
-        }),
-    })
-}
-
-function twoColumnCards(items) {
-    const rows = []
-
-    for (let i = 0; i < items.length; i += 2) {
-        const left = items[i] || ["", ""]
-        const right = items[i + 1] || ["", ""]
-
-        rows.push([
-            `${left[0]}\n${left[1]}`,
-            `${right[0]}\n${right[1]}`,
-        ])
+        economicsJudgment: report.economicsJudgment,
+        modelJudgment: report.businessModel.modelJudgment,
+        operatingRule: report.operatingRule,
+        finalRule: report.finalRule,
     }
 
-    return basicTable(rows)
+    html = replacePlaceholders(html, data)
+
+    html = html
+        .replace("{{tamSamSomRows}}", rows(report.tamSamSom))
+        .replace("{{customerTruthRows}}", rows(report.customerTruth))
+        .replace("{{competitionRows}}", rows(report.competitionMap))
+        .replace("{{competitionConclusion}}", esc(report.competitionConclusion))
+        .replace("{{unitEconomicsRows}}", rows(report.unitEconomicsTable))
+        .replace(
+            "{{marketingChannelRows}}",
+            rows(report.marketingStrategy.channelFit)
+        )
+        .replace(
+            "{{contentPlaybookItems}}",
+            listItems(report.marketingStrategy.contentPlaybook)
+        )
+        .replace(
+            "{{marketingTestRows}}",
+            rows(report.marketingStrategy.thirtyDayMarketingTest)
+        )
+        .replace(
+            "{{businessModelRows}}",
+            rows(report.businessModel.revenueLayers)
+        )
+        .replace("{{riskRows}}", rows(report.riskSystem))
+        .replace("{{executionRows}}", rows(report.executionPlan))
+        .replace("{{goThresholdRows}}", rows(report.goThreshold))
+        .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
+        .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
+
+    html = html.replace(/{{[^}]+}}/g, "")
+
+    return html
+}
+
+async function htmlToPdf(html) {
+    const browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+    })
+
+    try {
+        const page = await browser.newPage()
+
+        await page.setContent(html, {
+            waitUntil: "networkidle0",
+        })
+
+        return await page.pdf({
+            format: "A4",
+            printBackground: true,
+            margin: {
+                top: "0mm",
+                right: "0mm",
+                bottom: "0mm",
+                left: "0mm",
+            },
+        })
+    } finally {
+        await browser.close()
+    }
+}
+
+function replacePlaceholders(html, data) {
+    let output = html
+
+    Object.entries(data).forEach(([key, value]) => {
+        output = output.replace(
+            new RegExp(`{{${key}}}`, "g"),
+            esc(String(value ?? ""))
+        )
+    })
+
+    return output
+}
+
+function rows(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map((row) => {
+            const cells = Array.isArray(row) ? row : Object.values(row || {})
+            return `<tr>${cells.map((cell) => `<td>${esc(cell)}</td>`).join("")}</tr>`
+        })
+        .join("")
+}
+
+function listItems(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items.map((item) => `<li>${esc(item)}</li>`).join("")
+}
+
+function objectFromPairs(items) {
+    const out = {}
+
+    if (!Array.isArray(items)) return out
+
+    items.forEach((item) => {
+        if (Array.isArray(item)) {
+            out[item[0]] = item[1]
+        } else if (item?.label) {
+            out[item.label] = item.value
+        }
+    })
+
+    return out
+}
+
+function esc(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
 }
 
 function safeArray(value, fallback) {
@@ -989,6 +561,7 @@ function getLanguageName(code) {
         ja: "Japanese",
         zh: "Chinese",
     }
+
     return map[code] || "English"
 }
 
@@ -997,6 +570,300 @@ function sanitizeFileName(value) {
         .replace(/[\\/:*?"<>|]/g, "")
         .replace(/\s+/g, "_")
         .slice(0, 60)
+}
+
+function getSampleReport() {
+    return {
+        cover: {
+            brandName: "NomNomBox",
+            decision: "HOLD",
+            score: 61,
+            subtitle: "Premium pet-food sample subscription for online dog owners",
+            oneLineVerdict:
+                "Demand is real, but the model must prove a narrow niche, repeat purchasing, and margin after shipping before scaling.",
+        },
+        decisionMatrix: [
+            ["MARKET", "HIGH"],
+            ["PROFITABILITY", "MEDIUM"],
+            ["EXECUTION", "HIGH"],
+            ["RISK", "HIGH"],
+        ],
+        executiveDecision: [
+            [
+                "Why this works",
+                "Dog owners buy repeatedly, pet spending is resilient, and subscription behavior already exists in pet commerce.",
+            ],
+            [
+                "Why this fails",
+                "Generic sampling is easy to copy, shipping is margin-heavy, and repeat behavior weakens once the dog finds a preferred food.",
+            ],
+            [
+                "What to do now",
+                "Do not launch broadly. Validate one segment first with a 100-order paid pilot.",
+            ],
+        ],
+        founderDecision:
+            "NomNomBox deserves a controlled pilot, not a full launch. The business moves to GO only if customer acquisition payback and repeat purchase behavior pass the threshold section.",
+        marketCards: [
+            ["TAM", "~$128.7B"],
+            ["SAM", "~$43.5B"],
+            ["SOM", "500–2,000 subs"],
+            ["GROWTH", "4–5%+"],
+        ],
+        tamSamSom: [
+            [
+                "TAM",
+                "Global pet food market: ~$128.7B",
+                "Global pet food category spend",
+                "Large enough market, but too broad for entry strategy.",
+            ],
+            [
+                "SAM",
+                "U.S. online premium dog-food buyers",
+                "U.S. market × online adoption × premium dog share",
+                "Serviceable market is attractive if sharply positioned.",
+            ],
+            [
+                "SOM",
+                "500–2,000 subscribers",
+                "Early pilot conversion × target channel reach",
+                "Validation target, not domination.",
+            ],
+        ],
+        marketInsight:
+            "The market rewards trust, convenience, and measurable pet health confidence. A generic sample box is weak; a risk-reduction platform for picky or allergy-sensitive dogs is stronger.",
+        customerTruth: [
+            [
+                "Food rejection",
+                "Owners test brands and abandon bags their dog refuses.",
+                "Sampling reduces waste and purchase anxiety.",
+            ],
+            [
+                "Allergy concern",
+                "Owners fear switching food without proof.",
+                "Trust and guidance matter more than variety.",
+            ],
+            [
+                "Review dependence",
+                "Customers search reactions and ingredients.",
+                "UGC becomes acquisition asset.",
+            ],
+        ],
+        buyingTrigger:
+            "The strongest trigger is not discovery. It is avoiding wasted money and avoiding the wrong food.",
+        competitionMap: [
+            [
+                "Chewy Autoship",
+                "Marketplace subscription",
+                "Trust, logistics, recurring behavior",
+                "Weak curation",
+            ],
+            [
+                "Amazon Subscribe & Save",
+                "Marketplace utility",
+                "Convenience and price",
+                "No pet-specific trust layer",
+            ],
+            [
+                "The Farmer’s Dog",
+                "Fresh food subscription",
+                "Premium positioning",
+                "High price",
+            ],
+            [
+                "Ollie / Nom Nom",
+                "Fresh food DTC",
+                "Strong subscription model",
+                "Churn pressure",
+            ],
+        ],
+        competitionConclusion:
+            "The open space is not subscription pet food. The open space is trial-before-commitment guidance for owners with a specific dog problem.",
+        unitEconomicsCards: [
+            ["CAC", "$35–$90"],
+            ["LTV", "$120–$320"],
+            ["AOV", "$25–$55"],
+            ["REPEAT", "2.5x+"],
+        ],
+        unitEconomicsTable: [
+            [
+                "CAC",
+                "$35–$90",
+                "PASS below $45",
+                "Sampling boxes are low-AOV; CAC must stay controlled.",
+            ],
+            [
+                "Gross margin",
+                "35%+",
+                "PASS at 35%+",
+                "Shipping can destroy contribution margin.",
+            ],
+            [
+                "LTV",
+                "$120–$320",
+                "PASS above $180",
+                "LTV must justify acquisition.",
+            ],
+            [
+                "Repeat rate",
+                "2.5x+",
+                "PASS above 2.5x",
+                "One-time testers do not support subscription economics.",
+            ],
+        ],
+        economicsJudgment:
+            "The model works only if sampling becomes a conversion engine into full-size products.",
+        marketingStrategy: {
+            channelFit: [
+                [
+                    "TikTok / Reels",
+                    "HIGH",
+                    "Demand creation",
+                    "Pet reaction content is emotional and shareable.",
+                ],
+                [
+                    "Instagram",
+                    "HIGH",
+                    "Trust building",
+                    "Owner stories and testimonials work well.",
+                ],
+                [
+                    "Search / SEO",
+                    "MEDIUM",
+                    "Intent capture",
+                    "Useful for allergy and food comparison queries.",
+                ],
+                [
+                    "Paid social",
+                    "WATCH",
+                    "Scale channel",
+                    "Only after CAC and retention are proven.",
+                ],
+            ],
+            contentPlaybook: [
+                "Dog food reaction test: Will my picky dog eat it?",
+                "Allergy-safe trial pack explanation",
+                "Owner story: wasted money on rejected food",
+                "Before/after feeding routine",
+                "Full-size bag risk vs sample-first path",
+            ],
+            thirtyDayMarketingTest: [
+                [
+                    "Week 1–2",
+                    "Create 20 short videos across 4 angles.",
+                    "Find 2 hooks above baseline CTR.",
+                ],
+                [
+                    "Week 3",
+                    "Run $300–$500 micro paid test.",
+                    "CAC estimate below target band.",
+                ],
+                [
+                    "Week 4",
+                    "Interview buyers and non-buyers.",
+                    "Identify top objections and winning promise.",
+                ],
+            ],
+        },
+        businessModel: {
+            revenueLayers: [
+                ["Starter sample box", "$9–$19 trial", "Reduce first-purchase friction."],
+                [
+                    "Monthly discovery box",
+                    "$19–$39/month",
+                    "Recurring exploration revenue.",
+                ],
+                [
+                    "Full-size conversion",
+                    "Partner or private-label upsell",
+                    "Create real LTV.",
+                ],
+            ],
+            modelJudgment:
+                "A sample-only subscription is fragile. The stronger model is a sample-to-full-size conversion platform.",
+        },
+        riskSystem: [
+            [
+                "Fulfillment cost crushes margin",
+                "Severe",
+                "Limit SKU complexity and batch shipping tests.",
+            ],
+            [
+                "Weak repeat behavior",
+                "High",
+                "Create full-size conversion path.",
+            ],
+            [
+                "Trust gap",
+                "High",
+                "Use ingredient transparency and clear allergy handling.",
+            ],
+        ],
+        executionPlan: [
+            [
+                "0–30 days",
+                "Build one niche offer, landing page, 100-order pre-sell test.",
+                "Paid conversion rate + CAC estimate",
+            ],
+            [
+                "30–60 days",
+                "Fulfill pilot and measure repeat intent.",
+                "Gross margin after shipping",
+            ],
+            [
+                "60–90 days",
+                "Scale only winning segment and content angle.",
+                "CAC payback + retention",
+            ],
+        ],
+        operatingRule:
+            "Do not add more segments, SKUs, or channels until one customer segment proves repeat behavior.",
+        goThreshold: [
+            [
+                "CAC payback",
+                "Under 3 months",
+                "Customer acquisition is financially scalable.",
+            ],
+            [
+                "Gross margin after shipping",
+                "35%+",
+                "Operations can support marketing costs.",
+            ],
+            [
+                "Repeat rate",
+                "2.5x+ orders",
+                "Sampling converts into ongoing value.",
+            ],
+            [
+                "Refund / complaint rate",
+                "Below 5%",
+                "Product trust is not breaking.",
+            ],
+        ],
+        finalRule:
+            "GO only if at least three of four thresholds pass. HOLD if one or two fail. NO GO if CAC payback and repeat behavior both fail.",
+        appendix: {
+            dataSources: [
+                ["U.S. pet industry spend", "APPA industry reporting", "Market scale benchmark"],
+                [
+                    "Global pet food market",
+                    "Grand View Research pet food market report",
+                    "Global TAM reference",
+                ],
+                [
+                    "CAC / LTV ranges",
+                    "DTC subscription benchmark assumptions",
+                    "Economic stress test",
+                ],
+            ],
+            assumptions: [
+                "NomNomBox starts without existing brand equity.",
+                "Initial launch focuses on one country and one niche segment.",
+                "Financial ranges are directional and require validation with first-party test data.",
+                "This report is a sample layout for product design and PDF conversion.",
+            ],
+        },
+    }
 }
 
 app.listen(PORT, () => {
