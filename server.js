@@ -712,7 +712,13 @@ async function htmlToPdf(html) {
 
     try {
         const page = await browser.newPage()
-        await page.setContent(html, { waitUntil: "networkidle0" })
+
+        await page.setContent(html, {
+    waitUntil: ["domcontentloaded", "networkidle0"],
+    timeout: 0,
+})
+
+await page.evaluateHandle("document.fonts.ready")
 
         const pdf = await page.pdf({
             format: "A4",
