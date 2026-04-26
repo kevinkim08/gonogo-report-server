@@ -4,146 +4,296 @@
   <meta charset="UTF-8" />
   <title>GoNoGo Deep Report</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f4f1;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f3ef;
       color: #111;
     }
 
     .page {
-      width: 794px;
-      min-height: 1123px;
-      margin: 40px auto;
-      padding: 56px;
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 20mm;
       background: #fff;
-      box-sizing: border-box;
       page-break-after: always;
+      position: relative;
     }
 
     .brand {
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: -0.04em;
     }
 
     .decision {
-      font-size: 84px;
+      font-size: 82px;
       font-weight: 900;
-      margin-top: 80px;
       letter-spacing: -0.07em;
+      margin-top: 42px;
+      line-height: 0.9;
     }
 
     .score {
-      font-size: 28px;
-      font-weight: 800;
+      font-size: 26px;
+      font-weight: 900;
       margin-top: 12px;
     }
 
     .title {
-      font-size: 34px;
-      font-weight: 900;
-      margin-top: 40px;
-      letter-spacing: -0.05em;
-    }
-
-    .subtitle {
-      font-size: 18px;
-      color: #555;
-      margin-top: 12px;
-      line-height: 1.5;
-    }
-
-    .section-title {
       font-size: 32px;
       font-weight: 900;
       letter-spacing: -0.05em;
-      margin-bottom: 28px;
+      line-height: 1.05;
+      margin-top: 34px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #555;
+      margin-top: 10px;
+      line-height: 1.45;
+    }
+
+    .section-title {
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      margin-bottom: 24px;
+      line-height: 1.05;
     }
 
     .label {
-      font-size: 12px;
-      font-weight: 800;
-      color: #777;
+      font-size: 11px;
+      font-weight: 900;
+      color: #666;
       text-transform: uppercase;
       margin-bottom: 8px;
+      letter-spacing: 0.02em;
     }
 
     .card-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-top: 40px;
+      gap: 10px;
+      margin-top: 28px;
     }
 
     .card {
-      border: 1px solid #ddd;
-      padding: 18px;
-      min-height: 80px;
+      border: 1px solid #d8d8d8;
+      padding: 14px;
+      min-height: 72px;
+      background: #fff;
     }
 
     .card-title {
-      font-size: 12px;
+      font-size: 10px;
       color: #666;
-      font-weight: 800;
+      font-weight: 900;
       text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
     .card-value {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: 900;
-      margin-top: 12px;
+      margin-top: 10px;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
     }
 
     .verdict {
-      margin-top: 36px;
-      padding: 24px;
+      margin-top: 28px;
+      padding: 20px;
       background: #111;
       color: #fff;
-      font-size: 18px;
-      line-height: 1.5;
-      font-weight: 700;
+      font-size: 16px;
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    .visual-board {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      margin-top: 28px;
+    }
+
+    .score-box {
+      border: 1px solid #d8d8d8;
+      padding: 18px;
+    }
+
+    .score-row {
+      margin-bottom: 16px;
+    }
+
+    .score-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .score-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .bar-bg {
+      width: 100%;
+      height: 11px;
+      background: #e7e7e7;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: #111;
+      border-radius: 99px;
+    }
+
+    .big-metric {
+      border: 1px solid #111;
+      padding: 18px;
+      margin-bottom: 12px;
+      min-height: 86px;
+    }
+
+    .big-metric-title {
+      font-size: 10px;
+      font-weight: 900;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .big-metric-value {
+      font-size: 34px;
+      font-weight: 900;
+      margin-top: 8px;
+      letter-spacing: -0.06em;
+      line-height: 0.95;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      font-size: 13px;
+      margin-top: 18px;
+      font-size: 12px;
     }
 
     th {
       background: #111;
       color: #fff;
       text-align: left;
-      padding: 12px;
-      font-size: 12px;
+      padding: 10px;
+      font-size: 10.5px;
+      line-height: 1.35;
+      vertical-align: top;
     }
 
     td {
       border: 1px solid #ddd;
-      padding: 12px;
+      padding: 10px;
       vertical-align: top;
       line-height: 1.45;
     }
 
     .text-block {
-      font-size: 16px;
-      line-height: 1.65;
-      margin-top: 18px;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-top: 12px;
     }
 
     .bullet-list {
+      margin-top: 14px;
+      padding-left: 18px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .bullet-list li {
+      margin-bottom: 7px;
+    }
+
+    .funnel {
+      margin-top: 26px;
+      border: 1px solid #d8d8d8;
+      padding: 18px;
+    }
+
+    .funnel-row {
+      margin-bottom: 16px;
+    }
+
+    .funnel-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .funnel-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+
+    .checklist {
       margin-top: 20px;
-      padding-left: 20px;
-      font-size: 15px;
-      line-height: 1.6;
+      border-top: 1px solid #ddd;
+    }
+
+    .check-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #ddd;
+      padding: 13px 0;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .status-pass {
+      font-weight: 900;
+      color: #111;
+    }
+
+    .status-watch {
+      font-weight: 900;
+      color: #777;
+    }
+
+    .status-fail {
+      font-weight: 900;
+      color: #b00020;
+    }
+
+    .mini-note {
+      margin-top: 18px;
+      padding: 14px;
+      background: #f3f3ef;
+      font-size: 13px;
+      line-height: 1.55;
+      border-left: 4px solid #111;
     }
 
     .footer {
-      margin-top: 60px;
-      font-size: 12px;
+      position: absolute;
+      bottom: 12mm;
+      left: 20mm;
+      right: 20mm;
+      font-size: 10px;
       color: #888;
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #eee;
+      padding-top: 8px;
     }
 
     @media print {
@@ -155,11 +305,11 @@
         margin: 0;
         width: 210mm;
         min-height: 297mm;
-        page-break-after: always;
       }
     }
   </style>
 </head>
+
 <body>
 
   <!-- PAGE 1 -->
@@ -191,11 +341,48 @@
       </div>
     </div>
 
-    <div class="verdict">
-      {{oneLineVerdict}}
+    <div class="visual-board">
+      <div class="score-box">
+        <div class="score-row">
+          <div class="score-label"><span>Market</span><span>{{marketScore}} / 100</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width: {{marketScore}}%;"></div></div>
+        </div>
+
+        <div class="score-row">
+          <div class="score-label"><span>Profitability</span><span>{{profitabilityScore}} / 100</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width: {{profitabilityScore}}%;"></div></div>
+        </div>
+
+        <div class="score-row">
+          <div class="score-label"><span>Execution</span><span>{{executionScore}} / 100</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width: {{executionScore}}%;"></div></div>
+        </div>
+
+        <div class="score-row">
+          <div class="score-label"><span>Risk Pressure</span><span>{{riskScore}} / 100</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width: {{riskScore}}%;"></div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="big-metric">
+          <div class="big-metric-title">LTV / CAC</div>
+          <div class="big-metric-value">{{ltvToCac}}</div>
+        </div>
+
+        <div class="big-metric">
+          <div class="big-metric-title">Unit Economics</div>
+          <div class="big-metric-value">{{unitEconomicsStatus}}</div>
+        </div>
+      </div>
     </div>
 
-    <div class="footer">GoNoGo™ Business Decision Report</div>
+    <div class="verdict">{{oneLineVerdict}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Decision Board</span>
+    </div>
   </section>
 
   <!-- PAGE 2 -->
@@ -225,8 +412,17 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:40px;">Founder Decision</div>
+    <div class="label" style="margin-top:34px;">Founder Decision</div>
     <div class="text-block">{{founderDecision}}</div>
+
+    <div class="mini-note">
+      GoNoGo Principle: the first decision is not whether the idea is exciting. The first decision is whether the business can survive customer acquisition, margins, and repeat behavior.
+    </div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Executive Decision</span>
+    </div>
   </section>
 
   <!-- PAGE 3 -->
@@ -252,6 +448,25 @@
       </div>
     </div>
 
+    <div class="funnel">
+      <div class="label">Market Funnel</div>
+
+      <div class="funnel-row">
+        <div class="funnel-label"><span>TAM — {{tamValue}}</span><span>{{tamScore}}%</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width: {{tamScore}}%;"></div></div>
+      </div>
+
+      <div class="funnel-row">
+        <div class="funnel-label"><span>SAM — {{samValue}}</span><span>{{samScore}}%</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width: {{samScore}}%;"></div></div>
+      </div>
+
+      <div class="funnel-row">
+        <div class="funnel-label"><span>SOM — {{somValue}}</span><span>{{somScore}}%</span></div>
+        <div class="bar-bg"><div class="bar-fill" style="width: {{somScore}}%;"></div></div>
+      </div>
+    </div>
+
     <table>
       <thead>
         <tr>
@@ -266,8 +481,13 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Market Insight</div>
+    <div class="label" style="margin-top:26px;">Market Insight</div>
     <div class="text-block">{{marketInsight}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Market Reality</span>
+    </div>
   </section>
 
   <!-- PAGE 4 -->
@@ -287,8 +507,17 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Buying Trigger</div>
+    <div class="label" style="margin-top:30px;">Buying Trigger</div>
     <div class="text-block">{{buyingTrigger}}</div>
+
+    <div class="mini-note">
+      Customer truth is not demographic. Customer truth is the moment the buyer feels enough pain to spend money.
+    </div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Customer Truth</span>
+    </div>
   </section>
 
   <!-- PAGE 5 -->
@@ -309,8 +538,13 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Competitive Conclusion</div>
+    <div class="label" style="margin-top:30px;">Competitive Conclusion</div>
     <div class="text-block">{{competitionConclusion}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Competition Map</span>
+    </div>
   </section>
 
   <!-- PAGE 6 -->
@@ -336,6 +570,18 @@
       </div>
     </div>
 
+    <div class="visual-board">
+      <div class="big-metric">
+        <div class="big-metric-title">LTV / CAC</div>
+        <div class="big-metric-value">{{ltvToCac}}</div>
+      </div>
+
+      <div class="big-metric">
+        <div class="big-metric-title">Payback</div>
+        <div class="big-metric-value">{{paybackValue}}</div>
+      </div>
+    </div>
+
     <table>
       <thead>
         <tr>
@@ -350,8 +596,13 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Economics Judgment</div>
+    <div class="label" style="margin-top:26px;">Economics Judgment</div>
     <div class="text-block">{{economicsJudgment}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Unit Economics</span>
+    </div>
   </section>
 
   <!-- PAGE 7 -->
@@ -372,12 +623,12 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Content Playbook</div>
+    <div class="label" style="margin-top:26px;">Content Playbook</div>
     <ul class="bullet-list">
       {{contentPlaybookItems}}
     </ul>
 
-    <div class="label" style="margin-top:36px;">30-Day Marketing Test</div>
+    <div class="label" style="margin-top:26px;">30-Day Marketing Test</div>
     <table>
       <thead>
         <tr>
@@ -390,6 +641,11 @@
         {{marketingTestRows}}
       </tbody>
     </table>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Marketing Strategy</span>
+    </div>
   </section>
 
   <!-- PAGE 8 -->
@@ -409,8 +665,13 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Model Judgment</div>
+    <div class="label" style="margin-top:30px;">Model Judgment</div>
     <div class="text-block">{{modelJudgment}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Business Model</span>
+    </div>
   </section>
 
   <!-- PAGE 9 -->
@@ -429,6 +690,11 @@
         {{riskRows}}
       </tbody>
     </table>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Risk System</span>
+    </div>
   </section>
 
   <!-- PAGE 10 -->
@@ -448,8 +714,13 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Operating Rule</div>
+    <div class="label" style="margin-top:30px;">Operating Rule</div>
     <div class="text-block">{{operatingRule}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Execution Plan</span>
+    </div>
   </section>
 
   <!-- PAGE 11 -->
@@ -469,8 +740,18 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Final Rule</div>
+    <div class="label" style="margin-top:30px;">Go / No-Go Checklist</div>
+    <div class="checklist">
+      {{goChecklistItems}}
+    </div>
+
+    <div class="label" style="margin-top:30px;">Final Rule</div>
     <div class="verdict">{{finalRule}}</div>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>GO Threshold</span>
+    </div>
   </section>
 
   <!-- PAGE 12 -->
@@ -490,10 +771,15 @@
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:36px;">Assumptions</div>
+    <div class="label" style="margin-top:30px;">Assumptions</div>
     <ul class="bullet-list">
       {{assumptionItems}}
     </ul>
+
+    <div class="footer">
+      <span>GoNoGo™ Business Decision Report</span>
+      <span>Appendix</span>
+    </div>
   </section>
 
 </body>
