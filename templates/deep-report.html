@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>GoNoGo Deep Report</title>
+  <title>GoNoGo 심층 보고서</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Arial, "Noto Sans KR", sans-serif;
       background: #f3f3ef;
       color: #111;
     }
@@ -32,7 +30,7 @@
     }
 
     .decision {
-      font-size: 82px;
+      font-size: 76px;
       font-weight: 900;
       letter-spacing: -0.07em;
       margin-top: 42px;
@@ -46,10 +44,10 @@
     }
 
     .title {
-      font-size: 32px;
+      font-size: 31px;
       font-weight: 900;
       letter-spacing: -0.05em;
-      line-height: 1.05;
+      line-height: 1.15;
       margin-top: 34px;
     }
 
@@ -57,7 +55,7 @@
       font-size: 16px;
       color: #555;
       margin-top: 10px;
-      line-height: 1.45;
+      line-height: 1.55;
     }
 
     .section-title {
@@ -65,7 +63,7 @@
       font-weight: 900;
       letter-spacing: -0.05em;
       margin-bottom: 24px;
-      line-height: 1.05;
+      line-height: 1.1;
     }
 
     .label {
@@ -100,10 +98,10 @@
     }
 
     .card-value {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 900;
       margin-top: 10px;
-      line-height: 1.05;
+      line-height: 1.1;
       letter-spacing: -0.04em;
     }
 
@@ -113,7 +111,7 @@
       background: #111;
       color: #fff;
       font-size: 16px;
-      line-height: 1.45;
+      line-height: 1.55;
       font-weight: 800;
     }
 
@@ -175,11 +173,11 @@
     }
 
     .big-metric-value {
-      font-size: 34px;
+      font-size: 32px;
       font-weight: 900;
       margin-top: 8px;
       letter-spacing: -0.06em;
-      line-height: 0.95;
+      line-height: 1;
     }
 
     table {
@@ -195,7 +193,7 @@
       text-align: left;
       padding: 10px;
       font-size: 10.5px;
-      line-height: 1.35;
+      line-height: 1.4;
       vertical-align: top;
     }
 
@@ -203,12 +201,12 @@
       border: 1px solid #ddd;
       padding: 10px;
       vertical-align: top;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .text-block {
       font-size: 14px;
-      line-height: 1.6;
+      line-height: 1.7;
       margin-top: 12px;
     }
 
@@ -216,7 +214,7 @@
       margin-top: 14px;
       padding-left: 18px;
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.6;
     }
 
     .bullet-list li {
@@ -259,27 +257,16 @@
       line-height: 1.4;
     }
 
-    .status-pass {
-      font-weight: 900;
-      color: #111;
-    }
-
-    .status-watch {
-      font-weight: 900;
-      color: #777;
-    }
-
-    .status-fail {
-      font-weight: 900;
-      color: #b00020;
-    }
+    .status-pass { font-weight: 900; color: #111; }
+    .status-watch { font-weight: 900; color: #777; }
+    .status-fail { font-weight: 900; color: #b00020; }
 
     .mini-note {
       margin-top: 18px;
       padding: 14px;
       background: #f3f3ef;
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.6;
       border-left: 4px solid #111;
     }
 
@@ -297,10 +284,7 @@
     }
 
     @media print {
-      body {
-        background: #fff;
-      }
-
+      body { background: #fff; }
       .page {
         margin: 0;
         width: 210mm;
@@ -312,54 +296,38 @@
 
 <body>
 
-  <!-- PAGE 1 -->
   <section class="page">
     <div class="brand">GONOGO™</div>
 
     <div class="decision">{{decision}}</div>
-    <div class="score">Score: {{score}} / 100</div>
+    <div class="score">점수: {{score}} / 100</div>
 
-    <div class="title">{{brandName}} Deep Business Decision Report</div>
+    <div class="title">{{brandName}} 심층 사업 판단 보고서</div>
     <div class="subtitle">{{subtitle}}</div>
 
     <div class="card-grid">
-      <div class="card">
-        <div class="card-title">Market</div>
-        <div class="card-value">{{marketLevel}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Profitability</div>
-        <div class="card-value">{{profitabilityLevel}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Execution</div>
-        <div class="card-value">{{executionLevel}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Risk</div>
-        <div class="card-value">{{riskLevel}}</div>
-      </div>
+      <div class="card"><div class="card-title">시장성</div><div class="card-value">{{marketLevel}}</div></div>
+      <div class="card"><div class="card-title">수익성</div><div class="card-value">{{profitabilityLevel}}</div></div>
+      <div class="card"><div class="card-title">실행 난이도</div><div class="card-value">{{executionLevel}}</div></div>
+      <div class="card"><div class="card-title">리스크</div><div class="card-value">{{riskLevel}}</div></div>
     </div>
 
     <div class="visual-board">
       <div class="score-box">
         <div class="score-row">
-          <div class="score-label"><span>Market</span><span>{{marketScore}} / 100</span></div>
+          <div class="score-label"><span>시장성</span><span>{{marketScore}} / 100</span></div>
           <div class="bar-bg"><div class="bar-fill" style="width: {{marketScore}}%;"></div></div>
         </div>
-
         <div class="score-row">
-          <div class="score-label"><span>Profitability</span><span>{{profitabilityScore}} / 100</span></div>
+          <div class="score-label"><span>수익성</span><span>{{profitabilityScore}} / 100</span></div>
           <div class="bar-bg"><div class="bar-fill" style="width: {{profitabilityScore}}%;"></div></div>
         </div>
-
         <div class="score-row">
-          <div class="score-label"><span>Execution</span><span>{{executionScore}} / 100</span></div>
+          <div class="score-label"><span>실행 가능성</span><span>{{executionScore}} / 100</span></div>
           <div class="bar-bg"><div class="bar-fill" style="width: {{executionScore}}%;"></div></div>
         </div>
-
         <div class="score-row">
-          <div class="score-label"><span>Risk Pressure</span><span>{{riskScore}} / 100</span></div>
+          <div class="score-label"><span>리스크 압력</span><span>{{riskScore}} / 100</span></div>
           <div class="bar-bg"><div class="bar-fill" style="width: {{riskScore}}%;"></div></div>
         </div>
       </div>
@@ -369,9 +337,8 @@
           <div class="big-metric-title">LTV / CAC</div>
           <div class="big-metric-value">{{ltvToCac}}</div>
         </div>
-
         <div class="big-metric">
-          <div class="big-metric-title">Unit Economics</div>
+          <div class="big-metric-title">수익 구조 상태</div>
           <div class="big-metric-value">{{unitEconomicsStatus}}</div>
         </div>
       </div>
@@ -385,38 +352,25 @@
     </div>
   </section>
 
-  <!-- PAGE 2 -->
   <section class="page">
-    <div class="section-title">1. Executive Decision</div>
+    <div class="section-title">1. 핵심 판단</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Question</th>
-          <th>Judgment</th>
-        </tr>
+        <tr><th>질문</th><th>판단</th></tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Why this works</td>
-          <td>{{whyItWorks}}</td>
-        </tr>
-        <tr>
-          <td>Why this fails</td>
-          <td>{{whyItFails}}</td>
-        </tr>
-        <tr>
-          <td>What to do now</td>
-          <td>{{whatToDoNow}}</td>
-        </tr>
+        <tr><td>왜 되는가</td><td>{{whyItWorks}}</td></tr>
+        <tr><td>왜 실패할 수 있는가</td><td>{{whyItFails}}</td></tr>
+        <tr><td>지금 무엇을 해야 하는가</td><td>{{whatToDoNow}}</td></tr>
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:34px;">Founder Decision</div>
+    <div class="label" style="margin-top:34px;">대표 의사결정</div>
     <div class="text-block">{{founderDecision}}</div>
 
     <div class="mini-note">
-      GoNoGo Principle: the first decision is not whether the idea is exciting. The first decision is whether the business can survive customer acquisition, margins, and repeat behavior.
+      GoNoGo 원칙: 첫 판단은 “아이디어가 매력적인가”가 아니다. 첫 판단은 “이 사업이 고객획득비, 마진, 반복구매를 견디는가”다.
     </div>
 
     <div class="footer">
@@ -425,42 +379,26 @@
     </div>
   </section>
 
-  <!-- PAGE 3 -->
   <section class="page">
-    <div class="section-title">2. Market Reality</div>
+    <div class="section-title">2. 시장 현실</div>
 
     <div class="card-grid">
-      <div class="card">
-        <div class="card-title">TAM</div>
-        <div class="card-value">{{tamValue}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">SAM</div>
-        <div class="card-value">{{samValue}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">SOM</div>
-        <div class="card-value">{{somValue}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Growth</div>
-        <div class="card-value">{{growthValue}}</div>
-      </div>
+      <div class="card"><div class="card-title">TAM</div><div class="card-value">{{tamValue}}</div></div>
+      <div class="card"><div class="card-title">SAM</div><div class="card-value">{{samValue}}</div></div>
+      <div class="card"><div class="card-title">SOM</div><div class="card-value">{{somValue}}</div></div>
+      <div class="card"><div class="card-title">성장률</div><div class="card-value">{{growthValue}}</div></div>
     </div>
 
     <div class="funnel">
-      <div class="label">Market Funnel</div>
-
+      <div class="label">시장 퍼널</div>
       <div class="funnel-row">
         <div class="funnel-label"><span>TAM — {{tamValue}}</span><span>{{tamScore}}%</span></div>
         <div class="bar-bg"><div class="bar-fill" style="width: {{tamScore}}%;"></div></div>
       </div>
-
       <div class="funnel-row">
         <div class="funnel-label"><span>SAM — {{samValue}}</span><span>{{samScore}}%</span></div>
         <div class="bar-bg"><div class="bar-fill" style="width: {{samScore}}%;"></div></div>
       </div>
-
       <div class="funnel-row">
         <div class="funnel-label"><span>SOM — {{somValue}}</span><span>{{somScore}}%</span></div>
         <div class="bar-bg"><div class="bar-fill" style="width: {{somScore}}%;"></div></div>
@@ -469,19 +407,12 @@
 
     <table>
       <thead>
-        <tr>
-          <th>Layer</th>
-          <th>Estimate</th>
-          <th>Formula / Logic</th>
-          <th>Interpretation</th>
-        </tr>
+        <tr><th>구분</th><th>추정치</th><th>계산식 / 논리</th><th>해석</th></tr>
       </thead>
-      <tbody>
-        {{tamSamSomRows}}
-      </tbody>
+      <tbody>{{tamSamSomRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">Market Insight</div>
+    <div class="label" style="margin-top:26px;">시장 해석</div>
     <div class="text-block">{{marketInsight}}</div>
 
     <div class="footer">
@@ -490,28 +421,21 @@
     </div>
   </section>
 
-  <!-- PAGE 4 -->
   <section class="page">
-    <div class="section-title">3. Customer Truth</div>
+    <div class="section-title">3. 고객의 진짜 문제</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Customer Problem</th>
-          <th>Behavior Evidence</th>
-          <th>Business Meaning</th>
-        </tr>
+        <tr><th>고객 문제</th><th>행동 근거</th><th>사업적 의미</th></tr>
       </thead>
-      <tbody>
-        {{customerTruthRows}}
-      </tbody>
+      <tbody>{{customerTruthRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">Buying Trigger</div>
+    <div class="label" style="margin-top:30px;">구매 트리거</div>
     <div class="text-block">{{buyingTrigger}}</div>
 
     <div class="mini-note">
-      Customer truth is not demographic. Customer truth is the moment the buyer feels enough pain to spend money.
+      고객 분석은 인구통계가 아니다. 고객 분석은 “고객이 돈을 쓸 만큼 아픈 순간”을 찾는 작업이다.
     </div>
 
     <div class="footer">
@@ -520,25 +444,17 @@
     </div>
   </section>
 
-  <!-- PAGE 5 -->
   <section class="page">
-    <div class="section-title">4. Competition Map</div>
+    <div class="section-title">4. 경쟁 구도</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Competitor / Alternative</th>
-          <th>Type</th>
-          <th>Strength</th>
-          <th>Weakness</th>
-        </tr>
+        <tr><th>경쟁사 / 대체재</th><th>유형</th><th>강점</th><th>약점</th></tr>
       </thead>
-      <tbody>
-        {{competitionRows}}
-      </tbody>
+      <tbody>{{competitionRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">Competitive Conclusion</div>
+    <div class="label" style="margin-top:30px;">경쟁 판단</div>
     <div class="text-block">{{competitionConclusion}}</div>
 
     <div class="footer">
@@ -547,27 +463,14 @@
     </div>
   </section>
 
-  <!-- PAGE 6 -->
   <section class="page">
-    <div class="section-title">5. Unit Economics</div>
+    <div class="section-title">5. 수익 구조</div>
 
     <div class="card-grid">
-      <div class="card">
-        <div class="card-title">CAC</div>
-        <div class="card-value">{{cacValue}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">LTV</div>
-        <div class="card-value">{{ltvValue}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">AOV</div>
-        <div class="card-value">{{aovValue}}</div>
-      </div>
-      <div class="card">
-        <div class="card-title">Repeat</div>
-        <div class="card-value">{{repeatValue}}</div>
-      </div>
+      <div class="card"><div class="card-title">CAC</div><div class="card-value">{{cacValue}}</div></div>
+      <div class="card"><div class="card-title">LTV</div><div class="card-value">{{ltvValue}}</div></div>
+      <div class="card"><div class="card-title">AOV</div><div class="card-value">{{aovValue}}</div></div>
+      <div class="card"><div class="card-title">반복구매</div><div class="card-value">{{repeatValue}}</div></div>
     </div>
 
     <div class="visual-board">
@@ -575,28 +478,20 @@
         <div class="big-metric-title">LTV / CAC</div>
         <div class="big-metric-value">{{ltvToCac}}</div>
       </div>
-
       <div class="big-metric">
-        <div class="big-metric-title">Payback</div>
+        <div class="big-metric-title">회수 기간</div>
         <div class="big-metric-value">{{paybackValue}}</div>
       </div>
     </div>
 
     <table>
       <thead>
-        <tr>
-          <th>Metric</th>
-          <th>Target Range</th>
-          <th>Pass / Fail Rule</th>
-          <th>Reason</th>
-        </tr>
+        <tr><th>지표</th><th>목표 범위</th><th>통과 기준</th><th>이유</th></tr>
       </thead>
-      <tbody>
-        {{unitEconomicsRows}}
-      </tbody>
+      <tbody>{{unitEconomicsRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">Economics Judgment</div>
+    <div class="label" style="margin-top:26px;">수익성 판단</div>
     <div class="text-block">{{economicsJudgment}}</div>
 
     <div class="footer">
@@ -605,41 +500,25 @@
     </div>
   </section>
 
-  <!-- PAGE 7 -->
   <section class="page">
-    <div class="section-title">6. Marketing Strategy</div>
+    <div class="section-title">6. 마케팅 전략</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Channel</th>
-          <th>Fit</th>
-          <th>Role</th>
-          <th>Why</th>
-        </tr>
+        <tr><th>채널</th><th>적합도</th><th>역할</th><th>이유</th></tr>
       </thead>
-      <tbody>
-        {{marketingChannelRows}}
-      </tbody>
+      <tbody>{{marketingChannelRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">Content Playbook</div>
-    <ul class="bullet-list">
-      {{contentPlaybookItems}}
-    </ul>
+    <div class="label" style="margin-top:26px;">콘텐츠 플레이북</div>
+    <ul class="bullet-list">{{contentPlaybookItems}}</ul>
 
-    <div class="label" style="margin-top:26px;">30-Day Marketing Test</div>
+    <div class="label" style="margin-top:26px;">30일 마케팅 테스트</div>
     <table>
       <thead>
-        <tr>
-          <th>Period</th>
-          <th>Action</th>
-          <th>Success Metric</th>
-        </tr>
+        <tr><th>기간</th><th>실행</th><th>성공 지표</th></tr>
       </thead>
-      <tbody>
-        {{marketingTestRows}}
-      </tbody>
+      <tbody>{{marketingTestRows}}</tbody>
     </table>
 
     <div class="footer">
@@ -648,24 +527,17 @@
     </div>
   </section>
 
-  <!-- PAGE 8 -->
   <section class="page">
-    <div class="section-title">7. Business Model</div>
+    <div class="section-title">7. 비즈니스 모델</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Revenue Layer</th>
-          <th>Example</th>
-          <th>Purpose</th>
-        </tr>
+        <tr><th>수익 레이어</th><th>예시</th><th>목적</th></tr>
       </thead>
-      <tbody>
-        {{businessModelRows}}
-      </tbody>
+      <tbody>{{businessModelRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">Model Judgment</div>
+    <div class="label" style="margin-top:30px;">모델 판단</div>
     <div class="text-block">{{modelJudgment}}</div>
 
     <div class="footer">
@@ -674,21 +546,14 @@
     </div>
   </section>
 
-  <!-- PAGE 9 -->
   <section class="page">
-    <div class="section-title">8. Risk System</div>
+    <div class="section-title">8. 리스크 시스템</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Risk</th>
-          <th>Impact</th>
-          <th>Countermeasure</th>
-        </tr>
+        <tr><th>리스크</th><th>영향</th><th>대응책</th></tr>
       </thead>
-      <tbody>
-        {{riskRows}}
-      </tbody>
+      <tbody>{{riskRows}}</tbody>
     </table>
 
     <div class="footer">
@@ -697,24 +562,17 @@
     </div>
   </section>
 
-  <!-- PAGE 10 -->
   <section class="page">
-    <div class="section-title">9. Execution Plan</div>
+    <div class="section-title">9. 실행 계획</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Phase</th>
-          <th>Actions</th>
-          <th>Primary KPI</th>
-        </tr>
+        <tr><th>단계</th><th>실행 내용</th><th>핵심 KPI</th></tr>
       </thead>
-      <tbody>
-        {{executionRows}}
-      </tbody>
+      <tbody>{{executionRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">Operating Rule</div>
+    <div class="label" style="margin-top:30px;">운영 원칙</div>
     <div class="text-block">{{operatingRule}}</div>
 
     <div class="footer">
@@ -723,29 +581,20 @@
     </div>
   </section>
 
-  <!-- PAGE 11 -->
   <section class="page">
-    <div class="section-title">10. GO Threshold</div>
+    <div class="section-title">10. GO 판단 기준</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Metric</th>
-          <th>Pass Condition</th>
-          <th>Decision Meaning</th>
-        </tr>
+        <tr><th>지표</th><th>통과 조건</th><th>의사결정 의미</th></tr>
       </thead>
-      <tbody>
-        {{goThresholdRows}}
-      </tbody>
+      <tbody>{{goThresholdRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">Go / No-Go Checklist</div>
-    <div class="checklist">
-      {{goChecklistItems}}
-    </div>
+    <div class="label" style="margin-top:30px;">Go / No-Go 체크리스트</div>
+    <div class="checklist">{{goChecklistItems}}</div>
 
-    <div class="label" style="margin-top:30px;">Final Rule</div>
+    <div class="label" style="margin-top:30px;">최종 규칙</div>
     <div class="verdict">{{finalRule}}</div>
 
     <div class="footer">
@@ -754,27 +603,18 @@
     </div>
   </section>
 
-  <!-- PAGE 12 -->
   <section class="page">
-    <div class="section-title">11. Appendix</div>
+    <div class="section-title">11. 부록</div>
 
     <table>
       <thead>
-        <tr>
-          <th>Data Point</th>
-          <th>Source / Basis</th>
-          <th>Usage</th>
-        </tr>
+        <tr><th>데이터 항목</th><th>출처 / 기준</th><th>사용 목적</th></tr>
       </thead>
-      <tbody>
-        {{dataSourceRows}}
-      </tbody>
+      <tbody>{{dataSourceRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">Assumptions</div>
-    <ul class="bullet-list">
-      {{assumptionItems}}
-    </ul>
+    <div class="label" style="margin-top:30px;">가정</div>
+    <ul class="bullet-list">{{assumptionItems}}</ul>
 
     <div class="footer">
       <span>GoNoGo™ Business Decision Report</span>
