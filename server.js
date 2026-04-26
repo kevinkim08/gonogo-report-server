@@ -6,14 +6,10 @@ import {
     Packer,
     Paragraph,
     TextRun,
-    HeadingLevel,
     Table,
     TableRow,
     TableCell,
     WidthType,
-    BorderStyle,
-    AlignmentType,
-    PageBreak,
 } from "docx"
 
 const app = express()
@@ -27,12 +23,12 @@ app.use(
             if (!origin) return callback(null, true)
 
             const allowed =
-    origin.includes("framer.app") ||
-    origin.includes("framer.website") ||
-    origin.includes("onrender.com") ||
-    origin.includes("localhost") ||
-    origin.includes("127.0.0.1") ||
-    origin === "https://big-evidence-039433.framer.app"
+                origin.includes("framer.app") ||
+                origin.includes("framer.website") ||
+                origin.includes("onrender.com") ||
+                origin.includes("localhost") ||
+                origin.includes("127.0.0.1") ||
+                origin === "https://big-evidence-039433.framer.app"
 
             if (allowed) return callback(null, true)
 
@@ -51,7 +47,7 @@ app.get("/", (req, res) => {
     res.json({
         ok: true,
         service: "GoNoGo Report Server",
-        version: "1.1.0-free-report-upgrade",
+        version: "1.2.0-safe-docx",
     })
 })
 
@@ -114,7 +110,7 @@ app.post("/api/generate-report", async (req, res) => {
         )
         res.setHeader(
             "Content-Disposition",
-            `attachment; filename="${encodeURIComponent(fileName)}"`
+            `attachment; filename="${fileName}"`
         )
 
         return res.send(buffer)
@@ -145,8 +141,9 @@ Rules:
 - Avoid "might", "could", "possibly", "seems".
 - Every sentence must be judgment-based.
 - Use conservative estimates where exact data is unavailable.
-- This is a FREE SAMPLE REPORT, so it must be sharp, valuable, and conversion-oriented.
-- Do not provide a full execution strategy.
+- This is a FREE SAMPLE REPORT.
+- It must be sharp, valuable, and conversion-oriented.
+- Do not provide full execution strategy.
 - Do not provide full detailed financial modeling.
 - Return only valid JSON.
 `
@@ -159,7 +156,7 @@ Brand Name: ${brandName}
 Product / Service: ${productService}
 Target Customer: ${targetCustomer}
 
-The report must follow this exact JSON shape:
+Return this exact JSON shape:
 
 {
   "title": string,
@@ -222,7 +219,6 @@ Quality rules:
     if (!raw) throw new Error("Empty OpenAI response.")
 
     const parsed = JSON.parse(raw)
-
     return normalizeFreeReport(parsed, input)
 }
 
@@ -232,8 +228,6 @@ async function generateDeepReportJson(input) {
 
     const systemPrompt = `
 You are GoNoGo, a business strategy consultant.
-
-Create a structured deep report.
 Final report language: ${languageName}.
 Return only valid JSON.
 `
@@ -287,7 +281,6 @@ Return JSON:
     if (!raw) throw new Error("Empty OpenAI response.")
 
     const parsed = JSON.parse(raw)
-
     return normalizeDeepReport(parsed, input)
 }
 
@@ -371,86 +364,25 @@ function normalizeDeepReport(report, input) {
 
 async function buildDocx(report, meta) {
     if (report.reportType === "free") {
-        return await buildFreeDocx(report, meta)
+        return await buildSafeFreeDocx(report, meta)
     }
 
-    return await buildDeepDocx(report, meta)
+    return await buildSafeDeepDocx(report, meta)
 }
 
-async function buildFreeDocx(report, meta) {
+async function buildSafeFreeDocx(report, meta) {
     const children = []
 
-    children.push(
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: "GONOGO™",
-                    bold: true,
-                    size: 24,
-                }),
-            ],
-            spacing: { after: 800 },
-        })
-    )
+    addTitle(children, "GONOGO™")
+    addBigDecision(children, report.decision)
+    addScore(children, `${report.score}/100`)
+    addTitle(children, report.title)
+    addNormal(children, report.oneLineVerdict)
+
+    addSpacer(children)
 
     children.push(
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: report.decision,
-                    bold: true,
-                    size: 72,
-                }),
-            ],
-            spacing: { after: 200 },
-        })
-    )
-
-    children.push(
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: `${report.score}/100`,
-                    bold: true,
-                    size: 34,
-                }),
-            ],
-            spacing: { after: 500 },
-        })
-    )
-
-    children.push(
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: report.title,
-                    bold: true,
-                    size: 30,
-                }),
-            ],
-            spacing: { after: 200 },
-        })
-    )
-
-    children.push(
-        new Paragraph({
-            alignment: AlignmentType.CENTER,
-            children: [
-                new TextRun({
-                    text: report.oneLineVerdict,
-                    size: 22,
-                }),
-            ],
-            spacing: { after: 700 },
-        })
-    )
-
-    children.push(
-        createInfoTable([
+        safeTable([
             ["Report Type", "FREE SAMPLE"],
             ["Decision", report.decision],
             ["Score", `${report.score}/100`],
@@ -459,140 +391,82 @@ async function buildFreeDocx(report, meta) {
         ])
     )
 
-    children.push(new Paragraph({ children: [new PageBreak()] }))
-
-    addHeading(children, "1. Executive Kill Shot")
+    addSection(children, "1. Executive Kill Shot")
 
     children.push(
-        createDataTable({
-            headers: ["Question", "Judgment"],
-            rows: [
-                ["Why this works", report.killShot.whyItWorks],
-                ["Why this fails", report.killShot.whyItFails],
-                ["What to do now", report.killShot.whatToDoNow],
-            ],
-        })
+        safeTable([
+            ["Why this works", report.killShot.whyItWorks],
+            ["Why this fails", report.killShot.whyItFails],
+            ["What to do now", report.killShot.whatToDoNow],
+        ])
     )
 
-    addHeading(children, "2. Core Decision Logic")
-
-    report.decisionReasons.forEach((reason, index) => {
-        addBullet(children, `${index + 1}. ${reason}`)
+    addSection(children, "2. Core Decision Logic")
+    report.decisionReasons.forEach((item, index) => {
+        addBullet(children, `${index + 1}. ${item}`)
     })
 
-    addHeading(children, "3. Market Snapshot")
-
+    addSection(children, "3. Market Snapshot")
     children.push(
-        createDataTable({
-            headers: ["Item", "Judgment"],
-            rows: [
-                ["Estimated TAM", report.marketSnapshot.estimatedTAM],
-                ["Entry Difficulty", report.marketSnapshot.entryDifficulty],
-                ["Market Judgment", report.marketSnapshot.marketJudgment],
-            ],
-        })
+        safeTable([
+            ["Estimated TAM", report.marketSnapshot.estimatedTAM],
+            ["Entry Difficulty", report.marketSnapshot.entryDifficulty],
+            ["Market Judgment", report.marketSnapshot.marketJudgment],
+        ])
     )
 
-    addHeading(children, "4. Top 3 Risks")
+    addSection(children, "4. Top 3 Risks")
+    report.topRisks.forEach((item, index) => {
+        addSubSection(children, `Risk ${index + 1}: ${item.risk || ""}`)
+        addNormal(children, `Impact: ${item.impact || ""}`)
+        addNormal(children, `Reason: ${item.reason || ""}`)
+    })
 
+    addSection(children, "5. Unit Economics Estimate")
     children.push(
-        createDataTable({
-            headers: ["Risk", "Impact", "Reason"],
-            rows: report.topRisks.map((item) => [
-                item.risk || "",
-                item.impact || "",
-                item.reason || "",
-            ]),
-        })
+        safeTable([
+            ["Estimated CAC", report.unitEconomics.estimatedCAC],
+            ["Estimated LTV", report.unitEconomics.estimatedLTV],
+            ["Judgment", report.unitEconomics.judgment],
+        ])
     )
 
-    addHeading(children, "5. Unit Economics Estimate")
+    addSection(children, "6. First Action")
+    addNormal(children, report.firstAction)
 
-    children.push(
-        createDataTable({
-            headers: ["Metric", "Estimate"],
-            rows: [
-                ["Estimated CAC", report.unitEconomics.estimatedCAC],
-                ["Estimated LTV", report.unitEconomics.estimatedLTV],
-                ["Judgment", report.unitEconomics.judgment],
-            ],
-        })
-    )
+    addSection(children, "7. Unlock Deep Report")
+    addNormal(children, report.upgradeHook)
 
-    addHeading(children, "6. First Action")
-
-    children.push(
-        new Paragraph({
-            text: report.firstAction,
-            spacing: { after: 300 },
-        })
-    )
-
-    addHeading(children, "7. Unlock Deep Report")
-
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: report.upgradeHook,
-                    bold: true,
-                }),
-            ],
-            spacing: { after: 500 },
-        })
-    )
-
-    addHeading(children, "Appendix. Assumptions & Sources")
-
-    addSubHeading(children, "Assumptions")
+    addSection(children, "Appendix. Assumptions")
     report.appendix.assumptions.forEach((item) => addBullet(children, item))
 
-    addSubHeading(children, "Sources")
+    addSection(children, "Appendix. Sources")
     report.appendix.sources.forEach((item) => addBullet(children, item))
 
     const doc = new Document({
         creator: "GoNoGo",
         title: report.title,
         description: report.subtitle,
-        sections: [{ properties: {}, children }],
+        sections: [
+            {
+                children,
+            },
+        ],
     })
 
     return await Packer.toBuffer(doc)
 }
 
-async function buildDeepDocx(report, meta) {
+async function buildSafeDeepDocx(report, meta) {
     const children = []
 
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: "GONOGO™",
-                    bold: true,
-                    size: 24,
-                }),
-            ],
-        })
-    )
+    addTitle(children, "GONOGO™")
+    addTitle(children, report.title)
+    addNormal(children, report.subtitle)
 
     children.push(
-        new Paragraph({
-            text: report.title,
-            heading: HeadingLevel.TITLE,
-            spacing: { before: 900, after: 300 },
-        })
-    )
-
-    children.push(
-        new Paragraph({
-            children: [new TextRun({ text: report.subtitle, size: 24 })],
-            spacing: { after: 500 },
-        })
-    )
-
-    children.push(
-        createInfoTable([
-            ["Report Type", String(report.reportType).toUpperCase()],
+        safeTable([
+            ["Report Type", "DEEP REPORT"],
             ["Decision", report.decision],
             ["Score", `${report.score}/100`],
             ["Language", meta.language],
@@ -600,68 +474,134 @@ async function buildDeepDocx(report, meta) {
         ])
     )
 
-    children.push(new Paragraph({ children: [new PageBreak()] }))
-
-    addHeading(children, "0. Executive Summary")
-
+    addSection(children, "0. Executive Summary")
     report.summaryBullets.forEach((item) => addBullet(children, item))
 
     report.sections.forEach((section, index) => {
-        addHeading(children, `${index + 1}. ${section.heading || "Untitled"}`)
+        addSection(children, `${index + 1}. ${section.heading || "Untitled"}`)
 
-        if (section.body) {
-            children.push(
-                new Paragraph({
-                    text: section.body,
-                    spacing: { after: 240 },
-                })
-            )
-        }
+        if (section.body) addNormal(children, section.body)
 
         if (Array.isArray(section.bullets)) {
             section.bullets.forEach((bullet) => addBullet(children, bullet))
         }
 
         if (section.table && Array.isArray(section.table.rows)) {
-            addSubHeading(children, section.table.title || "Analysis Table")
-            children.push(createDataTable(section.table))
+            addSubSection(children, section.table.title || "Analysis Table")
+            children.push(
+                safeTable([
+                    section.table.headers || [],
+                    ...section.table.rows,
+                ])
+            )
         }
     })
 
-    addHeading(children, "Appendix. Assumptions & Sources")
-
-    addSubHeading(children, "Assumptions")
+    addSection(children, "Appendix. Assumptions")
     report.appendix.assumptions.forEach((item) => addBullet(children, item))
 
-    addSubHeading(children, "Sources")
+    addSection(children, "Appendix. Sources")
     report.appendix.sources.forEach((item) => addBullet(children, item))
 
     const doc = new Document({
         creator: "GoNoGo",
         title: report.title,
         description: report.subtitle,
-        sections: [{ properties: {}, children }],
+        sections: [
+            {
+                children,
+            },
+        ],
     })
 
     return await Packer.toBuffer(doc)
 }
 
-function addHeading(children, text) {
+function addTitle(children, text) {
     children.push(
         new Paragraph({
-            text,
-            heading: HeadingLevel.HEADING_1,
-            spacing: { before: 520, after: 240 },
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 32,
+                }),
+            ],
+            spacing: { after: 240 },
         })
     )
 }
 
-function addSubHeading(children, text) {
+function addBigDecision(children, text) {
     children.push(
         new Paragraph({
-            text,
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 280, after: 160 },
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 56,
+                }),
+            ],
+            spacing: { after: 160 },
+        })
+    )
+}
+
+function addScore(children, text) {
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 28,
+                }),
+            ],
+            spacing: { after: 240 },
+        })
+    )
+}
+
+function addSection(children, text) {
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 26,
+                }),
+            ],
+            spacing: { before: 360, after: 180 },
+        })
+    )
+}
+
+function addSubSection(children, text) {
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    bold: true,
+                    size: 22,
+                }),
+            ],
+            spacing: { before: 220, after: 120 },
+        })
+    )
+}
+
+function addNormal(children, text) {
+    children.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: String(text || ""),
+                    size: 22,
+                }),
+            ],
+            spacing: { after: 180 },
         })
     )
 }
@@ -669,60 +609,42 @@ function addSubHeading(children, text) {
 function addBullet(children, text) {
     children.push(
         new Paragraph({
-            text: `• ${text}`,
+            children: [
+                new TextRun({
+                    text: `• ${String(text || "")}`,
+                    size: 22,
+                }),
+            ],
             spacing: { after: 120 },
         })
     )
 }
 
-function createInfoTable(rows) {
-    return new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        rows: rows.map(([label, value]) => {
-            return new TableRow({
-                children: [
-                    new TableCell({
-                        width: { size: 30, type: WidthType.PERCENTAGE },
-                        shading: { fill: "F2F2F2" },
-                        children: [
-                            new Paragraph({
-                                children: [
-                                    new TextRun({
-                                        text: label,
-                                        bold: true,
-                                    }),
-                                ],
-                            }),
-                        ],
-                    }),
-                    new TableCell({
-                        width: { size: 70, type: WidthType.PERCENTAGE },
-                        children: [new Paragraph(String(value || ""))],
-                    }),
-                ],
-            })
-        }),
-    })
+function addSpacer(children) {
+    children.push(
+        new Paragraph({
+            children: [new TextRun({ text: "", size: 12 })],
+            spacing: { after: 260 },
+        })
+    )
 }
 
-function createDataTable(table) {
-    const headers = Array.isArray(table.headers) ? table.headers : []
-    const rows = Array.isArray(table.rows) ? table.rows : []
+function safeTable(rows) {
+    const safeRows = Array.isArray(rows) ? rows : []
 
-    const tableRows = []
-
-    if (headers.length) {
-        tableRows.push(
-            new TableRow({
-                children: headers.map((header) => {
+    return new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: safeRows.map((row) => {
+            const cells = Array.isArray(row) ? row : [String(row || "")]
+            return new TableRow({
+                children: cells.map((cell) => {
                     return new TableCell({
-                        shading: { fill: "EDEDED" },
                         children: [
                             new Paragraph({
                                 children: [
                                     new TextRun({
-                                        text: String(header),
-                                        bold: true,
+                                        text: String(cell || ""),
+                                        size: 20,
                                     }),
                                 ],
                             }),
@@ -730,40 +652,7 @@ function createDataTable(table) {
                     })
                 }),
             })
-        )
-    }
-
-    rows.forEach((row) => {
-        tableRows.push(
-            new TableRow({
-                children: row.map((cell) => {
-                    return new TableCell({
-                        children: [new Paragraph(String(cell || ""))],
-                    })
-                }),
-            })
-        )
-    })
-
-    return new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
-        borders: {
-            top: { style: BorderStyle.SINGLE, size: 1, color: "D9D9D9" },
-            bottom: { style: BorderStyle.SINGLE, size: 1, color: "D9D9D9" },
-            left: { style: BorderStyle.SINGLE, size: 1, color: "D9D9D9" },
-            right: { style: BorderStyle.SINGLE, size: 1, color: "D9D9D9" },
-            insideHorizontal: {
-                style: BorderStyle.SINGLE,
-                size: 1,
-                color: "D9D9D9",
-            },
-            insideVertical: {
-                style: BorderStyle.SINGLE,
-                size: 1,
-                color: "D9D9D9",
-            },
-        },
-        rows: tableRows,
+        }),
     })
 }
 
