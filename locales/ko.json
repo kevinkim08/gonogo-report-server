@@ -1,0 +1,104 @@
+{
+  "lang": "ko",
+  "fontFamily": "\"Noto Sans KR\", \"Malgun Gothic\", Arial, sans-serif",
+
+  "reportTitleSuffix": "심층 사업 판단 보고서",
+  "scoreLabel": "점수",
+
+  "labels": {
+    "market": "시장성",
+    "profitability": "수익성",
+    "execution": "실행 난이도",
+    "risk": "리스크",
+    "riskPressure": "리스크 압력",
+    "unitEconomics": "수익 구조 상태",
+    "ltvToCac": "LTV / CAC",
+    "payback": "회수 기간",
+
+    "section1": "1. 핵심 판단",
+    "section2": "2. 시장 현실",
+    "section3": "3. 고객의 진짜 문제",
+    "section4": "4. 경쟁 구도",
+    "section5": "5. 수익 구조",
+    "section6": "6. 마케팅 전략",
+    "section7": "7. 비즈니스 모델",
+    "section8": "8. 리스크 시스템",
+    "section9": "9. 실행 계획",
+    "section10": "10. GO 판단 기준",
+    "section11": "11. 부록",
+
+    "question": "질문",
+    "judgment": "판단",
+    "whyWorks": "왜 되는가",
+    "whyFails": "왜 실패할 수 있는가",
+    "whatNow": "지금 무엇을 해야 하는가",
+    "founderDecision": "대표 의사결정",
+
+    "marketFunnel": "시장 퍼널",
+    "tamSamSom": "TAM / SAM / SOM",
+    "layer": "구분",
+    "estimate": "추정치",
+    "formula": "계산식 / 논리",
+    "interpretation": "해석",
+    "marketInsight": "시장 해석",
+
+    "customerProblem": "고객 문제",
+    "behaviorEvidence": "행동 근거",
+    "businessMeaning": "사업적 의미",
+    "buyingTrigger": "구매 트리거",
+
+    "competitor": "경쟁사 / 대체재",
+    "type": "유형",
+    "strength": "강점",
+    "weakness": "약점",
+    "competitionConclusion": "경쟁 판단",
+
+    "metric": "지표",
+    "targetRange": "목표 범위",
+    "passFailRule": "통과 기준",
+    "reason": "이유",
+    "economicsJudgment": "수익성 판단",
+
+    "channel": "채널",
+    "fit": "적합도",
+    "role": "역할",
+    "why": "이유",
+    "contentPlaybook": "콘텐츠 플레이북",
+    "marketingTest": "30일 마케팅 테스트",
+    "period": "기간",
+    "action": "실행",
+    "successMetric": "성공 지표",
+
+    "revenueLayer": "수익 레이어",
+    "example": "예시",
+    "purpose": "목적",
+    "modelJudgment": "모델 판단",
+
+    "impact": "영향",
+    "countermeasure": "대응책",
+
+    "phase": "단계",
+    "actions": "실행 내용",
+    "primaryKpi": "핵심 KPI",
+    "operatingRule": "운영 원칙",
+
+    "passCondition": "통과 조건",
+    "decisionMeaning": "의사결정 의미",
+    "checklist": "Go / No-Go 체크리스트",
+    "finalRule": "최종 규칙",
+
+    "dataPoint": "데이터 항목",
+    "sourceBasis": "출처 / 기준",
+    "usage": "사용 목적",
+    "assumptions": "가정"
+  },
+
+  "fixedNotes": {
+    "executivePrinciple": "GoNoGo 원칙: 첫 판단은 “아이디어가 매력적인가”가 아니다. 첫 판단은 “이 사업이 고객획득비, 마진, 반복구매를 견디는가”다.",
+    "customerPrinciple": "고객 분석은 인구통계가 아니다. 고객 분석은 “고객이 돈을 쓸 만큼 아픈 순간”을 찾는 작업이다."
+  },
+
+  "footer": {
+    "left": "GoNoGo™ Business Decision Report"
+  }
+}
