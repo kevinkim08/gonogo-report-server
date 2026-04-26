@@ -1,42 +1,17 @@
 {
-  "cover": {
-    "brandName": "NomNomBox",
-    "decision": "HOLD",
-    "score": 61,
-    "subtitle": "Premium pet-food sample subscription for online dog owners",
-    "oneLineVerdict": "Demand is real, but the model must prove..."
+  "name": "gonogo-report-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
   },
-  "decisionMatrix": [
-    ["MARKET", "HIGH"],
-    ["PROFITABILITY", "MEDIUM"],
-    ["EXECUTION", "HIGH"],
-    ["RISK", "HIGH"]
-  ],
-  "executiveDecision": [
-    ["Why this works", "..."],
-    ["Why this fails", "..."],
-    ["What to do now", "..."]
-  ],
-  "marketCards": [
-    ["GLOBAL PET FOOD", "~$128.7B"],
-    ["U.S. PET FOOD", "~$43.5B"],
-    ["U.S. PET SPEND", "~$158B"],
-    ["GROWTH", "4-5%+"]
-  ],
-  "tamSamSom": [
-    ["TAM", "...", "...", "..."],
-    ["SAM", "...", "...", "..."],
-    ["SOM", "...", "...", "..."]
-  ],
-  "marketInsight": "...",
-  "customerTruth": [],
-  "competitionMap": [],
-  "unitEconomicsCards": [],
-  "unitEconomicsTable": [],
-  "marketingStrategy": {},
-  "businessModel": {},
-  "riskSystem": [],
-  "executionPlan": [],
-  "goThreshold": [],
-  "appendix": {}
+  "dependencies": {
+    "@sparticuz/chromium": "^131.0.1",
+    "cors": "^2.8.5",
+    "docx": "^9.5.1",
+    "express": "^4.19.2",
+    "openai": "^5.0.0",
+    "puppeteer-core": "^24.1.1"
+  }
 }
