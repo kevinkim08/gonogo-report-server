@@ -804,12 +804,8 @@ function addSpace(children) {
 }
 
 function addPageBreak(children) {
-    children.push(
-        new Paragraph({
-            children: [new TextRun({ text: "\n", break: 1 })],
-            spacing: { after: 320 },
-        })
-    )
+    addSpace(children)
+    addSpace(children)
 }
 
 function safeTable(rows) {
