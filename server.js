@@ -64,7 +64,8 @@ app.get("/api/test-pdf", async (req, res) => {
             `attachment; filename="GoNoGo_Test_Report.pdf"`
         )
 
-        return res.send(pdfBuffer)
+        res.setHeader("Content-Length", pdfBuffer.length)
+return res.end(pdfBuffer)
     } catch (error) {
         console.error("[TEST_PDF_ERROR]", error)
         return res.status(500).json({
@@ -480,16 +481,18 @@ async function htmlToPdf(html) {
             waitUntil: "networkidle0",
         })
 
-        return await page.pdf({
-            format: "A4",
-            printBackground: true,
-            margin: {
-                top: "0mm",
-                right: "0mm",
-                bottom: "0mm",
-                left: "0mm",
-            },
-        })
+        const pdf = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: {
+        top: "0mm",
+        right: "0mm",
+        bottom: "0mm",
+        left: "0mm",
+    },
+})
+
+return Buffer.from(pdf)
     } finally {
         await browser.close()
     }
