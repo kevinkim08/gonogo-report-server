@@ -735,315 +735,232 @@ function sanitizeFileName(value) {
 function getSampleReport() {
     return {
         cover: {
-            brandName: "NomNomBox",
+            brandName: "노미박스",
             decision: "HOLD",
             score: 61,
-            subtitle: "Premium pet-food sample subscription for online dog owners",
+            subtitle: "온라인 반려견 고객을 위한 프리미엄 사료 샘플 구독 서비스",
             oneLineVerdict:
-                "Demand is real, but the model must prove a narrow niche, repeat purchasing, and margin after shipping before scaling.",
+                "수요는 존재하지만, 반복구매와 마진 구조를 증명하기 전까지 확장은 위험하다.",
         },
+
         visualScores: {
             market: 82,
             profitability: 58,
             execution: 64,
             risk: 72,
         },
+
         decisionMatrix: [
-            ["MARKET", "HIGH"],
-            ["PROFITABILITY", "MEDIUM"],
-            ["EXECUTION", "HIGH"],
-            ["RISK", "HIGH"],
+            ["MARKET", "높음"],
+            ["PROFITABILITY", "중간"],
+            ["EXECUTION", "높음"],
+            ["RISK", "높음"],
         ],
+
         executiveDecision: [
             [
                 "Why this works",
-                "Dog owners buy repeatedly, pet spending is resilient, and subscription behavior already exists in pet commerce.",
+                "반려견 시장은 꾸준히 성장하고 있으며, 반복 소비 구조가 존재한다.",
             ],
             [
                 "Why this fails",
-                "Generic sampling is easy to copy, shipping is margin-heavy, and repeat behavior weakens once the dog finds a preferred food.",
+                "샘플 기반 모델은 차별화가 어렵고, 물류비가 수익성을 크게 악화시킨다.",
             ],
             [
                 "What to do now",
-                "Do not launch broadly. Validate one segment first with a 100-order paid pilot.",
+                "전체 시장 확장이 아닌, 특정 고객군을 대상으로 소규모 검증부터 진행해야 한다.",
             ],
         ],
+
         founderDecision:
-            "NomNomBox deserves a controlled pilot, not a full launch. The business moves to GO only if customer acquisition payback and repeat purchase behavior pass the threshold section.",
+            "이 사업은 바로 확장할 대상이 아니라, 반드시 검증을 거쳐야 하는 모델이다. CAC와 반복구매가 기준을 통과하기 전까지는 확장을 금지해야 한다.",
+
         marketCards: [
-            ["TAM", "~$128.7B"],
-            ["SAM", "~$43.5B"],
-            ["SOM", "500–2,000 subs"],
-            ["GROWTH", "4–5%+"],
+            ["TAM", "약 170조원"],
+            ["SAM", "약 58조원"],
+            ["SOM", "500~2000명"],
+            ["GROWTH", "연 5% 이상"],
         ],
+
         marketFunnel: [
-            { label: "TAM", value: "~$128.7B", score: 100 },
-            { label: "SAM", value: "~$43.5B", score: 55 },
-            { label: "SOM", value: "500–2,000 subs", score: 18 },
+            { label: "TAM", value: "170조원", score: 100 },
+            { label: "SAM", value: "58조원", score: 55 },
+            { label: "SOM", value: "초기 500~2000명", score: 18 },
         ],
+
         tamSamSom: [
             [
                 "TAM",
-                "Global pet food market: ~$128.7B",
-                "Global pet food category spend",
-                "Large enough market, but too broad for entry strategy.",
+                "글로벌 반려동물 식품 시장",
+                "전체 시장 규모 기준",
+                "시장 자체는 충분히 크다",
             ],
             [
                 "SAM",
-                "U.S. online premium dog-food buyers",
-                "U.S. market × online adoption × premium dog share",
-                "Serviceable market is attractive if sharply positioned.",
+                "프리미엄 온라인 반려견 소비자",
+                "온라인 + 프리미엄 고객층",
+                "타겟 시장은 충분히 존재",
             ],
             [
                 "SOM",
-                "500–2,000 subscribers",
-                "Early pilot conversion × target channel reach",
-                "Validation target, not domination.",
+                "초기 유료 고객",
+                "전환율 기반 추정",
+                "검증 단계 시장",
             ],
         ],
+
         marketInsight:
-            "The market rewards trust, convenience, and measurable pet health confidence. A generic sample box is weak; a risk-reduction platform for picky or allergy-sensitive dogs is stronger.",
+            "이 시장은 단순 상품 판매보다 '신뢰'와 '문제 해결'이 중요한 시장이다.",
+
         customerTruth: [
             [
-                "Food rejection",
-                "Owners test brands and abandon bags their dog refuses.",
-                "Sampling reduces waste and purchase anxiety.",
+                "사료 거부 문제",
+                "강아지가 사료를 먹지 않는 경우가 많다",
+                "샘플 테스트 수요 존재",
             ],
             [
-                "Allergy concern",
-                "Owners fear switching food without proof.",
-                "Trust and guidance matter more than variety.",
+                "알러지 문제",
+                "잘못된 사료 선택에 대한 두려움",
+                "검증된 제품 선호",
             ],
             [
-                "Review dependence",
-                "Customers search reactions and ingredients.",
-                "UGC becomes acquisition asset.",
+                "리뷰 의존",
+                "다른 고객 경험을 참고",
+                "콘텐츠 기반 마케팅 가능",
             ],
         ],
+
         buyingTrigger:
-            "The strongest trigger is not discovery. It is avoiding wasted money and avoiding the wrong food.",
+            "구매는 ‘새로운 사료를 찾는 순간’이 아니라 ‘실패를 피하고 싶을 때’ 발생한다.",
+
         competitionMap: [
-            [
-                "Chewy Autoship",
-                "Marketplace subscription",
-                "Trust, logistics, recurring behavior",
-                "Weak curation",
-            ],
-            [
-                "Amazon Subscribe & Save",
-                "Marketplace utility",
-                "Convenience and price",
-                "No pet-specific trust layer",
-            ],
-            [
-                "The Farmer’s Dog",
-                "Fresh food subscription",
-                "Premium positioning",
-                "High price",
-            ],
-            [
-                "Ollie / Nom Nom",
-                "Fresh food DTC",
-                "Strong subscription model",
-                "Churn pressure",
-            ],
+            ["쿠팡", "플랫폼", "편리함", "큐레이션 없음"],
+            ["네이버", "플랫폼", "가격 경쟁력", "신뢰 부족"],
+            ["프레시펫", "DTC", "프리미엄", "가격 부담"],
+            ["샘플 서비스 없음", "공백", "기회 존재", "시장 미형성"],
         ],
+
         competitionConclusion:
-            "The open space is not subscription pet food. The open space is trial-before-commitment guidance for owners with a specific dog problem.",
+            "이 시장의 기회는 ‘구독’이 아니라 ‘선택 실패를 줄여주는 구조’다.",
+
         unitEconomicsCards: [
-            ["CAC", "$35–$90"],
-            ["LTV", "$120–$320"],
-            ["AOV", "$25–$55"],
-            ["REPEAT", "2.5x+"],
+            ["CAC", "약 4~10만원"],
+            ["LTV", "약 15~40만원"],
+            ["AOV", "3~7만원"],
+            ["REPEAT", "2.5회 이상"],
         ],
+
         unitEconomicsScore: {
-            ltvToCac: "3.4x",
-            payback: "<3 mo",
-            margin: "35%+",
+            ltvToCac: "3.4배",
+            payback: "3개월 이내",
+            margin: "35% 이상",
             status: "WATCH",
         },
+
         unitEconomicsTable: [
             [
                 "CAC",
-                "$35–$90",
-                "PASS below $45",
-                "Sampling boxes are low-AOV; CAC must stay controlled.",
+                "4~10만원",
+                "5만원 이하",
+                "광고비 관리 필요",
             ],
             [
-                "Gross margin",
-                "35%+",
-                "PASS at 35%+",
-                "Shipping can destroy contribution margin.",
+                "마진",
+                "35% 이상",
+                "통과",
+                "물류비 영향 큼",
             ],
             [
                 "LTV",
-                "$120–$320",
-                "PASS above $180",
-                "LTV must justify acquisition.",
+                "15~40만원",
+                "20만원 이상",
+                "반복구매 중요",
             ],
             [
-                "Repeat rate",
-                "2.5x+",
-                "PASS above 2.5x",
-                "One-time testers do not support subscription economics.",
+                "반복구매",
+                "2.5회 이상",
+                "통과",
+                "핵심 지표",
             ],
         ],
+
         economicsJudgment:
-            "The model works only if sampling becomes a conversion engine into full-size products.",
+            "이 구조는 반복구매가 발생할 때만 성립하는 모델이다.",
+
         marketingStrategy: {
             channelFit: [
-                [
-                    "TikTok / Reels",
-                    "HIGH",
-                    "Demand creation",
-                    "Pet reaction content is emotional and shareable.",
-                ],
-                [
-                    "Instagram",
-                    "HIGH",
-                    "Trust building",
-                    "Owner stories and testimonials work well.",
-                ],
-                [
-                    "Search / SEO",
-                    "MEDIUM",
-                    "Intent capture",
-                    "Useful for allergy and food comparison queries.",
-                ],
-                [
-                    "Paid social",
-                    "WATCH",
-                    "Scale channel",
-                    "Only after CAC and retention are proven.",
-                ],
+                ["틱톡", "HIGH", "유입", "반려동물 콘텐츠 강함"],
+                ["인스타그램", "HIGH", "신뢰 구축", "스토리 기반"],
+                ["검색", "MEDIUM", "문제 해결", "알러지 검색"],
+                ["광고", "WATCH", "확장", "초기 비효율"],
             ],
             contentPlaybook: [
-                "Dog food reaction test: Will my picky dog eat it?",
-                "Allergy-safe trial pack explanation",
-                "Owner story: wasted money on rejected food",
-                "Before/after feeding routine",
-                "Full-size bag risk vs sample-first path",
+                "강아지 반응 테스트 영상",
+                "사료 비교 콘텐츠",
+                "알러지 해결 사례",
+                "실제 사용자 후기",
+                "실패 경험 공유",
             ],
             thirtyDayMarketingTest: [
-                [
-                    "Week 1–2",
-                    "Create 20 short videos across 4 angles.",
-                    "Find 2 hooks above baseline CTR.",
-                ],
-                [
-                    "Week 3",
-                    "Run $300–$500 micro paid test.",
-                    "CAC estimate below target band.",
-                ],
-                [
-                    "Week 4",
-                    "Interview buyers and non-buyers.",
-                    "Identify top objections and winning promise.",
-                ],
+                ["1~2주", "영상 20개 제작", "조회수 확인"],
+                ["3주", "소액 광고 테스트", "CAC 측정"],
+                ["4주", "고객 인터뷰", "문제 파악"],
             ],
         },
+
         businessModel: {
             revenueLayers: [
-                ["Starter sample box", "$9–$19 trial", "Reduce first-purchase friction."],
-                [
-                    "Monthly discovery box",
-                    "$19–$39/month",
-                    "Recurring exploration revenue.",
-                ],
-                [
-                    "Full-size conversion",
-                    "Partner or private-label upsell",
-                    "Create real LTV.",
-                ],
+                ["샘플 박스", "1~2만원", "진입 장벽 낮춤"],
+                ["구독", "월 2~4만원", "지속 수익"],
+                ["정식 제품", "업셀", "LTV 확보"],
             ],
             modelJudgment:
-                "A sample-only subscription is fragile. The stronger model is a sample-to-full-size conversion platform.",
+                "샘플만으로는 수익이 안 나오고, 반드시 본품 전환이 필요하다.",
         },
+
         riskSystem: [
-            [
-                "Fulfillment cost crushes margin",
-                "Severe",
-                "Limit SKU complexity and batch shipping tests.",
-            ],
-            [
-                "Weak repeat behavior",
-                "High",
-                "Create full-size conversion path.",
-            ],
-            [
-                "Trust gap",
-                "High",
-                "Use ingredient transparency and clear allergy handling.",
-            ],
+            ["물류비 증가", "높음", "상품 단순화"],
+            ["재구매 없음", "높음", "업셀 구조 필요"],
+            ["신뢰 부족", "높음", "리뷰 확보"],
         ],
+
         executionPlan: [
-            [
-                "0–30 days",
-                "Build one niche offer, landing page, 100-order pre-sell test.",
-                "Paid conversion rate + CAC estimate",
-            ],
-            [
-                "30–60 days",
-                "Fulfill pilot and measure repeat intent.",
-                "Gross margin after shipping",
-            ],
-            [
-                "60–90 days",
-                "Scale only winning segment and content angle.",
-                "CAC payback + retention",
-            ],
+            ["1단계", "랜딩 + 100명 테스트", "전환율"],
+            ["2단계", "배송 및 재구매 확인", "마진"],
+            ["3단계", "확장 여부 결정", "CAC"],
         ],
+
         operatingRule:
-            "Do not add more segments, SKUs, or channels until one customer segment proves repeat behavior.",
+            "검증 전까지 확장 금지. 하나의 고객군에서만 테스트 진행.",
+
         goThreshold: [
-            [
-                "CAC payback",
-                "Under 3 months",
-                "Customer acquisition is financially scalable.",
-            ],
-            [
-                "Gross margin after shipping",
-                "35%+",
-                "Operations can support marketing costs.",
-            ],
-            [
-                "Repeat rate",
-                "2.5x+ orders",
-                "Sampling converts into ongoing value.",
-            ],
-            [
-                "Refund / complaint rate",
-                "Below 5%",
-                "Product trust is not breaking.",
-            ],
+            ["CAC", "3개월 회수", "확장 가능"],
+            ["마진", "35% 이상", "운영 가능"],
+            ["재구매", "2.5회 이상", "수익 가능"],
+            ["불만율", "5% 이하", "제품 안정"],
         ],
+
         goChecklist: [
-            { label: "CAC payback under 3 months", status: "PASS" },
-            { label: "Gross margin above 35%", status: "PASS" },
-            { label: "Repeat rate above 2.5x", status: "WATCH" },
-            { label: "Complaint rate below 5%", status: "PASS" },
+            { label: "CAC 3개월 회수", status: "PASS" },
+            { label: "마진 35% 이상", status: "PASS" },
+            { label: "재구매율", status: "WATCH" },
+            { label: "불만율 5% 이하", status: "PASS" },
         ],
+
         finalRule:
-            "GO only if at least three of four thresholds pass. HOLD if one or two fail. NO GO if CAC payback and repeat behavior both fail.",
+            "4개 중 3개 이상 통과 시 GO, 2개 이하 통과 시 HOLD, 핵심 지표 실패 시 NO GO.",
+
         appendix: {
             dataSources: [
-                ["U.S. pet industry spend", "APPA industry reporting", "Market scale benchmark"],
-                [
-                    "Global pet food market",
-                    "Grand View Research pet food market report",
-                    "Global TAM reference",
-                ],
-                [
-                    "CAC / LTV ranges",
-                    "DTC subscription benchmark assumptions",
-                    "Economic stress test",
-                ],
+                ["반려동물 시장", "산업 보고서", "시장 규모"],
+                ["소비 데이터", "통계 자료", "수요 분석"],
+                ["광고 비용", "마케팅 데이터", "CAC 계산"],
             ],
             assumptions: [
-                "NomNomBox starts without existing brand equity.",
-                "Initial launch focuses on one country and one niche segment.",
-                "Financial ranges are directional and require validation with first-party test data.",
-                "This report is a sample layout for product design and PDF conversion.",
+                "초기 브랜드 없음",
+                "온라인 중심 판매",
+                "데이터 기반 추정",
+                "테스트 필요",
             ],
         },
     }
