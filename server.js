@@ -44,7 +44,7 @@ app.get("/", (req, res) => {
     res.json({
         ok: true,
         service: "GoNoGo Report Server",
-        version: "2.0.0-html-pdf",
+        version: "2.1.0-visual-pdf",
     })
 })
 
@@ -54,18 +54,25 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/test-pdf", async (req, res) => {
     try {
-        const sampleReport = getSampleReport()
+        const sampleReport = normalizeDeepReport(getSampleReport(), {
+            brandName: "NomNomBox",
+            productService:
+                "Premium pet-food sample subscription for online dog owners",
+            targetCustomer: "Online dog owners",
+            language: "en",
+        })
+
         const html = buildHtmlFromTemplate(sampleReport)
         const pdfBuffer = await htmlToPdf(html)
 
         res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Length", pdfBuffer.length)
         res.setHeader(
             "Content-Disposition",
             `attachment; filename="GoNoGo_Test_Report.pdf"`
         )
 
-        res.setHeader("Content-Length", pdfBuffer.length)
-return res.end(pdfBuffer)
+        return res.end(pdfBuffer)
     } catch (error) {
         console.error("[TEST_PDF_ERROR]", error)
         return res.status(500).json({
@@ -118,9 +125,10 @@ app.post("/api/generate-report", async (req, res) => {
                 : `GoNoGo_Deep_Report_${safeBrand}_${language}.pdf`
 
         res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Length", pdfBuffer.length)
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
 
-        return res.send(pdfBuffer)
+        return res.end(pdfBuffer)
     } catch (error) {
         console.error("[GENERATE_REPORT_ERROR]", error)
         return res.status(500).json({
@@ -169,56 +177,90 @@ Return this exact JSON shape:
     "subtitle": string,
     "oneLineVerdict": string
   },
+
+  "visualScores": {
+    "market": number,
+    "profitability": number,
+    "execution": number,
+    "risk": number
+  },
+
   "decisionMatrix": [
     ["MARKET", "LOW" | "MEDIUM" | "HIGH"],
     ["PROFITABILITY", "LOW" | "MEDIUM" | "HIGH"],
     ["EXECUTION", "LOW" | "MEDIUM" | "HIGH"],
     ["RISK", "LOW" | "MEDIUM" | "HIGH"]
   ],
+
   "executiveDecision": [
     ["Why this works", string],
     ["Why this fails", string],
     ["What to do now", string]
   ],
+
   "founderDecision": string,
+
   "marketCards": [
-    [string, string],
-    [string, string],
-    [string, string],
-    [string, string]
+    ["TAM", string],
+    ["SAM", string],
+    ["SOM", string],
+    ["GROWTH", string]
   ],
+
+  "marketFunnel": [
+    { "label": "TAM", "value": string, "score": number },
+    { "label": "SAM", "value": string, "score": number },
+    { "label": "SOM", "value": string, "score": number }
+  ],
+
   "tamSamSom": [
     ["TAM", string, string, string],
     ["SAM", string, string, string],
     ["SOM", string, string, string]
   ],
+
   "marketInsight": string,
+
   "customerTruth": [
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "buyingTrigger": string,
+
   "competitionMap": [
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string]
   ],
+
   "competitionConclusion": string,
+
   "unitEconomicsCards": [
     ["CAC", string],
     ["LTV", string],
     ["AOV", string],
     ["REPEAT", string]
   ],
+
+  "unitEconomicsScore": {
+    "ltvToCac": string,
+    "payback": string,
+    "margin": string,
+    "status": "PASS" | "WATCH" | "FAIL"
+  },
+
   "unitEconomicsTable": [
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string],
     [string, string, string, string]
   ],
+
   "economicsJudgment": string,
+
   "marketingStrategy": {
     "channelFit": [
       [string, "LOW" | "MEDIUM" | "HIGH" | "WATCH", string, string],
@@ -233,6 +275,7 @@ Return this exact JSON shape:
       [string, string, string]
     ]
   },
+
   "businessModel": {
     "revenueLayers": [
       [string, string, string],
@@ -241,24 +284,37 @@ Return this exact JSON shape:
     ],
     "modelJudgment": string
   },
+
   "riskSystem": [
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "executionPlan": [
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
   "operatingRule": string,
+
   "goThreshold": [
     [string, string, string],
     [string, string, string],
     [string, string, string],
     [string, string, string]
   ],
+
+  "goChecklist": [
+    { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
+    { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
+    { "label": string, "status": "PASS" | "WATCH" | "FAIL" },
+    { "label": string, "status": "PASS" | "WATCH" | "FAIL" }
+  ],
+
   "finalRule": string,
+
   "appendix": {
     "dataSources": [
       [string, string, string],
@@ -271,6 +327,8 @@ Return this exact JSON shape:
 
 Quality rules:
 - Include market size, success probability, unit economics, marketing strategy, and execution plan.
+- visualScores must be numbers from 0 to 100.
+- marketFunnel scores must be numbers from 0 to 100.
 - Numbers must include logic or assumptions.
 - Keep table cell text concise.
 `
@@ -317,6 +375,18 @@ function normalizeDeepReport(report, input) {
                 report?.cover?.oneLineVerdict ||
                 "This business requires validation before scaling.",
         },
+        visualScores: {
+            market: toScore(report?.visualScores?.market, sample.visualScores.market),
+            profitability: toScore(
+                report?.visualScores?.profitability,
+                sample.visualScores.profitability
+            ),
+            execution: toScore(
+                report?.visualScores?.execution,
+                sample.visualScores.execution
+            ),
+            risk: toScore(report?.visualScores?.risk, sample.visualScores.risk),
+        },
         decisionMatrix: safeArray(report?.decisionMatrix, sample.decisionMatrix),
         executiveDecision: safeArray(
             report?.executiveDecision,
@@ -324,6 +394,7 @@ function normalizeDeepReport(report, input) {
         ),
         founderDecision: report?.founderDecision || sample.founderDecision,
         marketCards: safeArray(report?.marketCards, sample.marketCards),
+        marketFunnel: safeArray(report?.marketFunnel, sample.marketFunnel),
         tamSamSom: safeArray(report?.tamSamSom, sample.tamSamSom),
         marketInsight: report?.marketInsight || sample.marketInsight,
         customerTruth: safeArray(report?.customerTruth, sample.customerTruth),
@@ -338,6 +409,20 @@ function normalizeDeepReport(report, input) {
             report?.unitEconomicsCards,
             sample.unitEconomicsCards
         ),
+        unitEconomicsScore: {
+            ltvToCac:
+                report?.unitEconomicsScore?.ltvToCac ||
+                sample.unitEconomicsScore.ltvToCac,
+            payback:
+                report?.unitEconomicsScore?.payback ||
+                sample.unitEconomicsScore.payback,
+            margin:
+                report?.unitEconomicsScore?.margin ||
+                sample.unitEconomicsScore.margin,
+            status:
+                report?.unitEconomicsScore?.status ||
+                sample.unitEconomicsScore.status,
+        },
         unitEconomicsTable: safeArray(
             report?.unitEconomicsTable,
             sample.unitEconomicsTable
@@ -371,6 +456,7 @@ function normalizeDeepReport(report, input) {
         executionPlan: safeArray(report?.executionPlan, sample.executionPlan),
         operatingRule: report?.operatingRule || sample.operatingRule,
         goThreshold: safeArray(report?.goThreshold, sample.goThreshold),
+        goChecklist: safeArray(report?.goChecklist, sample.goChecklist),
         finalRule: report?.finalRule || sample.finalRule,
         appendix: {
             dataSources: safeArray(
@@ -392,8 +478,9 @@ function buildHtmlFromTemplate(report) {
     const matrix = objectFromPairs(report.decisionMatrix)
     const market = objectFromPairs(report.marketCards)
     const unit = objectFromPairs(report.unitEconomicsCards)
-
     const executiveMap = objectFromPairs(report.executiveDecision)
+
+    const funnel = normalizeFunnel(report.marketFunnel)
 
     const data = {
         brandName: report.cover.brandName,
@@ -407,15 +494,28 @@ function buildHtmlFromTemplate(report) {
         executionLevel: matrix.EXECUTION || "",
         riskLevel: matrix.RISK || "",
 
+        marketScore: report.visualScores.market,
+        profitabilityScore: report.visualScores.profitability,
+        executionScore: report.visualScores.execution,
+        riskScore: report.visualScores.risk,
+
+        ltvToCac: report.unitEconomicsScore.ltvToCac,
+        unitEconomicsStatus: report.unitEconomicsScore.status,
+        paybackValue: report.unitEconomicsScore.payback,
+
         whyItWorks: executiveMap["Why this works"] || "",
         whyItFails: executiveMap["Why this fails"] || "",
         whatToDoNow: executiveMap["What to do now"] || "",
         founderDecision: report.founderDecision,
 
-        tamValue: market.TAM || market["GLOBAL PET FOOD"] || "",
-        samValue: market.SAM || market["U.S. PET FOOD"] || "",
-        somValue: market.SOM || market["U.S. PET SPEND"] || "",
+        tamValue: market.TAM || funnel.tam.value || "",
+        samValue: market.SAM || funnel.sam.value || "",
+        somValue: market.SOM || funnel.som.value || "",
         growthValue: market.GROWTH || "",
+
+        tamScore: funnel.tam.score,
+        samScore: funnel.sam.score,
+        somScore: funnel.som.score,
 
         marketInsight: report.marketInsight,
         buyingTrigger: report.buyingTrigger,
@@ -458,6 +558,7 @@ function buildHtmlFromTemplate(report) {
         .replace("{{riskRows}}", rows(report.riskSystem))
         .replace("{{executionRows}}", rows(report.executionPlan))
         .replace("{{goThresholdRows}}", rows(report.goThreshold))
+        .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
         .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
         .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
 
@@ -482,17 +583,17 @@ async function htmlToPdf(html) {
         })
 
         const pdf = await page.pdf({
-    format: "A4",
-    printBackground: true,
-    margin: {
-        top: "0mm",
-        right: "0mm",
-        bottom: "0mm",
-        left: "0mm",
-    },
-})
+            format: "A4",
+            printBackground: true,
+            margin: {
+                top: "0mm",
+                right: "0mm",
+                bottom: "0mm",
+                left: "0mm",
+            },
+        })
 
-return Buffer.from(pdf)
+        return Buffer.from(pdf)
     } finally {
         await browser.close()
     }
@@ -517,7 +618,9 @@ function rows(items) {
     return items
         .map((row) => {
             const cells = Array.isArray(row) ? row : Object.values(row || {})
-            return `<tr>${cells.map((cell) => `<td>${esc(cell)}</td>`).join("")}</tr>`
+            return `<tr>${cells
+                .map((cell) => `<td>${esc(cell)}</td>`)
+                .join("")}</tr>`
         })
         .join("")
 }
@@ -526,6 +629,29 @@ function listItems(items) {
     if (!Array.isArray(items)) return ""
 
     return items.map((item) => `<li>${esc(item)}</li>`).join("")
+}
+
+function checklistItems(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map((item) => {
+            const status = String(item.status || "WATCH").toUpperCase()
+            const cls =
+                status === "PASS"
+                    ? "status-pass"
+                    : status === "FAIL"
+                      ? "status-fail"
+                      : "status-watch"
+
+            return `
+                <div class="check-item">
+                    <span>${esc(item.label || "")}</span>
+                    <span class="${cls}">${esc(status)}</span>
+                </div>
+            `
+        })
+        .join("")
 }
 
 function objectFromPairs(items) {
@@ -544,6 +670,31 @@ function objectFromPairs(items) {
     return out
 }
 
+function normalizeFunnel(items) {
+    const base = {
+        tam: { value: "", score: 100 },
+        sam: { value: "", score: 55 },
+        som: { value: "", score: 18 },
+    }
+
+    if (!Array.isArray(items)) return base
+
+    items.forEach((item) => {
+        const label = String(item?.label || "").toUpperCase()
+        const target =
+            label === "TAM" ? "tam" : label === "SAM" ? "sam" : label === "SOM" ? "som" : null
+
+        if (!target) return
+
+        base[target] = {
+            value: String(item?.value || ""),
+            score: toScore(item?.score, base[target].score),
+        }
+    })
+
+    return base
+}
+
 function esc(value) {
     return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -555,6 +706,12 @@ function esc(value) {
 
 function safeArray(value, fallback) {
     return Array.isArray(value) ? value : fallback
+}
+
+function toScore(value, fallback = 50) {
+    const n = Number(value)
+    if (!Number.isFinite(n)) return fallback
+    return Math.max(0, Math.min(100, Math.round(n)))
 }
 
 function getLanguageName(code) {
@@ -585,6 +742,12 @@ function getSampleReport() {
             oneLineVerdict:
                 "Demand is real, but the model must prove a narrow niche, repeat purchasing, and margin after shipping before scaling.",
         },
+        visualScores: {
+            market: 82,
+            profitability: 58,
+            execution: 64,
+            risk: 72,
+        },
         decisionMatrix: [
             ["MARKET", "HIGH"],
             ["PROFITABILITY", "MEDIUM"],
@@ -612,6 +775,11 @@ function getSampleReport() {
             ["SAM", "~$43.5B"],
             ["SOM", "500–2,000 subs"],
             ["GROWTH", "4–5%+"],
+        ],
+        marketFunnel: [
+            { label: "TAM", value: "~$128.7B", score: 100 },
+            { label: "SAM", value: "~$43.5B", score: 55 },
+            { label: "SOM", value: "500–2,000 subs", score: 18 },
         ],
         tamSamSom: [
             [
@@ -688,6 +856,12 @@ function getSampleReport() {
             ["AOV", "$25–$55"],
             ["REPEAT", "2.5x+"],
         ],
+        unitEconomicsScore: {
+            ltvToCac: "3.4x",
+            payback: "<3 mo",
+            margin: "35%+",
+            status: "WATCH",
+        },
         unitEconomicsTable: [
             [
                 "CAC",
@@ -842,6 +1016,12 @@ function getSampleReport() {
                 "Below 5%",
                 "Product trust is not breaking.",
             ],
+        ],
+        goChecklist: [
+            { label: "CAC payback under 3 months", status: "PASS" },
+            { label: "Gross margin above 35%", status: "PASS" },
+            { label: "Repeat rate above 2.5x", status: "WATCH" },
+            { label: "Complaint rate below 5%", status: "PASS" },
         ],
         finalRule:
             "GO only if at least three of four thresholds pass. HOLD if one or two fail. NO GO if CAC payback and repeat behavior both fail.",
