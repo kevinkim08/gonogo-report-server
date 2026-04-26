@@ -1,0 +1,105 @@
+{
+  "lang": "mn",
+  "fontFamily": "\"Noto Sans\", Arial, sans-serif",
+
+  "reportTitleSuffix": "Бизнесийн шийдвэрийн гүнзгий тайлан",
+  "scoreLabel": "Оноо",
+
+  "labels": {
+    "market": "Зах зээлийн боломж",
+    "profitability": "Ашигт байдал",
+    "execution": "Хэрэгжилтийн төвөгшил",
+    "risk": "Эрсдэл",
+    "riskPressure": "Эрсдэлийн дарамт",
+
+    "unitEconomics": "Ашгийн бүтэц",
+    "ltvToCac": "LTV / CAC",
+    "payback": "Зардал нөхөх хугацаа",
+
+    "section1": "1. Гол шийдвэр",
+    "section2": "2. Зах зээлийн бодит байдал",
+    "section3": "3. Хэрэглэгчийн бодит асуудал",
+    "section4": "4. Өрсөлдөөний бүтэц",
+    "section5": "5. Ашгийн бүтэц",
+    "section6": "6. Маркетингийн стратеги",
+    "section7": "7. Бизнес модель",
+    "section8": "8. Эрсдэлийн систем",
+    "section9": "9. Хэрэгжүүлэх төлөвлөгөө",
+    "section10": "10. GO шийдвэрийн шалгуур",
+    "section11": "11. Хавсралт",
+
+    "question": "Асуулт",
+    "judgment": "Дүгнэлт",
+    "whyWorks": "Яагаад ажиллана вэ",
+    "whyFails": "Яагаад бүтэлгүйтэх вэ",
+    "whatNow": "Одоо юу хийх вэ",
+    "founderDecision": "Үүсгэн байгуулагчийн шийдвэр",
+
+    "marketFunnel": "Зах зээлийн шатлал",
+    "tamSamSom": "TAM / SAM / SOM",
+    "layer": "Түвшин",
+    "estimate": "Тооцоолол",
+    "formula": "Тооцооллын логик",
+    "interpretation": "Тайлбар",
+    "marketInsight": "Зах зээлийн ойлголт",
+
+    "customerProblem": "Хэрэглэгчийн асуудал",
+    "behaviorEvidence": "Зан үйлийн нотолгоо",
+    "businessMeaning": "Бизнесийн утга",
+    "buyingTrigger": "Худалдан авах шалтгаан",
+
+    "competitor": "Өрсөлдөгч / Орлуулагч",
+    "type": "Төрөл",
+    "strength": "Давуу тал",
+    "weakness": "Сул тал",
+    "competitionConclusion": "Өрсөлдөөний дүгнэлт",
+
+    "metric": "Үзүүлэлт",
+    "targetRange": "Зорилтот хэмжээ",
+    "passFailRule": "Шалгуур",
+    "reason": "Шалтгаан",
+    "economicsJudgment": "Ашгийн дүгнэлт",
+
+    "channel": "Суваг",
+    "fit": "Тохиромж",
+    "role": "Үүрэг",
+    "why": "Яагаад",
+    "contentPlaybook": "Контент стратеги",
+    "marketingTest": "30 хоногийн тест",
+    "period": "Хугацаа",
+    "action": "Үйлдэл",
+    "successMetric": "Амжилтын үзүүлэлт",
+
+    "revenueLayer": "Орлогын давхарга",
+    "example": "Жишээ",
+    "purpose": "Зорилго",
+    "modelJudgment": "Моделийн дүгнэлт",
+
+    "impact": "Нөлөө",
+    "countermeasure": "Шийдэл",
+
+    "phase": "Үе шат",
+    "actions": "Үйл ажиллагаа",
+    "primaryKpi": "Гол KPI",
+    "operatingRule": "Ажиллах зарчим",
+
+    "passCondition": "Шалгуур",
+    "decisionMeaning": "Шийдвэрийн утга",
+    "checklist": "Go / No-Go шалгах жагсаалт",
+    "finalRule": "Эцсийн дүрэм",
+
+    "dataPoint": "Өгөгдөл",
+    "sourceBasis": "Эх сурвалж",
+    "usage": "Ашиглалт",
+    "assumptions": "Таамаглал"
+  },
+
+  "fixedNotes": {
+    "executivePrinciple": "GoNoGo зарчим: Эхний шийдвэр нь санаа сонирхолтой эсэх биш, харин бизнес нь хэрэглэгч олж авах зардал, ашиг, давтан худалдан авалтыг даах чадвартай эсэх юм.",
+    "customerPrinciple": "Хэрэглэгчийн ойлголт нь нас, хүйс биш. Хэрэглэгч мөнгө төлөх хэмжээнд хүрсэн асуудлыг олох нь чухал."
+  },
+
+  "footer": {
+    "left": "GoNoGo™ Business Decision Report"
+  }
+}
