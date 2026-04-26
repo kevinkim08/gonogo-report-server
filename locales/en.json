@@ -1,0 +1,104 @@
+{
+  "lang": "en",
+  "fontFamily": "Arial, Helvetica, sans-serif",
+
+  "reportTitleSuffix": "Deep Business Decision Report",
+  "scoreLabel": "Score",
+
+  "labels": {
+    "market": "Market",
+    "profitability": "Profitability",
+    "execution": "Execution",
+    "risk": "Risk",
+    "riskPressure": "Risk Pressure",
+    "unitEconomics": "Unit Economics",
+    "ltvToCac": "LTV / CAC",
+    "payback": "Payback",
+
+    "section1": "1. Executive Decision",
+    "section2": "2. Market Reality",
+    "section3": "3. Customer Truth",
+    "section4": "4. Competition Map",
+    "section5": "5. Unit Economics",
+    "section6": "6. Marketing Strategy",
+    "section7": "7. Business Model",
+    "section8": "8. Risk System",
+    "section9": "9. Execution Plan",
+    "section10": "10. GO Threshold",
+    "section11": "11. Appendix",
+
+    "question": "Question",
+    "judgment": "Judgment",
+    "whyWorks": "Why this works",
+    "whyFails": "Why this fails",
+    "whatNow": "What to do now",
+    "founderDecision": "Founder Decision",
+
+    "marketFunnel": "Market Funnel",
+    "tamSamSom": "TAM / SAM / SOM",
+    "layer": "Layer",
+    "estimate": "Estimate",
+    "formula": "Formula / Logic",
+    "interpretation": "Interpretation",
+    "marketInsight": "Market Insight",
+
+    "customerProblem": "Customer Problem",
+    "behaviorEvidence": "Behavior Evidence",
+    "businessMeaning": "Business Meaning",
+    "buyingTrigger": "Buying Trigger",
+
+    "competitor": "Competitor / Alternative",
+    "type": "Type",
+    "strength": "Strength",
+    "weakness": "Weakness",
+    "competitionConclusion": "Competitive Conclusion",
+
+    "metric": "Metric",
+    "targetRange": "Target Range",
+    "passFailRule": "Pass / Fail Rule",
+    "reason": "Reason",
+    "economicsJudgment": "Economics Judgment",
+
+    "channel": "Channel",
+    "fit": "Fit",
+    "role": "Role",
+    "why": "Why",
+    "contentPlaybook": "Content Playbook",
+    "marketingTest": "30-Day Marketing Test",
+    "period": "Period",
+    "action": "Action",
+    "successMetric": "Success Metric",
+
+    "revenueLayer": "Revenue Layer",
+    "example": "Example",
+    "purpose": "Purpose",
+    "modelJudgment": "Model Judgment",
+
+    "impact": "Impact",
+    "countermeasure": "Countermeasure",
+
+    "phase": "Phase",
+    "actions": "Actions",
+    "primaryKpi": "Primary KPI",
+    "operatingRule": "Operating Rule",
+
+    "passCondition": "Pass Condition",
+    "decisionMeaning": "Decision Meaning",
+    "checklist": "Go / No-Go Checklist",
+    "finalRule": "Final Rule",
+
+    "dataPoint": "Data Point",
+    "sourceBasis": "Source / Basis",
+    "usage": "Usage",
+    "assumptions": "Assumptions"
+  },
+
+  "fixedNotes": {
+    "executivePrinciple": "GoNoGo Principle: the first decision is not whether the idea is exciting. The first decision is whether the business can survive customer acquisition, margins, and repeat behavior.",
+    "customerPrinciple": "Customer truth is not demographic. Customer truth is the moment the buyer feels enough pain to spend money."
+  },
+
+  "footer": {
+    "left": "GoNoGo™ Business Decision Report"
+  }
+}
