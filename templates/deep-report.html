@@ -645,6 +645,67 @@
   </section>
 
   <section class="page">
+    <div class="section-title">11. 수익 시뮬레이션</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>시나리오</th>
+          <th>고객 수</th>
+          <th>월 매출</th>
+          <th>마케팅 비용</th>
+          <th>예상 이익</th>
+          <th>판단</th>
+        </tr>
+      </thead>
+      <tbody>{{profitSimulationRows}}</tbody>
+    </table>
+
+    <div class="label" style="margin-top:30px;">손익분기점</div>
+    <div class="text-block">{{breakEvenPoint}}</div>
+
+    <div class="label" style="margin-top:30px;">수익성 판단</div>
+    <div class="text-block">{{profitJudgment}}</div>
+
+    <div class="label" style="margin-top:30px;">현금흐름 리스크</div>
+    <div class="verdict">{{cashRisk}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Profit Simulation</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="section-title">12. Kill 조건</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>지표</th>
+          <th>중단 기준</th>
+          <th>조치</th>
+        </tr>
+      </thead>
+      <tbody>{{killCriteriaRows}}</tbody>
+    </table>
+
+    <div class="label" style="margin-top:30px;">중단 결정</div>
+    <div class="text-block">{{stopDecision}}</div>
+
+    <div class="label" style="margin-top:30px;">전환 결정</div>
+    <div class="text-block">{{pivotDecision}}</div>
+
+    <div class="label" style="margin-top:30px;">확장 결정</div>
+    <div class="verdict">{{scaleDecision}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Kill Criteria</span>
+    </div>
+  </section>
+  
+  <section class="page">
     <div class="section-title">11. 데이터 신뢰도</div>
 
     <div class="label">신뢰도 수준</div>
