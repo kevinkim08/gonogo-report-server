@@ -493,6 +493,29 @@ Return this exact JSON shape:
     "founderWarning": ""
   },
 
+  "profitSimulation": {
+    "monthlyScenarioTable": [
+      ["Conservative", "", "", "", "", ""],
+      ["Base", "", "", "", "", ""],
+      ["Aggressive", "", "", "", "", ""]
+    ],
+    "breakEvenPoint": "",
+    "profitJudgment": "",
+    "cashRisk": ""
+  },
+
+  "killCriteria": {
+    "rules": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "stopDecision": "",
+    "pivotDecision": "",
+    "scaleDecision": ""
+  },
+
   "appendix": {
     "dataSources": [
       ["", "", ""],
@@ -527,6 +550,22 @@ Sensitivity analysis rules:
 - cacLtvTable columns must be: Scenario, CAC, LTV, Decision.
 - criticalBreakPoint must explain the point where the business becomes unprofitable.
 - founderWarning must be direct and practical.
+
+Profit simulation rules:
+- monthlyScenarioTable columns must be: Scenario, Customers, Revenue, Marketing Cost, Estimated Profit, Judgment.
+- Use realistic monthly customer acquisition assumptions.
+- Include marketing cost, gross margin, fulfillment cost if relevant.
+- breakEvenPoint must explain when the business starts making money.
+- profitJudgment must clearly say whether this business can make money.
+- cashRisk must explain the cashflow risk for the founder.
+
+Kill criteria rules:
+- Define measurable stop conditions.
+- Rules columns must be: Metric, Kill Line, Action.
+- Include CAC, conversion rate, repeat purchase, margin, refund/churn when relevant.
+- stopDecision must say when to stop.
+- pivotDecision must say when to change offer/model.
+- scaleDecision must say when to increase budget.
 
 Calculation rules:
 - TAM must describe the total reachable category demand.
@@ -841,6 +880,47 @@ function normalizeDeepReport(report, input) {
                 report?.sensitivityAnalysis?.founderWarning ||
                 "CAC가 상승했을 때도 이익이 남는지 먼저 확인해야 합니다.",
         },
+
+        profitSimulation: {
+            monthlyScenarioTable: safeArray(
+                report?.profitSimulation?.monthlyScenarioTable,
+                [
+                    ["Conservative", "100명", "2,990,000원", "2,000,000원", "적자 가능", "검증만 가능"],
+                    ["Base", "300명", "8,970,000원", "6,000,000원", "소폭 흑자/본전", "주의 필요"],
+                    ["Aggressive", "700명", "20,930,000원", "14,000,000원", "흑자 가능", "리텐션 전제"],
+                ]
+            ),
+            breakEvenPoint:
+                report?.profitSimulation?.breakEvenPoint ||
+                "초기에는 광고비와 물류비 때문에 손익분기까지 최소 2~3개월이 필요합니다.",
+            profitJudgment:
+                report?.profitSimulation?.profitJudgment ||
+                "이 사업은 초기부터 큰 이익을 내기 어렵고, 재구매율이 확인될 때만 확장 가능합니다.",
+            cashRisk:
+                report?.profitSimulation?.cashRisk ||
+                "광고비를 먼저 쓰고 회수는 나중에 발생하므로 초기 현금흐름 리스크가 큽니다.",
+        },
+
+        killCriteria: {
+            rules: safeArray(
+                report?.killCriteria?.rules,
+                [
+                    ["CAC", "목표 CAC의 150% 초과", "광고 확장 중단"],
+                    ["Conversion", "구매 전환율 1% 미만", "랜딩/상품 제안 재설계"],
+                    ["Repeat", "60일 재구매율 15% 미만", "구독 모델 중단"],
+                    ["Margin", "기여이익률 20% 미만", "가격/원가/배송 구조 재조정"],
+                ]
+            ),
+            stopDecision:
+                report?.killCriteria?.stopDecision ||
+                "핵심 지표 2개 이상이 기준 미달이면 사업 확장을 중단합니다.",
+            pivotDecision:
+                report?.killCriteria?.pivotDecision ||
+                "전환율은 있으나 재구매가 약하면 구독이 아니라 단품/번들 모델로 전환합니다.",
+            scaleDecision:
+                report?.killCriteria?.scaleDecision ||
+                "CAC, 전환율, 재구매율, 마진이 모두 기준을 넘을 때만 광고비를 증액합니다.",
+        },
         
         appendix: {
             dataSources: safeArray(
@@ -884,6 +964,14 @@ function buildHtmlFromTemplate(report, locale) {
         dataConfidenceSummary: report.dataConfidence?.summary || "",
         criticalBreakPoint: report.sensitivityAnalysis?.criticalBreakPoint || "",
         founderWarning: report.sensitivityAnalysis?.founderWarning || "",
+
+        breakEvenPoint: report.profitSimulation?.breakEvenPoint || "",
+        profitJudgment: report.profitSimulation?.profitJudgment || "",
+        cashRisk: report.profitSimulation?.cashRisk || "",
+
+        stopDecision: report.killCriteria?.stopDecision || "",
+        pivotDecision: report.killCriteria?.pivotDecision || "",
+        scaleDecision: report.killCriteria?.scaleDecision || "",
         
         lang: locale.lang,
         fontFamily: locale.fontFamily,
@@ -1017,6 +1105,8 @@ function buildHtmlFromTemplate(report, locale) {
 .replace("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
 .replace("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
 .replace("{{cacLtvRows}}", rows(report.sensitivityAnalysis?.cacLtvTable))
+ .replace("{{profitSimulationRows}}", rows(report.profitSimulation?.monthlyScenarioTable))
+.replace("{{killCriteriaRows}}", rows(report.killCriteria?.rules))        
 .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
 .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
 
