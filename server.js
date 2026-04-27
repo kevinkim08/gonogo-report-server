@@ -134,6 +134,49 @@ app.get("/api/generate-report-test", async (req, res) => {
     }
 })
 
+app.get("/api/debug-html", async (req, res) => {
+    try {
+        const language = normalizeLanguage(req.query.language || "ko")
+        const reportType = req.query.reportType === "free" ? "free" : "paid"
+
+        const brandName = req.query.brandName || "NomNomBox"
+        const productService =
+            req.query.productService || "Premium pet snack subscription"
+        const targetCustomer =
+            req.query.targetCustomer || "Dog owners in urban areas"
+
+        const locale = loadLocale(language)
+
+        const paidReport = await generateDeepReportJson({
+            brandName,
+            productService,
+            targetCustomer,
+            language,
+        })
+
+        const finalReport =
+            reportType === "free"
+                ? buildFreeReportFromPaidReport(paidReport)
+                : paidReport
+
+        const html = buildHtmlFromTemplate(finalReport, locale)
+
+        console.log("[DEBUG_HTML_LENGTH]", html.length)
+        console.log("[DEBUG_HTML_PREVIEW]", html.slice(0, 500))
+
+        res.setHeader("Content-Type", "text/html; charset=utf-8")
+        return res.send(html)
+    } catch (error) {
+        console.error("[DEBUG_HTML_ERROR]", error)
+
+        return res.status(500).json({
+            ok: false,
+            error: "DEBUG_HTML_FAILED",
+            detail: String(error?.message || error),
+        })
+    }
+})
+
 app.post("/api/generate-report", async (req, res) => {
     try {
         const {
