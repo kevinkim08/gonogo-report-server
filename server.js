@@ -443,14 +443,16 @@ function buildFreeReportFromPaidReport(fullReport) {
         riskSystem: [],
         goThreshold: [],
 
-        lockedSections: {
-            tamSamSom: true,
-            unitEconomics: true,
-            marketing: true,
-            execution: true,
-            risk: true,
-            goThreshold: true,
-            message: "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
+       lockedSections: {
+    tamSamSom: true,
+    unitEconomics: true,
+    marketing: true,
+    execution: true,
+    risk: true,
+    goThreshold: true,
+    competition: true,
+    message: "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
+}
         }
     }
 }
@@ -638,6 +640,9 @@ function buildHtmlFromTemplate(report, locale) {
     const execMap = objectFromPairs(report.executiveDecision)
 
     const funnel = normalizeFunnel(report.marketFunnel)
+    const lockedMessage =
+        report?.lockedSections?.message ||
+        "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
 
     const data = {
         lang: locale.lang,
@@ -702,30 +707,71 @@ function buildHtmlFromTemplate(report, locale) {
     html = replacePlaceholders(html, data)
 
     html = html
-        .replace("{{tamSamSomRows}}", rows(report.tamSamSom))
+        .replace(
+            "{{tamSamSomRows}}",
+            report?.lockedSections?.tamSamSom
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.tamSamSom)
+        )
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
-        .replace("{{competitionRows}}", rows(report.competitionMap))
-        .replace("{{competitionConclusion}}", esc(report.competitionConclusion))
-        .replace("{{unitEconomicsRows}}", rows(report.unitEconomicsTable))
+        .replace(
+            "{{competitionRows}}",
+            report?.lockedSections?.competition
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.competitionMap)
+        )
+        .replace(
+            "{{competitionConclusion}}",
+            report?.lockedSections?.competition
+                ? esc("상세 경쟁 분석은 유료 보고서에서 확인 가능합니다.")
+                : esc(report.competitionConclusion)
+        )
+        .replace(
+            "{{unitEconomicsRows}}",
+            report?.lockedSections?.unitEconomics
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.unitEconomicsTable)
+        )
         .replace(
             "{{marketingChannelRows}}",
-            rows(report.marketingStrategy.channelFit)
+            report?.lockedSections?.marketing
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.marketingStrategy.channelFit)
         )
         .replace(
             "{{contentPlaybookItems}}",
-            listItems(report.marketingStrategy.contentPlaybook)
+            report?.lockedSections?.marketing
+                ? `<li>${esc("콘텐츠 전략은 유료 보고서에서 확인 가능합니다.")}</li>`
+                : listItems(report.marketingStrategy.contentPlaybook)
         )
         .replace(
             "{{marketingTestRows}}",
-            rows(report.marketingStrategy.thirtyDayMarketingTest)
+            report?.lockedSections?.marketing
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.marketingStrategy.thirtyDayMarketingTest)
         )
         .replace(
             "{{businessModelRows}}",
             rows(report.businessModel.revenueLayers)
         )
-        .replace("{{riskRows}}", rows(report.riskSystem))
-        .replace("{{executionRows}}", rows(report.executionPlan))
-        .replace("{{goThresholdRows}}", rows(report.goThreshold))
+        .replace(
+            "{{riskRows}}",
+            report?.lockedSections?.risk
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.riskSystem)
+        )
+        .replace(
+            "{{executionRows}}",
+            report?.lockedSections?.execution
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.executionPlan)
+        )
+        .replace(
+            "{{goThresholdRows}}",
+            report?.lockedSections?.goThreshold
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                : rows(report.goThreshold)
+        )
         .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
         .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
         .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
@@ -733,6 +779,15 @@ function buildHtmlFromTemplate(report, locale) {
     html = html.replace(/{{[^}]+}}/g, "")
 
     return html
+}
+
+function lockedBox(message) {
+    return `
+        <div class="locked-box">
+            <h3>🔒 유료 보고서 전용</h3>
+            <p>${esc(message)}</p>
+        </div>
+    `
 }
 
 async function htmlToPdf(html) {
