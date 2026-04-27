@@ -253,6 +253,45 @@ Return this exact JSON shape:
     "oneLineVerdict": ""
   },
 
+  "glossary": [
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    }
+  ],
+
+  "businessDiagnosis": {
+    "industryType": "",
+    "businessModelType": "",
+    "countryMarketBehavior": "",
+    "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
+    "mainBottleneck": "",
+    "bestFirstOffer": "",
+    "validationExperiment": "",
+    "goNoGoLogic": ""
+  },
+
   "visualScores": {
     "market": 0,
     "profitability": 0,
@@ -399,6 +438,19 @@ Return this exact JSON shape:
     "assumptions": ["", "", "", ""]
   }
 }
+Glossary rules:
+- Explain important business terms used in the report.
+- Include terms such as TAM, SAM, SOM, CAC, LTV, AOV, Margin, Retention, Conversion when relevant.
+- Meanings must be simple enough for a non-expert founder.
+- whyItMatters must explain how the term affects the business decision.
+
+Business diagnosis rules:
+- Classify the business industry type.
+- Classify the business model type.
+- Explain country-specific buying behavior.
+- Identify the biggest bottleneck.
+- Recommend the best first offer.
+- Define the first validation experiment.
 
 Calculation rules:
 - TAM must describe the total reachable category demand.
@@ -519,6 +571,35 @@ function normalizeDeepReport(report, input) {
                 sample.cover.oneLineVerdict,
         },
 
+        glossary: safeArray(
+            report?.glossary,
+            getDefaultGlossary(input.language || "ko")
+        ),
+
+        businessDiagnosis: {
+            industryType:
+                report?.businessDiagnosis?.industryType || "Consumer product / commerce",
+            businessModelType:
+                report?.businessDiagnosis?.businessModelType || "Direct sales with optional subscription",
+            countryMarketBehavior:
+                report?.businessDiagnosis?.countryMarketBehavior ||
+                "구매 채널과 가격 민감도 검증이 필요합니다.",
+            marketEntryDifficulty:
+                report?.businessDiagnosis?.marketEntryDifficulty || "MEDIUM",
+            mainBottleneck:
+                report?.businessDiagnosis?.mainBottleneck ||
+                "초기 고객획득비와 반복구매 검증",
+            bestFirstOffer:
+                report?.businessDiagnosis?.bestFirstOffer ||
+                "첫 구매 전환용 번들 상품",
+            validationExperiment:
+                report?.businessDiagnosis?.validationExperiment ||
+                "30일 소액 광고와 사전 주문 테스트",
+            goNoGoLogic:
+                report?.businessDiagnosis?.goNoGoLogic ||
+                "CAC, 전환율, 재구매율이 기준을 넘을 때만 확장합니다.",
+        },
+        
         visualScores: {
             market: toScore(report?.visualScores?.market, sample.visualScores.market),
             profitability: toScore(
@@ -644,6 +725,16 @@ function buildHtmlFromTemplate(report, locale) {
         "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
 
     const data = {
+
+        industryType: report.businessDiagnosis?.industryType || "",
+        businessModelType: report.businessDiagnosis?.businessModelType || "",
+        countryMarketBehavior: report.businessDiagnosis?.countryMarketBehavior || "",
+        marketEntryDifficulty: report.businessDiagnosis?.marketEntryDifficulty || "",
+        mainBottleneck: report.businessDiagnosis?.mainBottleneck || "",
+        bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
+        validationExperiment: report.businessDiagnosis?.validationExperiment || "",
+        goNoGoLogic: report.businessDiagnosis?.goNoGoLogic || "",
+        
         lang: locale.lang,
         fontFamily: locale.fontFamily,
 
@@ -706,6 +797,7 @@ function buildHtmlFromTemplate(report, locale) {
     html = replacePlaceholders(html, data)
 
     html = html
+        .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace(
             "{{tamSamSomRows}}",
             report?.lockedSections?.tamSamSom
@@ -864,6 +956,22 @@ function rows(items) {
         .join("")
 }
 
+function glossaryRows(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map((item) => {
+            return `
+                <tr>
+                    <td>${esc(item.term || "")}</td>
+                    <td>${esc(item.meaning || "")}</td>
+                    <td>${esc(item.whyItMatters || "")}</td>
+                </tr>
+            `
+        })
+        .join("")
+}
+
 function listItems(items) {
     if (!Array.isArray(items)) return ""
     return items.map((i) => `<li>${esc(i)}</li>`).join("")
@@ -938,6 +1046,31 @@ function getLanguageName(code) {
 
 function sanitizeFileName(v) {
     return String(v || "report").replace(/[^\w]/g, "_")
+}
+
+function getDefaultGlossary(lang = "ko") {
+    const glossaries = {
+        ko: [
+            { term: "TAM", meaning: "전체 시장 규모", whyItMatters: "사업이 이론적으로 얼마나 큰 시장을 노릴 수 있는지 보여줍니다." },
+            { term: "SAM", meaning: "실제로 접근 가능한 시장", whyItMatters: "현재 국가, 채널, 고객 기준으로 현실적으로 노릴 수 있는 시장입니다." },
+            { term: "SOM", meaning: "초기 확보 가능 시장", whyItMatters: "첫 6~12개월 안에 실제로 얻을 수 있는 매출 가능성을 보여줍니다." },
+            { term: "CAC", meaning: "고객 1명을 얻는 비용", whyItMatters: "CAC가 LTV보다 높으면 팔수록 손해가 납니다." },
+            { term: "LTV", meaning: "고객 1명이 남기는 총 가치", whyItMatters: "LTV가 CAC보다 충분히 높아야 광고와 성장이 가능합니다." },
+            { term: "AOV", meaning: "1회 평균 주문 금액", whyItMatters: "객단가가 낮으면 배송비, 광고비를 감당하기 어렵습니다." },
+            { term: "Retention", meaning: "고객 유지율", whyItMatters: "반복구매가 없으면 구독형이나 재구매형 사업은 오래가기 어렵습니다." },
+        ],
+        en: [
+            { term: "TAM", meaning: "Total addressable market", whyItMatters: "Shows the maximum theoretical market size." },
+            { term: "SAM", meaning: "Serviceable available market", whyItMatters: "Shows the realistic market reachable by country, channel, and customer type." },
+            { term: "SOM", meaning: "Serviceable obtainable market", whyItMatters: "Shows the realistic revenue that can be captured in the first 6–12 months." },
+            { term: "CAC", meaning: "Customer acquisition cost", whyItMatters: "If CAC is higher than LTV, growth destroys profit." },
+            { term: "LTV", meaning: "Customer lifetime value", whyItMatters: "LTV must be meaningfully higher than CAC for paid growth to work." },
+            { term: "AOV", meaning: "Average order value", whyItMatters: "Low AOV makes ads, shipping, and fulfillment harder to sustain." },
+            { term: "Retention", meaning: "Customer retention", whyItMatters: "Without repeat behavior, subscription or repeat-purchase models weaken quickly." },
+        ],
+    }
+
+    return glossaries[lang] || glossaries.en
 }
 
 function getSampleReport(lang = "ko") {
