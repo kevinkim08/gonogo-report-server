@@ -147,221 +147,235 @@ app.post("/api/generate-report", async (req, res) => {
 })
 
 function buildPaidReportPrompt({ brandName, productService, targetCustomer, language }) {
-  return `
-You are a business decision engine, market analyst, investor, and execution strategist.
+    const languageName = getLanguageName(language)
 
-Your job is NOT to write a nice report.
-Your job is to judge whether this business should be started, improved, or stopped.
+    return `
+You are GoNoGo, a ruthless business decision engine.
 
-You must produce a premium paid business decision report.
+You are NOT a writer.
+You are NOT a generic consultant.
+You are a paid business decision report engine.
 
-INPUT:
-Brand Name: ${brandName}
-Product/Service: ${productService}
-Target Customer: ${targetCustomer}
-Language: ${language}
+Your job:
+Evaluate this business idea and generate a premium PDF-ready JSON report.
 
-CRITICAL RULES:
-1. Output valid JSON only.
-2. Do not include markdown.
-3. Do not include text outside JSON.
-4. Be realistic, not optimistic.
-5. If exact data is unavailable, use reasonable assumptions and clearly state them.
-6. All numbers must be internally consistent.
-7. Every conclusion must connect to execution.
-8. Do not avoid negative conclusions.
-9. Think like an investor.
-10. Think by country and market behavior.
+Final report language: ${languageName}
 
-LANGUAGE / COUNTRY STRATEGY:
-- If language is "ko", assume Korea-first strategy.
-- If language is "en", assume global / English-speaking market.
-- If language is "ja", assume Japan-first strategy.
-- If language is "zh", assume Chinese-speaking market strategy.
-- If language is "mn", assume Mongolia-first strategy.
-- For Mongolia, strongly consider Facebook commerce, bank transfer behavior, local trust, offline-online hybrid sales, and low-friction payment behavior.
+Business Input:
+- Brand Name: ${brandName}
+- Product / Service: ${productService}
+- Target Customer: ${targetCustomer}
+- Language / Market: ${language}
 
-REPORT PURPOSE:
-The reader must be able to decide:
-- Should I start this business?
-- How much money do I need to test it?
-- What should I test first?
-- What can kill this business?
-- What exact action should I take tomorrow?
+Critical rules:
+1. Output VALID JSON only.
+2. No markdown.
+3. No explanation outside JSON.
+4. Use the exact JSON shape provided below.
+5. Do not use placeholders.
+6. Every table cell must contain real content.
+7. Use realistic assumptions when exact data is unavailable.
+8. Clearly state assumptions in appendix.
+9. Use country-specific market logic.
+10. Be conservative, not optimistic.
+11. If the business is weak, say it clearly.
+12. All scores must be numbers from 0 to 100.
+13. Keep table cells concise but meaningful.
+14. Make the report directly useful for founder decision-making.
 
-OUTPUT JSON STRUCTURE:
+Country strategy rules:
+- ko: Korea-first. Consider Naver, Kakao, Coupang, SmartStore, Instagram, YouTube Shorts, local payment behavior, Korean price sensitivity.
+- en: Global / English market. Consider Google, Meta, Amazon, Shopify, TikTok, Reddit, creator ads, DTC funnel.
+- ja: Japan-first. Consider LINE, Rakuten, Yahoo Japan, Amazon JP, trust-heavy purchase behavior, conservative adoption.
+- zh: Chinese-speaking market. Consider WeChat, Xiaohongshu, Douyin, Tmall, group commerce, social proof, KOL/KOC.
+- mn: Mongolia-first. Consider Facebook commerce, bank transfer, offline trust, messenger sales, low-friction purchase behavior.
+
+Important:
+Your JSON must match the current HTML template structure exactly.
+
+Return this exact JSON shape:
 
 {
-  "meta": {
-    "brandName": "",
-    "productService": "",
-    "targetCustomer": "",
-    "language": "",
-    "reportType": "paid",
-    "reportTitle": "",
-    "generatedFor": ""
+  "cover": {
+    "brandName": "${brandName}",
+    "decision": "GO | HOLD | NO GO",
+    "score": 0,
+    "subtitle": "",
+    "oneLineVerdict": ""
   },
 
-  "executiveDecision": {
-    "decision": "GO | CONDITIONAL_GO | NO_GO",
-    "oneLineConclusion": "",
-    "decisionReason": "",
-    "confidenceScore": 0,
-    "whyNow": "",
-    "mainWarning": ""
+  "visualScores": {
+    "market": 0,
+    "profitability": 0,
+    "execution": 0,
+    "risk": 0
   },
 
-  "scorecard": {
-    "marketScore": 0,
-    "profitScore": 0,
-    "executionScore": 0,
-    "competitionScore": 0,
-    "timingScore": 0,
-    "totalScore": 0,
-    "scoreExplanation": ""
+  "decisionMatrix": [
+    ["MARKET", "LOW | MEDIUM | HIGH"],
+    ["PROFITABILITY", "LOW | MEDIUM | HIGH"],
+    ["EXECUTION", "LOW | MEDIUM | HIGH"],
+    ["RISK", "LOW | MEDIUM | HIGH"]
+  ],
+
+  "executiveDecision": [
+    ["Why this works", ""],
+    ["Why this fails", ""],
+    ["What to do now", ""]
+  ],
+
+  "founderDecision": "",
+
+  "marketCards": [
+    ["TAM", ""],
+    ["SAM", ""],
+    ["SOM", ""],
+    ["GROWTH", ""]
+  ],
+
+  "marketFunnel": [
+    { "label": "TAM", "value": "", "score": 100 },
+    { "label": "SAM", "value": "", "score": 60 },
+    { "label": "SOM", "value": "", "score": 20 }
+  ],
+
+  "tamSamSom": [
+    ["TAM", "", "", ""],
+    ["SAM", "", "", ""],
+    ["SOM", "", "", ""]
+  ],
+
+  "marketInsight": "",
+
+  "customerTruth": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+
+  "buyingTrigger": "",
+
+  "competitionMap": [
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""]
+  ],
+
+  "competitionConclusion": "",
+
+  "unitEconomicsCards": [
+    ["CAC", ""],
+    ["LTV", ""],
+    ["AOV", ""],
+    ["REPEAT", ""]
+  ],
+
+  "unitEconomicsScore": {
+    "ltvToCac": "",
+    "payback": "",
+    "margin": "",
+    "status": "PASS | WATCH | FAIL"
   },
 
-  "marketAnalysis": {
-    "marketDefinition": "",
-    "tam": {
-      "value": 0,
-      "currency": "USD",
-      "calculation": "",
-      "assumptions": []
-    },
-    "sam": {
-      "value": 0,
-      "currency": "USD",
-      "calculation": "",
-      "assumptions": []
-    },
-    "som": {
-      "value": 0,
-      "currency": "USD",
-      "calculation": "",
-      "assumptions": []
-    },
-    "marketTrend": "",
-    "marketTiming": "",
-    "marketRisks": []
-  },
+  "unitEconomicsTable": [
+    ["CAC", "", "", ""],
+    ["LTV", "", "", ""],
+    ["AOV", "", "", ""],
+    ["Repeat", "", "", ""]
+  ],
 
-  "customerAnalysis": {
-    "primaryPersona": {
-      "name": "",
-      "ageRange": "",
-      "incomeLevel": "",
-      "behavior": "",
-      "buyingTrigger": "",
-      "mainObjection": ""
-    },
-    "painPoints": [],
-    "desiredOutcomes": [],
-    "willingnessToPay": "",
-    "purchaseFrequency": "",
-    "trustBarriers": []
-  },
+  "economicsJudgment": "",
 
-  "productStrategy": {
-    "coreValueProposition": "",
-    "mustHaveFeatures": [],
-    "niceToHaveFeatures": [],
-    "minimumSellableOffer": "",
-    "pricingRecommendation": {
-      "lowPrice": 0,
-      "midPrice": 0,
-      "premiumPrice": 0,
-      "currency": "",
-      "reason": ""
-    },
-    "positioningStatement": ""
-  },
-
-  "unitEconomics": {
-    "aov": 0,
-    "grossMarginRate": 0,
-    "estimatedCAC": 0,
-    "estimatedLTV": 0,
-    "ltvToCacRatio": 0,
-    "paybackPeriod": "",
-    "profitabilityStatus": "PROFITABLE | RISKY | NOT_PROFITABLE",
-    "calculationAssumptions": [],
-    "unitEconomicsWarning": ""
-  },
-
-  "competition": {
-    "competitionLevel": "LOW | MEDIUM | HIGH",
-    "directCompetitors": [],
-    "indirectCompetitors": [],
-    "substituteBehaviors": [],
-    "differentiationStrategy": "",
-    "unfairAdvantageNeeded": ""
-  },
-
-  "goToMarket": {
-    "primaryChannels": [],
-    "channelReasoning": "",
-    "firstCampaign": {
-      "campaignName": "",
-      "message": "",
-      "targetAudience": "",
-      "budget": 0,
-      "expectedResult": ""
-    },
-    "countrySpecificStrategy": "",
-    "salesFunnel": {
-      "step1": "",
-      "step2": "",
-      "step3": "",
-      "step4": ""
-    }
-  },
-
-  "executionPlan": {
-    "day1": "",
-    "day3": "",
-    "day7": "",
-    "day14": "",
-    "day30": "",
-    "minimumTestBudget": 0,
-    "mustMeasureKPIs": [],
-    "killCriteria": [],
-    "scaleCriteria": []
-  },
-
-  "riskAnalysis": {
-    "topRisks": [
-      {
-        "risk": "",
-        "impact": "HIGH | MEDIUM | LOW",
-        "probability": "HIGH | MEDIUM | LOW",
-        "mitigation": ""
-      }
+  "marketingStrategy": {
+    "channelFit": [
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""],
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""],
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""],
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""]
     ],
-    "biggestFailureScenario": "",
-    "legalOrOperationalConcerns": []
+    "contentPlaybook": ["", "", "", "", ""],
+    "thirtyDayMarketingTest": [
+      ["Week 1", "", ""],
+      ["Week 2", "", ""],
+      ["Week 3", "", ""]
+    ]
   },
 
-  "finalRecommendation": {
-    "finalDecision": "GO | CONDITIONAL_GO | NO_GO",
-    "recommendedNextMove": "",
-    "whatNotToDo": [],
-    "founderMessage": ""
+  "businessModel": {
+    "revenueLayers": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "modelJudgment": ""
+  },
+
+  "riskSystem": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+
+  "executionPlan": [
+    ["Phase 1", "", ""],
+    ["Phase 2", "", ""],
+    ["Phase 3", "", ""]
+  ],
+
+  "operatingRule": "",
+
+  "goThreshold": [
+    ["CAC", "", ""],
+    ["Conversion", "", ""],
+    ["Repeat", "", ""],
+    ["Margin", "", ""]
+  ],
+
+  "goChecklist": [
+    { "label": "CAC", "status": "PASS | WATCH | FAIL" },
+    { "label": "Conversion", "status": "PASS | WATCH | FAIL" },
+    { "label": "Repeat Purchase", "status": "PASS | WATCH | FAIL" },
+    { "label": "Margin", "status": "PASS | WATCH | FAIL" }
+  ],
+
+  "finalRule": "",
+
+  "appendix": {
+    "dataSources": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "assumptions": ["", "", "", ""]
   }
 }
 
-SCORING RULES:
-- 80-100: Strong GO
-- 65-79: Conditional GO
-- 50-64: High risk, test only
-- Below 50: NO_GO
+Calculation rules:
+- TAM must describe the total reachable category demand.
+- SAM must narrow TAM to the country/channel/customer segment.
+- SOM must be a realistic first 12-month obtainable market.
+- Unit economics must include CAC, AOV, LTV, repeat purchase, margin, and payback.
+- LTV/CAC must be calculated logically.
+- Marketing channels must match the selected country.
+- Execution plan must be actionable within 30 days.
+- GO threshold must define measurable pass/fail criteria.
+- Appendix must include assumed data sources and assumptions.
 
-IMPORTANT:
-If the business idea is weak, say it clearly.
-If the idea can work only in a narrow condition, explain that condition.
-Do not write generic business advice.
-Generate the JSON now.
-`;
+Scoring logic:
+- Market score: demand size + urgency + accessibility.
+- Profitability score: margin + LTV/CAC + repeat purchase potential.
+- Execution score: founder feasibility + launch cost + operational complexity.
+- Risk score: higher number means higher risk pressure.
+- Overall cover.score should reflect weighted judgment.
+
+Decision logic:
+- GO: score 75+, strong demand, viable unit economics.
+- HOLD: score 50-74, needs validation.
+- NO GO: below 50, weak economics or market access.
+
+Now generate the JSON report.
+`
 }
 
 function buildFreeReportFromPaidReport(fullReport) {
