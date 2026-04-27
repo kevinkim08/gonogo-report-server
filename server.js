@@ -472,6 +472,27 @@ Return this exact JSON shape:
 
   "finalRule": "",
 
+  "dataConfidence": {
+    "overallLevel": "LOW | MEDIUM | HIGH",
+    "summary": "",
+    "sourceQuality": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "limits": ["", "", ""]
+  },
+
+  "sensitivityAnalysis": {
+    "cacLtvTable": [
+      ["Low CAC", "", "", ""],
+      ["Base CAC", "", "", ""],
+      ["High CAC", "", "", ""]
+    ],
+    "criticalBreakPoint": "",
+    "founderWarning": ""
+  },
+
   "appendix": {
     "dataSources": [
       ["", "", ""],
@@ -494,6 +515,18 @@ Business diagnosis rules:
 - Identify the biggest bottleneck.
 - Recommend the best first offer.
 - Define the first validation experiment.
+
+Data confidence rules:
+- Explain how reliable the market and unit economics assumptions are.
+- Separate public data, platform observations, and assumptions.
+- Clearly state what is uncertain.
+- Do not pretend exact data exists when it does not.
+
+Sensitivity analysis rules:
+- Show how the business changes when CAC rises or LTV falls.
+- cacLtvTable columns must be: Scenario, CAC, LTV, Decision.
+- criticalBreakPoint must explain the point where the business becomes unprofitable.
+- founderWarning must be direct and practical.
 
 Calculation rules:
 - TAM must describe the total reachable category demand.
@@ -769,6 +802,46 @@ function normalizeDeepReport(report, input) {
         goChecklist: safeArray(report?.goChecklist, sample.goChecklist),
         finalRule: report?.finalRule || sample.finalRule,
 
+        dataConfidence: {
+            overallLevel: report?.dataConfidence?.overallLevel || "MEDIUM",
+            summary:
+                report?.dataConfidence?.summary ||
+                "현재 보고서는 공개 자료, 플랫폼 관찰, 보수적 가정을 함께 사용했습니다.",
+            sourceQuality: safeArray(
+                report?.dataConfidence?.sourceQuality,
+                [
+                    ["공개 통계", "MEDIUM", "시장 방향성 판단에는 유효하지만 세부 카테고리 수치는 제한적입니다."],
+                    ["플랫폼 관찰", "MEDIUM", "가격대와 경쟁 구도 판단에는 유효하지만 실제 판매량은 추정입니다."],
+                    ["사업 가정", "LOW", "CAC, LTV, 유지율은 실제 테스트 전까지 변동 가능성이 큽니다."],
+                ]
+            ),
+            limits: safeArray(
+                report?.dataConfidence?.limits,
+                [
+                    "정확한 경쟁사 매출은 공개되지 않았습니다.",
+                    "광고비와 전환율은 소재, 계정, 시즌에 따라 크게 달라집니다.",
+                    "초기 테스트 전까지 LTV와 재구매율은 가정값입니다.",
+                ]
+            ),
+        },
+
+        sensitivityAnalysis: {
+            cacLtvTable: safeArray(
+                report?.sensitivityAnalysis?.cacLtvTable,
+                [
+                    ["Low CAC", "15,000원", "90,000원", "GO 가능"],
+                    ["Base CAC", "25,000원", "75,000원", "조건부 HOLD"],
+                    ["High CAC", "45,000원", "60,000원", "NO GO 위험"],
+                ]
+            ),
+            criticalBreakPoint:
+                report?.sensitivityAnalysis?.criticalBreakPoint ||
+                "LTV/CAC가 2배 아래로 내려가면 광고 확장은 위험합니다.",
+            founderWarning:
+                report?.sensitivityAnalysis?.founderWarning ||
+                "CAC가 상승했을 때도 이익이 남는지 먼저 확인해야 합니다.",
+        },
+        
         appendix: {
             dataSources: safeArray(
                 report?.appendix?.dataSources,
@@ -806,6 +879,11 @@ function buildHtmlFromTemplate(report, locale) {
         bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
         validationExperiment: report.businessDiagnosis?.validationExperiment || "",
         goNoGoLogic: report.businessDiagnosis?.goNoGoLogic || "",
+
+        dataConfidenceLevel: report.dataConfidence?.overallLevel || "",
+        dataConfidenceSummary: report.dataConfidence?.summary || "",
+        criticalBreakPoint: report.sensitivityAnalysis?.criticalBreakPoint || "",
+        founderWarning: report.sensitivityAnalysis?.founderWarning || "",
         
         lang: locale.lang,
         fontFamily: locale.fontFamily,
@@ -936,8 +1014,11 @@ function buildHtmlFromTemplate(report, locale) {
                 : rows(report.goThreshold)
         )
         .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
-        .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
-        .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
+.replace("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
+.replace("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
+.replace("{{cacLtvRows}}", rows(report.sensitivityAnalysis?.cacLtvTable))
+.replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
+.replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
 
     html = html.replace(/{{[^}]+}}/g, "")
 
