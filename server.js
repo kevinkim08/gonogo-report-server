@@ -85,6 +85,55 @@ app.get("/api/test-pdf", async (req, res) => {
     }
 })
 
+app.get("/api/generate-report-test", async (req, res) => {
+    try {
+        const language = normalizeLanguage(req.query.language || "ko")
+        const reportType = req.query.reportType === "free" ? "free" : "paid"
+
+        const brandName = req.query.brandName || "NomNomBox"
+        const productService =
+            req.query.productService || "Premium pet snack subscription"
+        const targetCustomer =
+            req.query.targetCustomer || "Dog owners in urban areas"
+
+        const locale = loadLocale(language)
+
+        const paidReport = await generateDeepReportJson({
+            brandName,
+            productService,
+            targetCustomer,
+            language,
+        })
+
+        const finalReport =
+            reportType === "free"
+                ? buildFreeReportFromPaidReport(paidReport)
+                : paidReport
+
+        const html = buildHtmlFromTemplate(finalReport, locale)
+        const pdfBuffer = await htmlToPdf(html)
+
+        const safeBrand = sanitizeFileName(brandName)
+
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Length", pdfBuffer.length)
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="GoNoGo_${reportType}_Report_${safeBrand}_${language}.pdf"`
+        )
+
+        return res.end(pdfBuffer)
+    } catch (error) {
+        console.error("[GENERATE_REPORT_TEST_ERROR]", error)
+
+        return res.status(500).json({
+            ok: false,
+            error: "Failed to generate test report.",
+            detail: String(error?.message || error),
+        })
+    }
+})
+
 app.post("/api/generate-report", async (req, res) => {
     try {
         const {
