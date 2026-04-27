@@ -9,24 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;600;700;800;900&family=Noto+Sans+Mongolian&display=swap" rel="stylesheet">
 
   <style>
-    .locked-box {
-  border: 2px dashed #ccc;
-  border-radius: 16px;
-  padding: 30px;
-  text-align: center;
-  background: #fafafa;
-  margin-top: 20px;
-}
-
-.locked-box h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-}
-
-.locked-box p {
-  font-size: 14px;
-  color: #666;
-}
     * { box-sizing: border-box; }
 
     body {
@@ -269,6 +251,25 @@
       border-left: 4px solid #111;
     }
 
+    .locked-box {
+      border: 2px dashed #ccc;
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      background: #fafafa;
+      margin-top: 20px;
+    }
+
+    .locked-box h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .locked-box p {
+      font-size: 14px;
+      color: #666;
+    }
+
     .footer {
       position: absolute;
       bottom: 12mm;
@@ -290,7 +291,6 @@
 </head>
 
 <body>
-
   <section class="page">
     <div class="brand">GONOGO™</div>
 
@@ -347,7 +347,31 @@
     </div>
   </section>
 
-   <section class="page">
+  <section class="page">
+    <div class="section-title">0. 보고서 핵심 용어</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>용어</th>
+          <th>뜻</th>
+          <th>왜 중요한가</th>
+        </tr>
+      </thead>
+      <tbody>{{glossaryRows}}</tbody>
+    </table>
+
+    <div class="mini-note">
+      이 페이지는 보고서를 읽기 전에 반드시 이해해야 할 핵심 용어를 정리한 페이지입니다.
+    </div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Glossary</span>
+    </div>
+  </section>
+
+  <section class="page">
     <div class="section-title">0-2. 사업 구조 진단</div>
 
     <table>
@@ -363,12 +387,16 @@
       </tbody>
     </table>
 
+    <div class="mini-note">
+      이 페이지는 사업 아이디어를 업종, 수익모델, 시장 진입 난이도 기준으로 먼저 분류하여 이후 분석의 기준점을 잡는 역할을 합니다.
+    </div>
+
     <div class="footer">
       <span>{{footerLeft}}</span>
       <span>Business Diagnosis</span>
     </div>
   </section>
-  
+
   <section class="page">
     <div class="section-title">{{label.section1}}</div>
 
@@ -615,56 +643,7 @@
       <span>GO Threshold</span>
     </div>
   </section>
-  <section class="page">
-    <div class="section-title">0. 보고서 핵심 용어</div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>용어</th>
-          <th>뜻</th>
-          <th>왜 중요한가</th>
-        </tr>
-      </thead>
-      <tbody>{{glossaryRows}}</tbody>
-    </table>
-
-    <div class="mini-note">
-      이 페이지는 보고서를 읽기 전에 반드시 이해해야 할 핵심 용어를 정리한 페이지입니다.
-    </div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Glossary</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">0-2. 사업 구조 진단</div>
-
-    <table>
-      <tbody>
-        <tr><td>업종 유형</td><td>{{industryType}}</td></tr>
-        <tr><td>수익모델 유형</td><td>{{businessModelType}}</td></tr>
-        <tr><td>국가별 구매 행동</td><td>{{countryMarketBehavior}}</td></tr>
-        <tr><td>시장 진입 난이도</td><td>{{marketEntryDifficulty}}</td></tr>
-        <tr><td>가장 큰 병목</td><td>{{mainBottleneck}}</td></tr>
-        <tr><td>첫 판매 제안</td><td>{{bestFirstOffer}}</td></tr>
-        <tr><td>검증 실험</td><td>{{validationExperiment}}</td></tr>
-        <tr><td>GO / NO-GO 판단 논리</td><td>{{goNoGoLogic}}</td></tr>
-      </tbody>
-    </table>
-
-    <div class="mini-note">
-      이 페이지는 사업 아이디어를 업종, 수익모델, 시장 진입 난이도 기준으로 먼저 분류하여 이후 분석의 기준점을 잡는 역할을 합니다.
-    </div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Business Diagnosis</span>
-    </div>
-  </section>
-  
   <section class="page">
     <div class="section-title">{{label.section11}}</div>
 
@@ -683,6 +662,5 @@
       <span>Appendix</span>
     </div>
   </section>
-
 </body>
 </html>
