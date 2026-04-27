@@ -443,17 +443,16 @@ function buildFreeReportFromPaidReport(fullReport) {
         riskSystem: [],
         goThreshold: [],
 
-       lockedSections: {
-    tamSamSom: true,
-    unitEconomics: true,
-    marketing: true,
-    execution: true,
-    risk: true,
-    goThreshold: true,
-    competition: true,
-    message: "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
-}
-        }
+        lockedSections: {
+            tamSamSom: true,
+            unitEconomics: true,
+            marketing: true,
+            execution: true,
+            risk: true,
+            goThreshold: true,
+            competition: true,
+            message: "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다.",
+        },
     }
 }
 
