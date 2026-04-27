@@ -645,6 +645,65 @@
   </section>
 
   <section class="page">
+    <div class="section-title">11. 데이터 신뢰도</div>
+
+    <div class="label">신뢰도 수준</div>
+    <div class="big-metric">
+      <div class="big-metric-title">DATA CONFIDENCE</div>
+      <div class="big-metric-value">{{dataConfidenceLevel}}</div>
+    </div>
+
+    <div class="label" style="margin-top:26px;">요약</div>
+    <div class="text-block">{{dataConfidenceSummary}}</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>자료 유형</th>
+          <th>신뢰도</th>
+          <th>해석</th>
+        </tr>
+      </thead>
+      <tbody>{{sourceQualityRows}}</tbody>
+    </table>
+
+    <div class="label" style="margin-top:26px;">한계</div>
+    <ul class="bullet-list">{{dataLimitItems}}</ul>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Data Confidence</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="section-title">12. CAC / LTV 민감도 분석</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>시나리오</th>
+          <th>CAC</th>
+          <th>LTV</th>
+          <th>판단</th>
+        </tr>
+      </thead>
+      <tbody>{{cacLtvRows}}</tbody>
+    </table>
+
+    <div class="label" style="margin-top:30px;">손익분기 경계선</div>
+    <div class="text-block">{{criticalBreakPoint}}</div>
+
+    <div class="label" style="margin-top:30px;">창업자 경고</div>
+    <div class="verdict">{{founderWarning}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>CAC / LTV Sensitivity</span>
+    </div>
+  </section>
+  
+  <section class="page">
     <div class="section-title">{{label.section11}}</div>
 
     <table>
