@@ -428,62 +428,31 @@ Now generate the JSON report.
 }
 
 function buildFreeReportFromPaidReport(fullReport) {
-  return {
-    meta: {
-      brandName: fullReport?.meta?.brandName || "",
-      productService: fullReport?.meta?.productService || "",
-      targetCustomer: fullReport?.meta?.targetCustomer || "",
-      language: fullReport?.meta?.language || "ko",
-      reportType: "free",
-      reportTitle: fullReport?.meta?.reportTitle || "Free Business Report",
-    },
+    return {
+        ...fullReport,
 
-    executiveDecision: {
-      decision: fullReport?.executiveDecision?.decision || "CONDITIONAL_GO",
-      oneLineConclusion: fullReport?.executiveDecision?.oneLineConclusion || "",
-      confidenceScore: fullReport?.executiveDecision?.confidenceScore || 0,
-      mainWarning: fullReport?.executiveDecision?.mainWarning || "",
-    },
+        tamSamSom: [],
+        marketFunnel: [],
+        unitEconomicsTable: [],
+        marketingStrategy: {
+            channelFit: [],
+            contentPlaybook: [],
+            thirtyDayMarketingTest: [],
+        },
+        executionPlan: [],
+        riskSystem: [],
+        goThreshold: [],
 
-    scorecard: {
-      marketScore: fullReport?.scorecard?.marketScore || 0,
-      profitScore: fullReport?.scorecard?.profitScore || 0,
-      executionScore: fullReport?.scorecard?.executionScore || 0,
-      totalScore: fullReport?.scorecard?.totalScore || 0,
-    },
-
-    marketAnalysis: {
-      marketDefinition: fullReport?.marketAnalysis?.marketDefinition || "",
-      marketTrend: fullReport?.marketAnalysis?.marketTrend || "",
-      marketTiming: fullReport?.marketAnalysis?.marketTiming || "",
-    },
-
-    customerAnalysis: {
-      painPoints: fullReport?.customerAnalysis?.painPoints?.slice(0, 3) || [],
-      desiredOutcomes: fullReport?.customerAnalysis?.desiredOutcomes?.slice(0, 3) || [],
-      willingnessToPay: fullReport?.customerAnalysis?.willingnessToPay || "",
-    },
-
-    productStrategy: {
-      coreValueProposition: fullReport?.productStrategy?.coreValueProposition || "",
-      minimumSellableOffer: fullReport?.productStrategy?.minimumSellableOffer || "",
-    },
-
-    finalRecommendation: {
-      finalDecision: fullReport?.finalRecommendation?.finalDecision || "CONDITIONAL_GO",
-      recommendedNextMove: fullReport?.finalRecommendation?.recommendedNextMove || "",
-    },
-
-    lockedSections: {
-      tamSamSom: true,
-      unitEconomics: true,
-      competition: true,
-      goToMarket: true,
-      executionPlan: true,
-      riskAnalysis: true,
-      message: "전체 시장 규모, 수익성 계산, 실행 전략은 유료 보고서에서 확인할 수 있습니다."
+        lockedSections: {
+            tamSamSom: true,
+            unitEconomics: true,
+            marketing: true,
+            execution: true,
+            risk: true,
+            goThreshold: true,
+            message: "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
+        }
     }
-  };
 }
 
 async function generateDeepReportJson(input) {
