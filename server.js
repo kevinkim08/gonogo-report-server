@@ -600,6 +600,35 @@ function normalizeDeepReport(report, input) {
                 "CAC, 전환율, 재구매율이 기준을 넘을 때만 확장합니다.",
         },
         
+        glossary: safeArray(
+            report?.glossary,
+            getDefaultGlossary(input.language || "ko")
+        ),
+
+        businessDiagnosis: {
+            industryType:
+                report?.businessDiagnosis?.industryType || "Consumer product / commerce",
+            businessModelType:
+                report?.businessDiagnosis?.businessModelType || "Direct sales with optional subscription",
+            countryMarketBehavior:
+                report?.businessDiagnosis?.countryMarketBehavior ||
+                "구매 채널과 가격 민감도 검증이 필요합니다.",
+            marketEntryDifficulty:
+                report?.businessDiagnosis?.marketEntryDifficulty || "MEDIUM",
+            mainBottleneck:
+                report?.businessDiagnosis?.mainBottleneck ||
+                "초기 고객획득비와 반복구매 검증",
+            bestFirstOffer:
+                report?.businessDiagnosis?.bestFirstOffer ||
+                "첫 구매 전환용 번들 상품",
+            validationExperiment:
+                report?.businessDiagnosis?.validationExperiment ||
+                "30일 소액 광고와 사전 주문 테스트",
+            goNoGoLogic:
+                report?.businessDiagnosis?.goNoGoLogic ||
+                "CAC, 전환율, 재구매율이 기준을 넘을 때만 확장합니다.",
+        },
+        
         visualScores: {
             market: toScore(report?.visualScores?.market, sample.visualScores.market),
             profitability: toScore(
@@ -1068,6 +1097,88 @@ function getDefaultGlossary(lang = "ko") {
             { term: "AOV", meaning: "Average order value", whyItMatters: "Low AOV makes ads, shipping, and fulfillment harder to sustain." },
             { term: "Retention", meaning: "Customer retention", whyItMatters: "Without repeat behavior, subscription or repeat-purchase models weaken quickly." },
         ],
+    }
+
+    return glossaries[lang] || glossaries.en
+}
+
+function getDefaultGlossary(lang = "ko") {
+    const glossaries = {
+        ko: [
+            {
+                term: "TAM",
+                meaning: "전체 시장 규모",
+                whyItMatters: "사업이 이론적으로 얼마나 큰 시장을 노릴 수 있는지 보여준다."
+            },
+            {
+                term: "SAM",
+                meaning: "실제 접근 가능한 시장",
+                whyItMatters: "현재 국가와 채널 기준으로 현실적으로 공략 가능한 시장이다."
+            },
+            {
+                term: "SOM",
+                meaning: "초기 확보 가능한 시장",
+                whyItMatters: "첫 6~12개월 안에 실제로 얻을 수 있는 매출 규모를 의미한다."
+            },
+            {
+                term: "CAC",
+                meaning: "고객 1명을 얻는 비용",
+                whyItMatters: "CAC가 LTV보다 높으면 팔수록 손해가 발생한다."
+            },
+            {
+                term: "LTV",
+                meaning: "고객 1명이 남기는 총 가치",
+                whyItMatters: "LTV가 CAC보다 충분히 높아야 광고와 성장이 가능하다."
+            },
+            {
+                term: "AOV",
+                meaning: "평균 주문 금액",
+                whyItMatters: "객단가가 낮으면 배송비와 광고비를 감당하기 어렵다."
+            },
+            {
+                term: "Retention",
+                meaning: "고객 유지율",
+                whyItMatters: "재구매가 없으면 구독형 사업은 유지되기 어렵다."
+            }
+        ],
+
+        en: [
+            {
+                term: "TAM",
+                meaning: "Total addressable market",
+                whyItMatters: "Shows the total theoretical demand size."
+            },
+            {
+                term: "SAM",
+                meaning: "Serviceable available market",
+                whyItMatters: "Represents the realistically reachable segment."
+            },
+            {
+                term: "SOM",
+                meaning: "Serviceable obtainable market",
+                whyItMatters: "Shows the realistic first-stage revenue potential."
+            },
+            {
+                term: "CAC",
+                meaning: "Customer acquisition cost",
+                whyItMatters: "If CAC exceeds LTV, scaling destroys profit."
+            },
+            {
+                term: "LTV",
+                meaning: "Lifetime value",
+                whyItMatters: "Must exceed CAC for sustainable growth."
+            },
+            {
+                term: "AOV",
+                meaning: "Average order value",
+                whyItMatters: "Low AOV reduces profitability and scalability."
+            },
+            {
+                term: "Retention",
+                meaning: "Customer retention",
+                whyItMatters: "Repeat behavior is critical for growth."
+            }
+        ]
     }
 
     return glossaries[lang] || glossaries.en
