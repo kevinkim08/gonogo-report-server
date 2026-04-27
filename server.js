@@ -986,18 +986,16 @@ function rows(items) {
 }
 
 function glossaryRows(items) {
-    if (!Array.isArray(items)) return ""
+    if (!Array.isArray(items) || items.length === 0) return ""
 
     return items
-        .map((item) => {
-            return `
-                <tr>
-                    <td>${esc(item.term || "")}</td>
-                    <td>${esc(item.meaning || "")}</td>
-                    <td>${esc(item.whyItMatters || "")}</td>
-                </tr>
-            `
-        })
+        .map((item) => `
+            <tr>
+                <td>${esc(item?.term || "")}</td>
+                <td>${esc(item?.meaning || "")}</td>
+                <td>${esc(item?.whyItMatters || "")}</td>
+            </tr>
+        `)
         .join("")
 }
 
