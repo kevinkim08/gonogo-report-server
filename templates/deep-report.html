@@ -51,7 +51,7 @@
       width: 210mm;
       min-height: 297mm;
       margin: 0 auto;
-      padding: 20mm;
+      padding: 16mm;
       background: #fff;
       page-break-after: always;
       position: relative;
@@ -297,6 +297,50 @@
       color: #666;
     }
 
+.status-green {
+  color: #2f7d57;
+  font-weight: 900;
+}
+
+.status-yellow {
+  color: #b58b16;
+  font-weight: 900;
+}
+
+.status-red {
+  color: #b94a48;
+  font-weight: 900;
+}
+
+.bar-fill.status-green {
+  background: #2f7d57;
+}
+
+.bar-fill.status-yellow {
+  background: #d8b85a;
+}
+
+.bar-fill.status-red {
+  background: #b94a48;
+}
+
+.chart-fill {
+  background: #2f7d57;
+}
+
+.chart-fill.light {
+  background: #8fbf9f;
+}
+
+.chart-fill.danger {
+  background: #c76b6b;
+}
+
+.chart-box {
+  background: #f6faf7;
+  border: 1px solid #d8e7dc;
+}
+    
     .footer {
       position: absolute;
       bottom: 12mm;
@@ -467,6 +511,19 @@
       <tbody>{{glossaryRows}}</tbody>
     </table>
 
+    <div class="label" style="margin-top:28px;">점수 구간 해석</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>점수</th>
+          <th>구간</th>
+          <th>판단 의미</th>
+        </tr>
+      </thead>
+      <tbody>{{scoreGuideRows}}</tbody>
+    </table>
+    
     <div class="mini-note">
       이 페이지는 보고서를 읽기 전에 반드시 이해해야 할 핵심 용어를 정리한 페이지입니다.
     </div>
@@ -503,6 +560,30 @@
     </div>
   </section>
 
+  <section class="page">
+    <div class="section-title">3-2. 고객이 반응할 수 있는 이유</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>긍정 신호</th>
+          <th>고객 행동</th>
+          <th>사업적 활용</th>
+        </tr>
+      </thead>
+      <tbody>{{customerOpportunityRows}}</tbody>
+    </table>
+
+    <div class="mini-note">
+      부정적인 문제만 보는 것이 아니라, 고객이 실제로 반응할 수 있는 긍정 신호를 함께 봐야 실행 판단이 가능해집니다.
+    </div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Customer Opportunity</span>
+    </div>
+  </section>
+  
   <section class="page">
     <div class="section-title">{{label.section1}}</div>
 
@@ -612,6 +693,30 @@
     </div>
   </section>
 
+  <section class="page">
+    <div class="section-title">4-2. 유사 서비스 벤치마크</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>사례</th>
+          <th>유형</th>
+          <th>배울 점</th>
+        </tr>
+      </thead>
+      <tbody>{{benchmarkRows}}</tbody>
+    </table>
+
+    <div class="mini-note">
+      벤치마크는 그대로 따라 하라는 뜻이 아니라, 이미 시장에서 검증된 구매 이유와 운영 구조를 분해해 참고하는 용도입니다.
+    </div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Benchmark Cases</span>
+    </div>
+  </section>
+  
   <section class="page">
     <div class="section-title">{{label.section5}}</div>
 
@@ -816,7 +921,7 @@
   </section>
   
   <section class="page">
-    <div class="section-title">11. 데이터 신뢰도</div>
+    <div class="section-title">13. 데이터 신뢰도</div>
 
     <div class="label">신뢰도 수준</div>
     <div class="big-metric">
@@ -841,6 +946,17 @@
     <div class="label" style="margin-top:26px;">한계</div>
     <ul class="bullet-list">{{dataLimitItems}}</ul>
 
+        <div class="label" style="margin-top:26px;">참고 링크</div>
+    <table>
+      <thead>
+        <tr>
+          <th>자료명</th>
+          <th>링크</th>
+        </tr>
+      </thead>
+      <tbody>{{referenceLinkRows}}</tbody>
+    </table>
+
     <div class="footer">
       <span>{{footerLeft}}</span>
       <span>Data Confidence</span>
@@ -848,7 +964,7 @@
   </section>
 
   <section class="page">
-    <div class="section-title">12. CAC / LTV 민감도 분석</div>
+    <div class="section-title">14. CAC / LTV 민감도 분석</div>
 
     <table>
       <thead>
@@ -877,7 +993,7 @@
   </section>
   
   <section class="page">
-    <div class="section-title">{{label.section11}}</div>
+    <div class="section-title">15. 부록</div>
 
     <table>
       <thead>
@@ -889,6 +1005,17 @@
     <div class="label" style="margin-top:30px;">{{label.assumptions}}</div>
     <ul class="bullet-list">{{assumptionItems}}</ul>
 
+    <div class="label" style="margin-top:26px;">참고 링크</div>
+    <table>
+      <thead>
+        <tr>
+          <th>자료명</th>
+          <th>링크</th>
+        </tr>
+      </thead>
+      <tbody>{{referenceLinkRows}}</tbody>
+    </table>
+    
     <div class="footer">
       <span>{{footerLeft}}</span>
       <span>Appendix</span>
