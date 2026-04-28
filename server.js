@@ -987,6 +987,7 @@ function buildHtmlFromTemplate(report, locale) {
         brandName: report.cover.brandName,
         decision: report.cover.decision,
         score: report.cover.score,
+        decisionClass: getStatusClass(report.cover?.decision),
         subtitle: report.cover.subtitle,
         oneLineVerdict: report.cover.oneLineVerdict,
 
@@ -999,6 +1000,11 @@ function buildHtmlFromTemplate(report, locale) {
         profitabilityScore: report.visualScores.profitability,
         executionScore: report.visualScores.execution,
         riskScore: report.visualScores.risk,
+
+        marketScoreClass: getScoreClass(report.visualScores.market),
+        profitabilityScoreClass: getScoreClass(report.visualScores.profitability),
+        executionScoreClass: getScoreClass(report.visualScores.execution),
+        riskScoreClass: getRiskScoreClass(report.visualScores.risk),
 
         ltvToCac: report.unitEconomicsScore.ltvToCac,
         unitEconomicsStatus: report.unitEconomicsScore.status,
@@ -1200,6 +1206,42 @@ function rows(items) {
             return `<tr>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`
         })
         .join("")
+}
+
+function getStatusClass(value) {
+    const v = String(value || "").toLowerCase()
+
+    if (v.includes("no go") || v.includes("fail") || v.includes("danger") || v.includes("위험")) {
+        return "status-red"
+    }
+
+    if (v.includes("hold") || v.includes("watch") || v.includes("주의") || v.includes("보류")) {
+        return "status-yellow"
+    }
+
+    if (v.includes("go") || v.includes("pass") || v.includes("가능")) {
+        return "status-green"
+    }
+
+    return ""
+}
+
+function getScoreClass(score) {
+    const n = Number(score)
+    if (!Number.isFinite(n)) return "status-yellow"
+    if (n >= 70) return "status-green"
+    if (n >= 50) return "status-yellow"
+    return "status-red"
+}
+
+function getRiskScoreClass(score) {
+    const n = Number(score)
+    if (!Number.isFinite(n)) return "status-yellow"
+
+    // 리스크는 점수가 높을수록 위험하니까 반대로 처리
+    if (n >= 70) return "status-red"
+    if (n >= 50) return "status-yellow"
+    return "status-green"
 }
 
 function marketFunnelChart(items) {
