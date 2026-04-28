@@ -287,6 +287,85 @@
       body { background: #fff; }
       .page { margin: 0; width: 210mm; min-height: 297mm; }
     }
+
+    .chart-box {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 120px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+
+.chart-row:last-child {
+  margin-bottom: 0;
+}
+
+.chart-label {
+  font-weight: 900;
+}
+
+.chart-track {
+  height: 13px;
+  background: #e5e5e5;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.chart-fill {
+  height: 100%;
+  background: #111;
+  border-radius: 99px;
+}
+
+.chart-fill.light {
+  background: #777;
+}
+
+.chart-fill.danger {
+  background: #b00020;
+}
+
+.chart-value {
+  font-size: 11px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.scenario-chart {
+  margin-bottom: 20px;
+}
+
+.scenario-chart:last-child {
+  margin-bottom: 0;
+}
+
+.scenario-title {
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.mini-bar-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 110px;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.mini-bar-row b {
+  text-align: right;
+}
+    
   </style>
 </head>
 
@@ -432,7 +511,9 @@
       <div class="card"><div class="card-title">GROWTH</div><div class="card-value">{{growthValue}}</div></div>
     </div>
 
+    {{marketFunnelChart}}
     <div class="funnel">
+      
       <div class="label">{{label.marketFunnel}}</div>
       <div class="funnel-row">
         <div class="funnel-label"><span>TAM — {{tamValue}}</span><span>{{tamScore}}%</span></div>
@@ -660,7 +741,9 @@
       </thead>
       <tbody>{{profitSimulationRows}}</tbody>
     </table>
-
+    
+    {{profitSimulationChart}}
+    
     <div class="label" style="margin-top:30px;">손익분기점</div>
     <div class="text-block">{{breakEvenPoint}}</div>
 
@@ -751,6 +834,8 @@
       </thead>
       <tbody>{{cacLtvRows}}</tbody>
     </table>
+
+   {{cacLtvRiskChart}}
 
     <div class="label" style="margin-top:30px;">손익분기 경계선</div>
     <div class="text-block">{{criticalBreakPoint}}</div>
