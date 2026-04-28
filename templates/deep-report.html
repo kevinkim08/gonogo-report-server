@@ -400,7 +400,7 @@
   <section class="page">
     <div class="brand">GONOGO™</div>
 
-    <div class="decision">{{decision}}</div>
+    <div class="decision {{decisionClass}}">{{decision}}</div>
     <div class="score">{{scoreLabel}}: {{score}} / 100</div>
 
     <div class="title">{{brandName}} {{reportTitleSuffix}}</div>
@@ -417,19 +417,19 @@
       <div class="score-box">
         <div class="score-row">
           <div class="score-label"><span>{{label.market}}</span><span>{{marketScore}} / 100</span></div>
-          <div class="bar-bg"><div class="bar-fill" style="width: {{marketScore}}%;"></div></div>
+          <div class="bar-bg"><div class="bar-fill {{marketScoreClass}}" style="width: {{marketScore}}%;"></div></div>
         </div>
         <div class="score-row">
           <div class="score-label"><span>{{label.profitability}}</span><span>{{profitabilityScore}} / 100</span></div>
-          <div class="bar-bg"><div class="bar-fill" style="width: {{profitabilityScore}}%;"></div></div>
+          <div class="bar-bg"><div class="bar-fill {{profitabilityScoreClass}}" style="width: {{profitabilityScore}}%;"></div></div>
         </div>
         <div class="score-row">
           <div class="score-label"><span>{{label.execution}}</span><span>{{executionScore}} / 100</span></div>
-          <div class="bar-bg"><div class="bar-fill" style="width: {{executionScore}}%;"></div></div>
+          <div class="bar-bg"><div class="bar-fill {{executionScoreClass}}" style="width: {{executionScore}}%;"></div></div>
         </div>
         <div class="score-row">
           <div class="score-label"><span>{{label.riskPressure}}</span><span>{{riskScore}} / 100</span></div>
-          <div class="bar-bg"><div class="bar-fill" style="width: {{riskScore}}%;"></div></div>
+          <div class="bar-bg"><div class="bar-fill {{riskScoreClass}}" style="width: {{riskScore}}%;"></div></div>
         </div>
       </div>
 
