@@ -1036,6 +1036,9 @@ function buildHtmlFromTemplate(report, locale) {
 
     html = html
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
+        .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
+        .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
+        .replace("{{cacLtvRiskChart}}", cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable))
         .replace(
             "{{tamSamSomRows}}",
             report?.lockedSections?.tamSamSom
@@ -1197,6 +1200,105 @@ function rows(items) {
             return `<tr>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`
         })
         .join("")
+}
+
+function marketFunnelChart(items) {
+    if (!Array.isArray(items)) return ""
+
+    return `
+        <div class="chart-box">
+            ${items.map((item) => {
+                const score = Math.max(5, Math.min(100, Number(item.score || 0)))
+                return `
+                    <div class="chart-row">
+                        <div class="chart-label">${esc(item.label || "")}</div>
+                        <div class="chart-track">
+                            <div class="chart-fill" style="width:${score}%"></div>
+                        </div>
+                        <div class="chart-value">${esc(item.value || "")}</div>
+                    </div>
+                `
+            }).join("")}
+        </div>
+    `
+}
+
+function profitSimulationChart(rowsData) {
+    if (!Array.isArray(rowsData)) return ""
+
+    return `
+        <div class="chart-box">
+            ${rowsData.map((row) => {
+                const scenario = row?.[0] || ""
+                const revenue = parseMoney(row?.[2])
+                const marketing = parseMoney(row?.[3])
+                const profit = parseMoney(row?.[4])
+
+                const max = Math.max(revenue, marketing, Math.abs(profit), 1)
+                const revenueW = Math.max(5, Math.min(100, (revenue / max) * 100))
+                const marketingW = Math.max(5, Math.min(100, (marketing / max) * 100))
+                const profitW = Math.max(5, Math.min(100, (Math.abs(profit) / max) * 100))
+
+                return `
+                    <div class="scenario-chart">
+                        <div class="scenario-title">${esc(scenario)}</div>
+
+                        <div class="mini-bar-row">
+                            <span>매출</span>
+                            <div class="chart-track"><div class="chart-fill" style="width:${revenueW}%"></div></div>
+                            <b>${esc(row?.[2] || "")}</b>
+                        </div>
+
+                        <div class="mini-bar-row">
+                            <span>마케팅비</span>
+                            <div class="chart-track"><div class="chart-fill light" style="width:${marketingW}%"></div></div>
+                            <b>${esc(row?.[3] || "")}</b>
+                        </div>
+
+                        <div class="mini-bar-row">
+                            <span>이익</span>
+                            <div class="chart-track"><div class="chart-fill ${profit < 0 ? "danger" : ""}" style="width:${profitW}%"></div></div>
+                            <b>${esc(row?.[4] || "")}</b>
+                        </div>
+                    </div>
+                `
+            }).join("")}
+        </div>
+    `
+}
+
+function cacLtvRiskChart(rowsData) {
+    if (!Array.isArray(rowsData)) return ""
+
+    return `
+        <div class="chart-box">
+            ${rowsData.map((row) => {
+                const scenario = row?.[0] || ""
+                const cac = parseMoney(row?.[1])
+                const ltv = parseMoney(row?.[2])
+                const ratio = cac > 0 ? ltv / cac : 0
+                const width = Math.max(5, Math.min(100, ratio * 25))
+                const cls = ratio >= 3 ? "" : ratio >= 2 ? "light" : "danger"
+
+                return `
+                    <div class="chart-row">
+                        <div class="chart-label">${esc(scenario)}</div>
+                        <div class="chart-track">
+                            <div class="chart-fill ${cls}" style="width:${width}%"></div>
+                        </div>
+                        <div class="chart-value">LTV/CAC ${ratio.toFixed(1)}x</div>
+                    </div>
+                `
+            }).join("")}
+        </div>
+    `
+}
+
+function parseMoney(v) {
+    const raw = String(v || "")
+    const cleaned = raw.replace(/[^\d.-]/g, "")
+    const n = Number(cleaned)
+    return Number.isFinite(n) ? Math.abs(n) : 0
 }
 
 function glossaryRows(items) {
