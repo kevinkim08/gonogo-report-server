@@ -949,6 +949,35 @@ function buildHtmlFromTemplate(report, locale) {
         report?.lockedSections?.message ||
         "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
 
+        const scoreGuideRows = [
+        ["85~100", "매우 좋음", "강한 GO 후보. 확장 검토 가능"],
+        ["70~84", "좋음", "조건이 맞으면 GO 가능"],
+        ["50~69", "보통 / 검증 필요", "HOLD. 작은 테스트 후 판단"],
+        ["30~49", "위험", "NO GO 가능성 높음. 구조 재설계 필요"],
+        ["0~29", "매우 위험", "즉시 중단 또는 전면 재검토"],
+    ]
+
+    const customerOpportunityRows = [
+        ["구매 감정", "반려견에게 더 좋은 것을 주고 싶은 욕구가 강함", "첫 구매 전환을 만들 수 있음"],
+        ["선물성", "귀엽고 프리미엄한 패키지는 선물 수요와 잘 맞음", "체험박스·시즌박스에 유리"],
+        ["반복 구매", "강아지가 잘 먹는 제품은 반복 구매 가능성이 있음", "구독 전환의 근거가 될 수 있음"],
+        ["콘텐츠 적합성", "반려견 반응 영상은 숏폼 콘텐츠와 잘 맞음", "인스타그램·유튜브 쇼츠 테스트에 유리"],
+    ]
+
+    const benchmarkRows = [
+        ["BarkBox", "미국 반려견 구독박스", "테마형 박스와 장난감·간식 조합으로 구독 재미를 만듦"],
+        ["Butternut Box", "영국 맞춤형 펫푸드 구독", "반려견 정보 기반 맞춤 추천과 정기배송 구조가 강점"],
+        ["프리미엄 펫푸드 DTC 브랜드", "자사몰 중심 반복구매 모델", "성분 신뢰, 후기, 정기배송 혜택으로 재구매를 유도"],
+    ]
+
+    const referenceLinks = [
+        ["농림축산식품부", "https://www.mafra.go.kr"],
+        ["통계청", "https://kostat.go.kr"],
+        ["네이버 쇼핑", "https://shopping.naver.com"],
+        ["쿠팡", "https://www.coupang.com"],
+        ["Google Trends", "https://trends.google.com"],
+    ]
+
     const data = {
 
         industryType: report.businessDiagnosis?.industryType || "",
@@ -1042,6 +1071,7 @@ function buildHtmlFromTemplate(report, locale) {
 
     html = html
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
+        .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
         .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
         .replace("{{cacLtvRiskChart}}", cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable))
@@ -1052,6 +1082,7 @@ function buildHtmlFromTemplate(report, locale) {
                 : rows(report.tamSamSom)
         )
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
+        .replace("{{customerOpportunityRows}}", rows(customerOpportunityRows))
         .replace(
             "{{competitionRows}}",
             report?.lockedSections?.competition
@@ -1113,6 +1144,7 @@ function buildHtmlFromTemplate(report, locale) {
         .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
 .replace("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
 .replace("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
+.replace("{{referenceLinkRows}}", rows(referenceLinks))
 .replace("{{cacLtvRows}}", rows(report.sensitivityAnalysis?.cacLtvTable))
  .replace("{{profitSimulationRows}}", rows(report.profitSimulation?.monthlyScenarioTable))
 .replace("{{killCriteriaRows}}", rows(report.killCriteria?.rules))        
