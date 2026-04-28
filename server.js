@@ -1084,17 +1084,27 @@ function buildHtmlFromTemplate(report, locale) {
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
         .replace("{{customerOpportunityRows}}", rows(customerOpportunityRows))
         .replace(
-            "{{competitionRows}}",
-            report?.lockedSections?.competition
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
-                : rows(report.competitionMap)
-        )
-        .replace(
-            "{{competitionConclusion}}",
-            report?.lockedSections?.competition
-                ? esc("상세 경쟁 분석은 유료 보고서에서 확인 가능합니다.")
-                : esc(report.competitionConclusion)
-        )
+    "{{competitionRows}}",
+    report?.lockedSections?.competition
+        ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+        : rows(report.competitionMap)
+)
+.replace(
+    "{{competitionConclusion}}",
+    report?.lockedSections?.competition
+        ? esc("상세 경쟁 분석은 유료 보고서에서 확인 가능합니다.")
+        : esc(report.competitionConclusion)
+)
+
+// 👇 여기 추가 (이 위치가 정확함)
+.replace("{{benchmarkRows}}", rows(benchmarkRows))
+
+.replace(
+    "{{unitEconomicsRows}}",
+    report?.lockedSections?.economics
+        ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+        : rows(report.unitEconomicsTable)
+)
         .replace(
             "{{unitEconomicsRows}}",
             report?.lockedSections?.unitEconomics
