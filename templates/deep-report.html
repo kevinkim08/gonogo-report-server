@@ -14,39 +14,12 @@
     body {
       margin: 0;
       font-family: {{fontFamily}}, "Noto Sans KR", "Noto Sans JP", "Noto Sans SC", "Noto Sans Mongolian", "Noto Sans", Arial, sans-serif;
-      background: #f3f3ef;
-      color: #111;
+      background: #f3f7f4;
+      color: #102018;
       word-break: keep-all;
       letter-spacing: -0.02em;
     }
 
-.status-green {
-  color: #0f9d58;
-  font-weight: 900;
-}
-
-.status-yellow {
-  color: #f4b400;
-  font-weight: 900;
-}
-
-.status-red {
-  color: #d93025;
-  font-weight: 900;
-}
-
-.bg-green {
-  background: #e6f4ea;
-}
-
-.bg-yellow {
-  background: #fff7e0;
-}
-
-.bg-red {
-  background: #fde7e9;
-}
-    
     .page {
       width: 210mm;
       min-height: 297mm;
@@ -55,6 +28,37 @@
       background: #fff;
       page-break-after: always;
       position: relative;
+    }
+
+    .section-cover {
+      background: linear-gradient(135deg, #eaf6ef 0%, #f4f9ff 100%);
+      border-left: 10px solid #2f7d57;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .section-kicker {
+      font-size: 15px;
+      font-weight: 900;
+      color: #2f7d57;
+      margin-bottom: 18px;
+      letter-spacing: 0.04em;
+    }
+
+    .section-cover-title {
+      font-size: 46px;
+      line-height: 1.15;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+      margin-bottom: 22px;
+    }
+
+    .section-cover-desc {
+      font-size: 17px;
+      line-height: 1.7;
+      color: #33443b;
+      max-width: 620px;
     }
 
     .brand { font-size: 18px; font-weight: 900; letter-spacing: -0.04em; }
@@ -78,21 +82,22 @@
       word-spacing: 0.05em;
     }
 
-    .subtitle { font-size: 16px; color: #555; margin-top: 10px; line-height: 1.55; }
+    .subtitle { font-size: 16px; color: #4b5d53; margin-top: 10px; line-height: 1.55; }
 
     .section-title {
       font-size: 30px;
       font-weight: 900;
       letter-spacing: -0.05em;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       line-height: 1.15;
       word-spacing: 0.05em;
+      color: #102018;
     }
 
     .label {
       font-size: 11px;
       font-weight: 900;
-      color: #666;
+      color: #4d6b5c;
       text-transform: uppercase;
       margin-bottom: 8px;
       letter-spacing: 0.02em;
@@ -102,36 +107,36 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      margin-top: 28px;
+      margin-top: 24px;
     }
 
     .card {
-      border: 1px solid #d8d8d8;
+      border: 1px solid #d8e7dc;
       padding: 14px;
       min-height: 72px;
-      background: #fff;
+      background: #fbfdfb;
     }
 
     .card-title {
       font-size: 10px;
-      color: #666;
+      color: #5b7065;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: 0.02em;
     }
 
     .card-value {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: 900;
       margin-top: 10px;
-      line-height: 1.1;
+      line-height: 1.12;
       letter-spacing: -0.04em;
     }
 
     .verdict {
-      margin-top: 28px;
+      margin-top: 24px;
       padding: 20px;
-      background: #111;
+      background: #163c2b;
       color: #fff;
       font-size: 16px;
       line-height: 1.55;
@@ -142,10 +147,10 @@
       display: grid;
       grid-template-columns: 1.2fr 0.8fr;
       gap: 18px;
-      margin-top: 28px;
+      margin-top: 24px;
     }
 
-    .score-box { border: 1px solid #d8d8d8; padding: 18px; }
+    .score-box { border: 1px solid #d8e7dc; padding: 18px; background: #fbfdfb; }
 
     .score-row { margin-bottom: 16px; }
     .score-row:last-child { margin-bottom: 0; }
@@ -161,34 +166,43 @@
     .bar-bg {
       width: 100%;
       height: 11px;
-      background: #e7e7e7;
+      background: #e3ebe6;
       border-radius: 99px;
       overflow: hidden;
     }
 
     .bar-fill {
       height: 100%;
-      background: #111;
+      background: #2f7d57;
       border-radius: 99px;
     }
 
+    .bar-fill.status-green { background: #2f7d57; }
+    .bar-fill.status-yellow { background: #d8b85a; }
+    .bar-fill.status-red { background: #b94a48; }
+
+    .status-green { color: #2f7d57; font-weight: 900; }
+    .status-yellow { color: #b58b16; font-weight: 900; }
+    .status-red { color: #b94a48; font-weight: 900; }
+
     .big-metric {
-      border: 1px solid #111;
+      border: 1px solid #2f7d57;
       padding: 18px;
       margin-bottom: 12px;
       min-height: 86px;
+      background: #fbfdfb;
     }
 
     .big-metric-title {
       font-size: 10px;
       font-weight: 900;
-      color: #666;
+      color: #5b7065;
       text-transform: uppercase;
       letter-spacing: 0.02em;
     }
 
     .big-metric-value {
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 900;
       margin-top: 8px;
       letter-spacing: -0.06em;
@@ -198,12 +212,12 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 18px;
+      margin-top: 16px;
       font-size: 12px;
     }
 
     th {
-      background: #111;
+      background: #163c2b;
       color: #fff;
       text-align: left;
       padding: 10px;
@@ -213,7 +227,7 @@
     }
 
     td {
-      border: 1px solid #ddd;
+      border: 1px solid #dce7df;
       padding: 10px;
       vertical-align: top;
       line-height: 1.5;
@@ -234,123 +248,125 @@
 
     .bullet-list li { margin-bottom: 7px; }
 
-    .funnel {
-      margin-top: 26px;
-      border: 1px solid #d8d8d8;
-      padding: 18px;
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
     }
 
-    .funnel-row { margin-bottom: 16px; }
-    .funnel-row:last-child { margin-bottom: 0; }
+    .soft-panel {
+      border: 1px solid #d8e7dc;
+      background: #f6faf7;
+      padding: 14px;
+    }
 
-    .funnel-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
+    .soft-panel-title {
+      font-size: 15px;
       font-weight: 900;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
+      color: #2f7d57;
     }
+
+    .mini-note {
+      margin-top: 16px;
+      padding: 14px;
+      background: #f3f8f5;
+      font-size: 13px;
+      line-height: 1.6;
+      border-left: 4px solid #2f7d57;
+    }
+
+    .chart-box {
+      margin-top: 18px;
+      padding: 16px;
+      border: 1px solid #d8e7dc;
+      background: #f6faf7;
+    }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 120px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 12px;
+    }
+
+    .chart-row:last-child { margin-bottom: 0; }
+
+    .chart-label { font-weight: 900; }
+
+    .chart-track {
+      height: 13px;
+      background: #e1ebe5;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .chart-fill {
+      height: 100%;
+      background: #2f7d57;
+      border-radius: 99px;
+    }
+
+    .chart-fill.light { background: #8fbf9f; }
+    .chart-fill.danger { background: #c76b6b; }
+
+    .chart-value {
+      font-size: 11px;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .scenario-chart { margin-bottom: 18px; }
+    .scenario-chart:last-child { margin-bottom: 0; }
+
+    .scenario-title {
+      font-size: 13px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .mini-bar-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 110px;
+      gap: 10px;
+      align-items: center;
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .mini-bar-row b { text-align: right; }
 
     .checklist {
       margin-top: 20px;
-      border-top: 1px solid #ddd;
+      border-top: 1px solid #dce7df;
     }
 
     .check-item {
       display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid #dce7df;
       padding: 13px 0;
       font-size: 14px;
       line-height: 1.4;
     }
 
-    .status-pass { font-weight: 900; color: #111; }
-    .status-watch { font-weight: 900; color: #777; }
-    .status-fail { font-weight: 900; color: #b00020; }
+    .status-pass { font-weight: 900; color: #2f7d57; }
+    .status-watch { font-weight: 900; color: #b58b16; }
+    .status-fail { font-weight: 900; color: #b94a48; }
 
-    .mini-note {
-      margin-top: 18px;
-      padding: 14px;
-      background: #f3f3ef;
-      font-size: 13px;
-      line-height: 1.6;
-      border-left: 4px solid #111;
-    }
-
-    .locked-box {
-      border: 2px dashed #ccc;
-      border-radius: 16px;
-      padding: 30px;
-      text-align: center;
-      background: #fafafa;
-      margin-top: 20px;
-    }
-
-    .locked-box h3 {
-      margin: 0 0 10px;
-      font-size: 18px;
-    }
-
-    .locked-box p {
-      font-size: 14px;
-      color: #666;
-    }
-
-.status-green {
-  color: #2f7d57;
-  font-weight: 900;
-}
-
-.status-yellow {
-  color: #b58b16;
-  font-weight: 900;
-}
-
-.status-red {
-  color: #b94a48;
-  font-weight: 900;
-}
-
-.bar-fill.status-green {
-  background: #2f7d57;
-}
-
-.bar-fill.status-yellow {
-  background: #d8b85a;
-}
-
-.bar-fill.status-red {
-  background: #b94a48;
-}
-
-.chart-fill {
-  background: #2f7d57;
-}
-
-.chart-fill.light {
-  background: #8fbf9f;
-}
-
-.chart-fill.danger {
-  background: #c76b6b;
-}
-
-.chart-box {
-  background: #f6faf7;
-  border: 1px solid #d8e7dc;
-}
-    
     .footer {
       position: absolute;
       bottom: 12mm;
-      left: 20mm;
-      right: 20mm;
+      left: 16mm;
+      right: 16mm;
       font-size: 10px;
-      color: #888;
+      color: #8a9a91;
       display: flex;
       justify-content: space-between;
-      border-top: 1px solid #eee;
+      border-top: 1px solid #e6eee9;
       padding-top: 8px;
     }
 
@@ -358,85 +374,6 @@
       body { background: #fff; }
       .page { margin: 0; width: 210mm; min-height: 297mm; }
     }
-
-    .chart-box {
-  margin-top: 22px;
-  padding: 18px;
-  border: 1px solid #ddd;
-  background: #fafafa;
-}
-
-.chart-row {
-  display: grid;
-  grid-template-columns: 80px 1fr 120px;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 14px;
-  font-size: 12px;
-}
-
-.chart-row:last-child {
-  margin-bottom: 0;
-}
-
-.chart-label {
-  font-weight: 900;
-}
-
-.chart-track {
-  height: 13px;
-  background: #e5e5e5;
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.chart-fill {
-  height: 100%;
-  background: #111;
-  border-radius: 99px;
-}
-
-.chart-fill.light {
-  background: #777;
-}
-
-.chart-fill.danger {
-  background: #b00020;
-}
-
-.chart-value {
-  font-size: 11px;
-  font-weight: 800;
-  text-align: right;
-}
-
-.scenario-chart {
-  margin-bottom: 20px;
-}
-
-.scenario-chart:last-child {
-  margin-bottom: 0;
-}
-
-.scenario-title {
-  font-size: 13px;
-  font-weight: 900;
-  margin-bottom: 10px;
-}
-
-.mini-bar-row {
-  display: grid;
-  grid-template-columns: 80px 1fr 110px;
-  gap: 10px;
-  align-items: center;
-  font-size: 11px;
-  margin-bottom: 8px;
-}
-
-.mini-bar-row b {
-  text-align: right;
-}
-    
   </style>
 </head>
 
@@ -497,8 +434,21 @@
     </div>
   </section>
 
+  <section class="page section-cover">
+    <div class="section-kicker">SECTION 01</div>
+    <div class="section-cover-title">보고서를 읽기 위한 기준</div>
+    <div class="section-cover-desc">
+      이 섹션은 보고서에 나오는 핵심 용어와 사업 구조를 먼저 정리합니다.
+      숫자의 의미를 이해해야 뒤의 GO / HOLD / NO GO 판단을 정확히 읽을 수 있습니다.
+    </div>
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Section 01</span>
+    </div>
+  </section>
+
   <section class="page">
-    <div class="section-title">0. 보고서 핵심 용어</div>
+    <div class="section-title">1-1. 보고서 핵심 용어</div>
 
     <table>
       <thead>
@@ -523,9 +473,9 @@
       </thead>
       <tbody>{{scoreGuideRows}}</tbody>
     </table>
-    
+
     <div class="mini-note">
-      이 페이지는 보고서를 읽기 전에 반드시 이해해야 할 핵심 용어를 정리한 페이지입니다.
+      이 페이지는 보고서를 읽기 전에 반드시 이해해야 할 핵심 용어와 점수 해석 기준을 정리한 페이지입니다.
     </div>
 
     <div class="footer">
@@ -535,7 +485,7 @@
   </section>
 
   <section class="page">
-    <div class="section-title">0-2. 사업 구조 진단</div>
+    <div class="section-title">1-2. 사업 구조 진단</div>
 
     <table>
       <tbody>
@@ -558,93 +508,133 @@
       <span>{{footerLeft}}</span>
       <span>Business Diagnosis</span>
     </div>
+  </section>  
+
+    <section class="page section-cover">
+    <div class="section-kicker">SECTION 02</div>
+    <div class="section-cover-title">고객이 살 이유 vs 안 살 이유</div>
+    <div class="section-cover-desc">
+      고객은 항상 두 가지 힘 사이에서 움직인다. 사고 싶은 이유와 망설이는 이유.
+      이 섹션은 구매를 만드는 힘과 막는 힘을 동시에 분석한다.
+    </div>
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Section 02</span>
+    </div>
   </section>
 
+  <!-- 2-1 / 2-2 통합 -->
   <section class="page">
-    <div class="section-title">3-2. 고객이 반응할 수 있는 이유</div>
+    <div class="section-title">2-1 / 2-2. 고객 반응 가능성 vs 고객의 진짜 문제</div>
+
+    <div class="split-grid">
+      <div class="soft-panel">
+        <div class="soft-panel-title">긍정 신호 (왜 살까)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>신호</th>
+              <th>행동</th>
+              <th>의미</th>
+            </tr>
+          </thead>
+          <tbody>{{customerOpportunityRows}}</tbody>
+        </table>
+      </div>
+
+      <div class="soft-panel">
+        <div class="soft-panel-title">부정 신호 (왜 안 살까)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>문제</th>
+              <th>행동</th>
+              <th>리스크</th>
+            </tr>
+          </thead>
+          <tbody>{{customerTruthRows}}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:22px;">구매 트리거</div>
+    <div class="text-block">{{buyingTrigger}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Customer Analysis</span>
+    </div>
+  </section>
+
+  <!-- 핵심 판단 -->
+  <section class="page">
+    <div class="section-title">2-3. 핵심 판단</div>
+
+    <table>
+      <tbody>
+        <tr>
+          <td>왜 이 사업이 작동할 수 있는가</td>
+          <td>{{whyItWorks}}</td>
+        </tr>
+        <tr>
+          <td>왜 실패할 가능성이 있는가</td>
+          <td>{{whyItFails}}</td>
+        </tr>
+        <tr>
+          <td>지금 해야 할 행동</td>
+          <td>{{whatToDoNow}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="label" style="margin-top:26px;">대표 의사결정 (중요)</div>
+    <div class="verdict">
+      {{founderDecision}}
+    </div>
+
+    <div class="mini-note">
+      이 판단은 단순 분석이 아니라 실제 돈과 시간을 투입할지 결정하는 기준이다.
+      감정이 아니라 숫자와 구조로 판단해야 한다.
+    </div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Core Decision</span>
+    </div>
+  </section>
+
+    <section class="page section-cover">
+    <div class="section-kicker">SECTION 03</div>
+    <div class="section-cover-title">시장, 경쟁, 수익 구조</div>
+    <div class="section-cover-desc">
+      시장 크기보다 중요한 것은 실제로 돈이 흐르는 구조다.
+      이 섹션에서는 시장의 현실, 경쟁 구도, 그리고 이 사업이 실제로 수익을 만들 수 있는지를 본다.
+    </div>
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Section 03</span>
+    </div>
+  </section>
+
+  <!-- 3-1 시장 현실 -->
+  <section class="page">
+    <div class="section-title">3-1. 시장 현실</div>
+
+    {{marketFunnelChart}}
 
     <table>
       <thead>
         <tr>
-          <th>긍정 신호</th>
-          <th>고객 행동</th>
-          <th>사업적 활용</th>
+          <th>구분</th>
+          <th>규모</th>
+          <th>설명</th>
+          <th>의미</th>
         </tr>
       </thead>
-      <tbody>{{customerOpportunityRows}}</tbody>
+      <tbody>{{tamSamSom}}</tbody>
     </table>
 
-    <div class="mini-note">
-      부정적인 문제만 보는 것이 아니라, 고객이 실제로 반응할 수 있는 긍정 신호를 함께 봐야 실행 판단이 가능해집니다.
-    </div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Customer Opportunity</span>
-    </div>
-  </section>
-  
-  <section class="page">
-    <div class="section-title">{{label.section1}}</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.question}}</th><th>{{label.judgment}}</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>{{label.whyWorks}}</td><td>{{whyItWorks}}</td></tr>
-        <tr><td>{{label.whyFails}}</td><td>{{whyItFails}}</td></tr>
-        <tr><td>{{label.whatNow}}</td><td>{{whatToDoNow}}</td></tr>
-      </tbody>
-    </table>
-
-    <div class="label" style="margin-top:34px;">{{label.founderDecision}}</div>
-    <div class="text-block">{{founderDecision}}</div>
-
-    <div class="mini-note">{{note.executivePrinciple}}</div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Executive Decision</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">{{label.section2}}</div>
-
-    <div class="card-grid">
-      <div class="card"><div class="card-title">TAM</div><div class="card-value">{{tamValue}}</div></div>
-      <div class="card"><div class="card-title">SAM</div><div class="card-value">{{samValue}}</div></div>
-      <div class="card"><div class="card-title">SOM</div><div class="card-value">{{somValue}}</div></div>
-      <div class="card"><div class="card-title">GROWTH</div><div class="card-value">{{growthValue}}</div></div>
-    </div>
-
-    {{marketFunnelChart}}
-    <div class="funnel">
-      
-      <div class="label">{{label.marketFunnel}}</div>
-      <div class="funnel-row">
-        <div class="funnel-label"><span>TAM — {{tamValue}}</span><span>{{tamScore}}%</span></div>
-        <div class="bar-bg"><div class="bar-fill" style="width: {{tamScore}}%;"></div></div>
-      </div>
-      <div class="funnel-row">
-        <div class="funnel-label"><span>SAM — {{samValue}}</span><span>{{samScore}}%</span></div>
-        <div class="bar-bg"><div class="bar-fill" style="width: {{samScore}}%;"></div></div>
-      </div>
-      <div class="funnel-row">
-        <div class="funnel-label"><span>SOM — {{somValue}}</span><span>{{somScore}}%</span></div>
-        <div class="bar-bg"><div class="bar-fill" style="width: {{somScore}}%;"></div></div>
-      </div>
-    </div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.layer}}</th><th>{{label.estimate}}</th><th>{{label.formula}}</th><th>{{label.interpretation}}</th></tr>
-      </thead>
-      <tbody>{{tamSamSomRows}}</tbody>
-    </table>
-
-    <div class="label" style="margin-top:26px;">{{label.marketInsight}}</div>
+    <div class="label" style="margin-top:22px;">시장 인사이트</div>
     <div class="text-block">{{marketInsight}}</div>
 
     <div class="footer">
@@ -653,124 +643,136 @@
     </div>
   </section>
 
+  <!-- 3-2 + 3-3 통합 -->
   <section class="page">
-    <div class="section-title">{{label.section3}}</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.customerProblem}}</th><th>{{label.behaviorEvidence}}</th><th>{{label.businessMeaning}}</th></tr>
-      </thead>
-      <tbody>{{customerTruthRows}}</tbody>
-    </table>
-
-    <div class="label" style="margin-top:30px;">{{label.buyingTrigger}}</div>
-    <div class="text-block">{{buyingTrigger}}</div>
-
-    <div class="mini-note">{{note.customerPrinciple}}</div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Customer Truth</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">{{label.section4}}</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.competitor}}</th><th>{{label.type}}</th><th>{{label.strength}}</th><th>{{label.weakness}}</th></tr>
-      </thead>
-      <tbody>{{competitionRows}}</tbody>
-    </table>
-
-    <div class="label" style="margin-top:30px;">{{label.competitionConclusion}}</div>
-    <div class="text-block">{{competitionConclusion}}</div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Competition Map</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">4-2. 유사 서비스 벤치마크</div>
+    <div class="section-title">3-2 / 3-3. 경쟁 구도 & 벤치마크</div>
 
     <table>
       <thead>
         <tr>
-          <th>사례</th>
+          <th>경쟁사</th>
           <th>유형</th>
-          <th>배울 점</th>
+          <th>강점</th>
+          <th>약점</th>
+        </tr>
+      </thead>
+      <tbody>{{competitionRows}}</tbody>
+    </table>
+
+    <div class="label" style="margin-top:22px;">경쟁 판단</div>
+    <div class="text-block">{{competitionConclusion}}</div>
+
+    <div class="label" style="margin-top:26px;">유사 서비스 벤치마크</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>브랜드</th>
+          <th>유형 / 링크</th>
+          <th>핵심 강점</th>
         </tr>
       </thead>
       <tbody>{{benchmarkRows}}</tbody>
     </table>
 
     <div class="mini-note">
-      벤치마크는 그대로 따라 하라는 뜻이 아니라, 이미 시장에서 검증된 구매 이유와 운영 구조를 분해해 참고하는 용도입니다.
+      중요한 건 “제품”이 아니라 “왜 계속 사는 구조인지”다.
+      구독 유지 장치와 반복 구매 이유를 반드시 분해해서 봐야 한다.
     </div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Benchmark Cases</span>
+      <span>Competition</span>
     </div>
   </section>
-  
+
+  <!-- 3-4 수익 구조 -->
   <section class="page">
-    <div class="section-title">{{label.section5}}</div>
+    <div class="section-title">3-4. 수익 구조</div>
 
-    <div class="card-grid">
-      <div class="card"><div class="card-title">CAC</div><div class="card-value">{{cacValue}}</div></div>
-      <div class="card"><div class="card-title">LTV</div><div class="card-value">{{ltvValue}}</div></div>
-      <div class="card"><div class="card-title">AOV</div><div class="card-value">{{aovValue}}</div></div>
-      <div class="card"><div class="card-title">REPEAT</div><div class="card-value">{{repeatValue}}</div></div>
-    </div>
-
-    <div class="visual-board">
-      <div class="big-metric">
-        <div class="big-metric-title">{{label.ltvToCac}}</div>
-        <div class="big-metric-value">{{ltvToCac}}</div>
-      </div>
-      <div class="big-metric">
-        <div class="big-metric-title">{{label.payback}}</div>
-        <div class="big-metric-value">{{paybackValue}}</div>
-      </div>
-    </div>
+    {{profitSimulationChart}}
 
     <table>
       <thead>
-        <tr><th>{{label.metric}}</th><th>{{label.targetRange}}</th><th>{{label.passFailRule}}</th><th>{{label.reason}}</th></tr>
+        <tr>
+          <th>항목</th>
+          <th>값</th>
+        </tr>
       </thead>
-      <tbody>{{unitEconomicsRows}}</tbody>
+      <tbody>{{unitEconomicsCards}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">{{label.economicsJudgment}}</div>
+    <div class="label" style="margin-top:22px;">경제성 판단</div>
     <div class="text-block">{{economicsJudgment}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Unit Economics</span>
+      <span>Economics</span>
+    </div>
+  </section>
+
+    <section class="page section-cover">
+    <div class="section-kicker">SECTION 04</div>
+    <div class="section-cover-title">실행, 운영, 중단 기준</div>
+    <div class="section-cover-desc">
+      좋은 아이디어도 실행 기준이 없으면 실패합니다.
+      이 섹션은 어떻게 팔고, 어떻게 운영하고, 언제 멈출지를 숫자로 정리합니다.
+    </div>
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Section 04</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">{{label.section6}}</div>
+    <div class="section-title">4-1. 비즈니스 모델</div>
 
     <table>
       <thead>
-        <tr><th>{{label.channel}}</th><th>{{label.fit}}</th><th>{{label.role}}</th><th>{{label.why}}</th></tr>
+        <tr>
+          <th>수익 레이어</th>
+          <th>예시</th>
+          <th>목적</th>
+        </tr>
+      </thead>
+      <tbody>{{businessModelRows}}</tbody>
+    </table>
+
+    <div class="label" style="margin-top:26px;">모델 판단</div>
+    <div class="text-block">{{modelJudgment}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Business Model</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="section-title">4-2. 마케팅 전략</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>채널</th>
+          <th>적합도</th>
+          <th>역할</th>
+          <th>이유</th>
+        </tr>
       </thead>
       <tbody>{{marketingChannelRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">{{label.contentPlaybook}}</div>
+    <div class="label" style="margin-top:22px;">콘텐츠 플레이북</div>
     <ul class="bullet-list">{{contentPlaybookItems}}</ul>
 
-    <div class="label" style="margin-top:26px;">{{label.marketingTest}}</div>
+    <div class="label" style="margin-top:22px;">마케팅 테스트</div>
     <table>
       <thead>
-        <tr><th>{{label.period}}</th><th>{{label.action}}</th><th>{{label.successMetric}}</th></tr>
+        <tr>
+          <th>기간</th>
+          <th>실행</th>
+          <th>성공 지표</th>
+        </tr>
       </thead>
       <tbody>{{marketingTestRows}}</tbody>
     </table>
@@ -782,51 +784,20 @@
   </section>
 
   <section class="page">
-    <div class="section-title">{{label.section7}}</div>
+    <div class="section-title">4-3. 실행 계획</div>
 
     <table>
       <thead>
-        <tr><th>{{label.revenueLayer}}</th><th>{{label.example}}</th><th>{{label.purpose}}</th></tr>
-      </thead>
-      <tbody>{{businessModelRows}}</tbody>
-    </table>
-
-    <div class="label" style="margin-top:30px;">{{label.modelJudgment}}</div>
-    <div class="text-block">{{modelJudgment}}</div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Business Model</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">{{label.section8}}</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.risk}}</th><th>{{label.impact}}</th><th>{{label.countermeasure}}</th></tr>
-      </thead>
-      <tbody>{{riskRows}}</tbody>
-    </table>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>Risk System</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">{{label.section9}}</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.phase}}</th><th>{{label.actions}}</th><th>{{label.primaryKpi}}</th></tr>
+        <tr>
+          <th>단계</th>
+          <th>실행 내용</th>
+          <th>핵심 KPI</th>
+        </tr>
       </thead>
       <tbody>{{executionRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">{{label.operatingRule}}</div>
+    <div class="label" style="margin-top:26px;">운영 원칙</div>
     <div class="text-block">{{operatingRule}}</div>
 
     <div class="footer">
@@ -836,29 +807,7 @@
   </section>
 
   <section class="page">
-    <div class="section-title">{{label.section10}}</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.metric}}</th><th>{{label.passCondition}}</th><th>{{label.decisionMeaning}}</th></tr>
-      </thead>
-      <tbody>{{goThresholdRows}}</tbody>
-    </table>
-
-    <div class="label" style="margin-top:30px;">{{label.checklist}}</div>
-    <div class="checklist">{{goChecklistItems}}</div>
-
-    <div class="label" style="margin-top:30px;">{{label.finalRule}}</div>
-    <div class="verdict">{{finalRule}}</div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>GO Threshold</span>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-title">11. 수익 시뮬레이션</div>
+    <div class="section-title">4-4. 수익 시뮬레이션</div>
 
     <table>
       <thead>
@@ -873,16 +822,16 @@
       </thead>
       <tbody>{{profitSimulationRows}}</tbody>
     </table>
-    
+
     {{profitSimulationChart}}
-    
-    <div class="label" style="margin-top:30px;">손익분기점</div>
+
+    <div class="label" style="margin-top:24px;">손익분기점</div>
     <div class="text-block">{{breakEvenPoint}}</div>
 
-    <div class="label" style="margin-top:30px;">수익성 판단</div>
+    <div class="label" style="margin-top:20px;">수익성 판단</div>
     <div class="text-block">{{profitJudgment}}</div>
 
-    <div class="label" style="margin-top:30px;">현금흐름 리스크</div>
+    <div class="label" style="margin-top:20px;">현금흐름 리스크</div>
     <div class="verdict">{{cashRisk}}</div>
 
     <div class="footer">
@@ -892,44 +841,130 @@
   </section>
 
   <section class="page">
-    <div class="section-title">12. Kill 조건</div>
+    <div class="section-title">4-5 / 4-6. 리스크 시스템 & Kill 조건</div>
+
+    <div class="split-grid">
+      <div class="soft-panel">
+        <div class="soft-panel-title">리스크 시스템</div>
+        <table>
+          <thead>
+            <tr>
+              <th>리스크</th>
+              <th>영향</th>
+              <th>대응책</th>
+            </tr>
+          </thead>
+          <tbody>{{riskRows}}</tbody>
+        </table>
+      </div>
+
+      <div class="soft-panel">
+        <div class="soft-panel-title">Kill 조건</div>
+        <table>
+          <thead>
+            <tr>
+              <th>지표</th>
+              <th>중단 기준</th>
+              <th>조치</th>
+            </tr>
+          </thead>
+          <tbody>{{killCriteriaRows}}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:22px;">중단 결정</div>
+    <div class="text-block">{{stopDecision}}</div>
+
+    <div class="label" style="margin-top:18px;">전환 결정</div>
+    <div class="text-block">{{pivotDecision}}</div>
+
+    <div class="label" style="margin-top:18px;">확장 결정</div>
+    <div class="verdict">{{scaleDecision}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Risk & Kill Criteria</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="section-title">4-7. GO 판단 기준</div>
 
     <table>
       <thead>
         <tr>
           <th>지표</th>
-          <th>중단 기준</th>
-          <th>조치</th>
+          <th>통과 조건</th>
+          <th>의사결정 의미</th>
         </tr>
       </thead>
-      <tbody>{{killCriteriaRows}}</tbody>
+      <tbody>{{goThresholdRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">중단 결정</div>
-    <div class="text-block">{{stopDecision}}</div>
+    <div class="label" style="margin-top:26px;">GO / NO-GO 체크리스트</div>
+    <div class="checklist">{{goChecklistItems}}</div>
 
-    <div class="label" style="margin-top:30px;">전환 결정</div>
-    <div class="text-block">{{pivotDecision}}</div>
-
-    <div class="label" style="margin-top:30px;">확장 결정</div>
-    <div class="verdict">{{scaleDecision}}</div>
+    <div class="label" style="margin-top:26px;">최종 규칙</div>
+    <div class="verdict">{{finalRule}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Kill Criteria</span>
+      <span>GO Threshold</span>
     </div>
   </section>
-  
-  <section class="page">
-    <div class="section-title">13. 데이터 신뢰도</div>
 
-    <div class="label">신뢰도 수준</div>
+  <section class="page section-cover">
+    <div class="section-kicker">SECTION 05</div>
+    <div class="section-cover-title">검증, 신뢰도, 부록</div>
+    <div class="section-cover-desc">
+      이 섹션은 숫자의 민감도, 데이터 신뢰도, 참고 기준을 정리합니다.
+      보고서의 결론이 어떤 가정 위에 세워졌는지 확인하는 구간입니다.
+    </div>
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>Section 05</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="section-title">5-1. CAC / LTV 민감도 분석</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>시나리오</th>
+          <th>CAC</th>
+          <th>LTV</th>
+          <th>판단</th>
+        </tr>
+      </thead>
+      <tbody>{{cacLtvRows}}</tbody>
+    </table>
+
+    {{cacLtvRiskChart}}
+
+    <div class="label" style="margin-top:24px;">손익분기 경계선</div>
+    <div class="text-block">{{criticalBreakPoint}}</div>
+
+    <div class="label" style="margin-top:24px;">창업자 경고</div>
+    <div class="verdict">{{founderWarning}}</div>
+
+    <div class="footer">
+      <span>{{footerLeft}}</span>
+      <span>CAC / LTV Sensitivity</span>
+    </div>
+  </section>
+
+  <section class="page">
+    <div class="section-title">5-2. 데이터 신뢰도</div>
+
     <div class="big-metric">
       <div class="big-metric-title">DATA CONFIDENCE</div>
       <div class="big-metric-value">{{dataConfidenceLevel}}</div>
     </div>
 
-    <div class="label" style="margin-top:26px;">요약</div>
+    <div class="label" style="margin-top:22px;">요약</div>
     <div class="text-block">{{dataConfidenceSummary}}</div>
 
     <table>
@@ -943,10 +978,10 @@
       <tbody>{{sourceQualityRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">한계</div>
+    <div class="label" style="margin-top:22px;">한계</div>
     <ul class="bullet-list">{{dataLimitItems}}</ul>
 
-        <div class="label" style="margin-top:26px;">참고 링크</div>
+    <div class="label" style="margin-top:22px;">참고 링크</div>
     <table>
       <thead>
         <tr>
@@ -964,48 +999,23 @@
   </section>
 
   <section class="page">
-    <div class="section-title">14. CAC / LTV 민감도 분석</div>
+    <div class="section-title">5-3. 부록</div>
 
     <table>
       <thead>
         <tr>
-          <th>시나리오</th>
-          <th>CAC</th>
-          <th>LTV</th>
-          <th>판단</th>
+          <th>데이터 항목</th>
+          <th>출처 / 기준</th>
+          <th>사용 목적</th>
         </tr>
-      </thead>
-      <tbody>{{cacLtvRows}}</tbody>
-    </table>
-
-   {{cacLtvRiskChart}}
-
-    <div class="label" style="margin-top:30px;">손익분기 경계선</div>
-    <div class="text-block">{{criticalBreakPoint}}</div>
-
-    <div class="label" style="margin-top:30px;">창업자 경고</div>
-    <div class="verdict">{{founderWarning}}</div>
-
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>CAC / LTV Sensitivity</span>
-    </div>
-  </section>
-  
-  <section class="page">
-    <div class="section-title">15. 부록</div>
-
-    <table>
-      <thead>
-        <tr><th>{{label.dataPoint}}</th><th>{{label.sourceBasis}}</th><th>{{label.usage}}</th></tr>
       </thead>
       <tbody>{{dataSourceRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:30px;">{{label.assumptions}}</div>
+    <div class="label" style="margin-top:24px;">가정</div>
     <ul class="bullet-list">{{assumptionItems}}</ul>
 
-    <div class="label" style="margin-top:26px;">참고 링크</div>
+    <div class="label" style="margin-top:22px;">참고 링크</div>
     <table>
       <thead>
         <tr>
@@ -1015,7 +1025,7 @@
       </thead>
       <tbody>{{referenceLinkRows}}</tbody>
     </table>
-    
+
     <div class="footer">
       <span>{{footerLeft}}</span>
       <span>Appendix</span>
@@ -1023,3 +1033,4 @@
   </section>
 </body>
 </html>
+  
