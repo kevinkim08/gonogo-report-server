@@ -1072,8 +1072,6 @@ function buildHtmlFromTemplate(report, locale) {
     ...data
 }
 
-html = applyTemplateVars(html, templateData)
-
     html = html
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
@@ -1166,6 +1164,8 @@ html = applyTemplateVars(html, templateData)
 .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
 .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
 
+    html = applyTemplateVars(html, templateData)
+    
     html = html.replace(/{{[^}]+}}/g, "")
 
     return html
