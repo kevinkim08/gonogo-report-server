@@ -2,7 +2,7 @@
 <html lang="{{lang}}">
 <head>
   <meta charset="UTF-8" />
-  <title>GoNoGo Report</title>
+  <title>{{html_title}}</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -379,7 +379,7 @@
 
 <body>
   <section class="page">
-    <div class="brand">GONOGO™</div>
+    <div class="brand">{{brand_mark}}</div>
 
     <div class="decision {{decisionClass}}">{{decision}}</div>
     <div class="score">{{scoreLabel}}: {{score}} / 100</div>
@@ -420,8 +420,8 @@
           <div class="big-metric-value">{{ltvToCac}}</div>
         </div>
         <div class="big-metric">
-          <div class="big-metric-title">{{label.unitEconomics}}</div>
-          <div class="big-metric-value">{{unitEconomicsStatus}}</div>
+          <div class="big-metric-title">{{label.unit{{footer_economics}}}}</div>
+          <div class="big-metric-value">{{unit{{footer_economics}}Status}}</div>
         </div>
       </div>
     </div>
@@ -430,112 +430,110 @@
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Decision Board</span>
+      <span>{{footer_decision_board}}</span>
     </div>
   </section>
 
   <section class="page section-cover">
-    <div class="section-kicker">SECTION 01</div>
-    <div class="section-cover-title">보고서를 읽기 위한 기준</div>
+    <div class="section-kicker">{{section01_kicker}}</div>
+    <div class="section-cover-title">{{section01_cover_title}}</div>
     <div class="section-cover-desc">
-      이 섹션은 보고서에 나오는 핵심 용어와 사업 구조를 먼저 정리합니다.
-      숫자의 의미를 이해해야 뒤의 GO / HOLD / NO GO 판단을 정확히 읽을 수 있습니다.
+      {{section01_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Section 01</span>
+      <span>{{footer_section01}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">1-1. 보고서 핵심 용어</div>
+    <div class="section-title">{{section01_01_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>용어</th>
-          <th>뜻</th>
-          <th>왜 중요한가</th>
+          <th>{{th_term}}</th>
+          <th>{{th_meaning}}</th>
+          <th>{{th_why_important}}</th>
         </tr>
       </thead>
       <tbody>{{glossaryRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:28px;">점수 구간 해석</div>
+    <div class="label" style="margin-top:28px;">{{score_guide_label}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>점수</th>
-          <th>구간</th>
-          <th>판단 의미</th>
+          <th>{{th_score}}</th>
+          <th>{{th_range}}</th>
+          <th>{{th_decision_meaning}}</th>
         </tr>
       </thead>
       <tbody>{{scoreGuideRows}}</tbody>
     </table>
 
     <div class="mini-note">
-      이 페이지는 보고서를 읽기 전에 반드시 이해해야 할 핵심 용어와 점수 해석 기준을 정리한 페이지입니다.
+      {{section01_01_note}}
     </div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Glossary</span>
+      <span>{{footer_glossary}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">1-2. 사업 구조 진단</div>
+    <div class="section-title">{{section01_02_title}}</div>
 
     <table>
       <tbody>
-        <tr><td>업종 유형</td><td>{{industryType}}</td></tr>
-        <tr><td>수익모델 유형</td><td>{{businessModelType}}</td></tr>
-        <tr><td>국가별 구매 행동</td><td>{{countryMarketBehavior}}</td></tr>
-        <tr><td>시장 진입 난이도</td><td>{{marketEntryDifficulty}}</td></tr>
-        <tr><td>가장 큰 병목</td><td>{{mainBottleneck}}</td></tr>
-        <tr><td>첫 판매 제안</td><td>{{bestFirstOffer}}</td></tr>
-        <tr><td>검증 실험</td><td>{{validationExperiment}}</td></tr>
-        <tr><td>GO / NO-GO 판단 논리</td><td>{{goNoGoLogic}}</td></tr>
+        <tr><td>{{td_industry_type}}</td><td>{{industryType}}</td></tr>
+        <tr><td>{{td_business_model_type}}</td><td>{{businessModelType}}</td></tr>
+        <tr><td>{{td_country_market_behavior}}</td><td>{{countryMarketBehavior}}</td></tr>
+        <tr><td>{{td_market_entry_difficulty}}</td><td>{{marketEntryDifficulty}}</td></tr>
+        <tr><td>{{td_main_bottleneck}}</td><td>{{mainBottleneck}}</td></tr>
+        <tr><td>{{td_best_first_offer}}</td><td>{{bestFirstOffer}}</td></tr>
+        <tr><td>{{td_validation_experiment}}</td><td>{{validationExperiment}}</td></tr>
+        <tr><td>{{td_gonogo_logic}}</td><td>{{goNoGoLogic}}</td></tr>
       </tbody>
     </table>
 
     <div class="mini-note">
-      이 페이지는 사업 아이디어를 업종, 수익모델, 시장 진입 난이도 기준으로 먼저 분류하여 이후 분석의 기준점을 잡는 역할을 합니다.
+      {{section01_02_note}}
     </div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Business Diagnosis</span>
+      <span>{{footer_business_diagnosis}}</span>
     </div>
   </section>  
 
     <section class="page section-cover">
-    <div class="section-kicker">SECTION 02</div>
-    <div class="section-cover-title">고객이 살 이유 vs 안 살 이유</div>
+    <div class="section-kicker">{{section02_kicker}}</div>
+    <div class="section-cover-title">{{section02_cover_title}}</div>
     <div class="section-cover-desc">
-      고객은 항상 두 가지 힘 사이에서 움직인다. 사고 싶은 이유와 망설이는 이유.
-      이 섹션은 구매를 만드는 힘과 막는 힘을 동시에 분석한다.
+      {{section02_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Section 02</span>
+      <span>{{footer_section02}}</span>
     </div>
   </section>
 
-  <!-- 2-1 / 2-2 통합 -->
+  <!-- Section 02 combined -->
   <section class="page">
-    <div class="section-title">2-1 / 2-2. 고객 반응 가능성 vs 고객의 진짜 문제</div>
+    <div class="section-title">{{section02_01_title}}</div>
 
     <div class="split-grid">
       <div class="soft-panel">
-        <div class="soft-panel-title">긍정 신호 (왜 살까)</div>
+        <div class="soft-panel-title">{{positive_signal_title}}</div>
         <table>
           <thead>
             <tr>
-              <th>신호</th>
-              <th>행동</th>
-              <th>의미</th>
+              <th>{{th_signal}}</th>
+              <th>{{th_action}}</th>
+              <th>{{th_meaning_short}}</th>
             </tr>
           </thead>
           <tbody>{{customerOpportunityRows}}</tbody>
@@ -543,13 +541,13 @@
       </div>
 
       <div class="soft-panel">
-        <div class="soft-panel-title">부정 신호 (왜 안 살까)</div>
+        <div class="soft-panel-title">{{negative_signal_title}}</div>
         <table>
           <thead>
             <tr>
-              <th>문제</th>
-              <th>행동</th>
-              <th>리스크</th>
+              <th>{{th_problem}}</th>
+              <th>{{th_action}}</th>
+              <th>{{th_risk}}</th>
             </tr>
           </thead>
           <tbody>{{customerTruthRows}}</tbody>
@@ -557,221 +555,217 @@
       </div>
     </div>
 
-    <div class="label" style="margin-top:22px;">구매 트리거</div>
+    <div class="label" style="margin-top:22px;">{{buying_trigger_label}}</div>
     <div class="text-block">{{buyingTrigger}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Customer Analysis</span>
+      <span>{{footer_customer_analysis}}</span>
     </div>
   </section>
 
-  <!-- 핵심 판단 -->
+  <!-- Core decision -->
   <section class="page">
-    <div class="section-title">2-3. 핵심 판단</div>
+    <div class="section-title">{{section02_03_title}}</div>
 
     <table>
       <tbody>
         <tr>
-          <td>왜 이 사업이 작동할 수 있는가</td>
+          <td>{{td_why_it_works}}</td>
           <td>{{whyItWorks}}</td>
         </tr>
         <tr>
-          <td>왜 실패할 가능성이 있는가</td>
+          <td>{{td_why_it_fails}}</td>
           <td>{{whyItFails}}</td>
         </tr>
         <tr>
-          <td>지금 해야 할 행동</td>
+          <td>{{td_what_to_do_now}}</td>
           <td>{{whatToDoNow}}</td>
         </tr>
       </tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">대표 의사결정 (중요)</div>
+    <div class="label" style="margin-top:26px;">{{founder_decision_label}}</div>
     <div class="verdict">
       {{founderDecision}}
     </div>
 
     <div class="mini-note">
-      이 판단은 단순 분석이 아니라 실제 돈과 시간을 투입할지 결정하는 기준이다.
-      감정이 아니라 숫자와 구조로 판단해야 한다.
+      {{section02_03_note}}
     </div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Core Decision</span>
+      <span>{{footer_core_decision}}</span>
     </div>
   </section>
 
     <section class="page section-cover">
-    <div class="section-kicker">SECTION 03</div>
-    <div class="section-cover-title">시장, 경쟁, 수익 구조</div>
+    <div class="section-kicker">{{section03_kicker}}</div>
+    <div class="section-cover-title">{{section03_cover_title}}</div>
     <div class="section-cover-desc">
-      시장 크기보다 중요한 것은 실제로 돈이 흐르는 구조다.
-      이 섹션에서는 시장의 현실, 경쟁 구도, 그리고 이 사업이 실제로 수익을 만들 수 있는지를 본다.
+      {{section03_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Section 03</span>
+      <span>{{footer_section03}}</span>
     </div>
   </section>
 
-  <!-- 3-1 시장 현실 -->
+  <!-- Section 03 market reality -->
   <section class="page">
-    <div class="section-title">3-1. 시장 현실</div>
+    <div class="section-title">{{section03_01_title}}</div>
 
     {{marketFunnelChart}}
 
     <table>
       <thead>
         <tr>
-          <th>구분</th>
-          <th>규모</th>
-          <th>설명</th>
-          <th>의미</th>
+          <th>{{th_category}}</th>
+          <th>{{th_size}}</th>
+          <th>{{th_description}}</th>
+          <th>{{th_meaning_short}}</th>
         </tr>
       </thead>
       <tbody>{{tamSamSom}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:22px;">시장 인사이트</div>
+    <div class="label" style="margin-top:22px;">{{market_insight_label}}</div>
     <div class="text-block">{{marketInsight}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Market Reality</span>
+      <span>{{footer_market_reality}}</span>
     </div>
   </section>
 
-  <!-- 3-2 + 3-3 통합 -->
+  <!-- Section 03 competition benchmark combined -->
   <section class="page">
-    <div class="section-title">3-2 / 3-3. 경쟁 구도 & 벤치마크</div>
+    <div class="section-title">{{section03_02_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>경쟁사</th>
-          <th>유형</th>
-          <th>강점</th>
-          <th>약점</th>
+          <th>{{th_competitor}}</th>
+          <th>{{th_type}}</th>
+          <th>{{th_strength}}</th>
+          <th>{{th_weakness}}</th>
         </tr>
       </thead>
       <tbody>{{competitionRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:22px;">경쟁 판단</div>
+    <div class="label" style="margin-top:22px;">{{competition_conclusion_label}}</div>
     <div class="text-block">{{competitionConclusion}}</div>
 
-    <div class="label" style="margin-top:26px;">유사 서비스 벤치마크</div>
+    <div class="label" style="margin-top:26px;">{{benchmark_label}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>브랜드</th>
-          <th>유형 / 링크</th>
-          <th>핵심 강점</th>
+          <th>{{th_brand}}</th>
+          <th>{{th_type_link}}</th>
+          <th>{{th_core_strength}}</th>
         </tr>
       </thead>
       <tbody>{{benchmarkRows}}</tbody>
     </table>
 
     <div class="mini-note">
-      중요한 건 “제품”이 아니라 “왜 계속 사는 구조인지”다.
-      구독 유지 장치와 반복 구매 이유를 반드시 분해해서 봐야 한다.
+      {{section03_02_note}}
     </div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Competition</span>
+      <span>{{footer_competition}}</span>
     </div>
   </section>
 
-  <!-- 3-4 수익 구조 -->
+  <!-- Section 03 economics -->
   <section class="page">
-    <div class="section-title">3-4. 수익 구조</div>
+    <div class="section-title">{{section03_04_title}}</div>
 
     {{profitSimulationChart}}
 
     <table>
       <thead>
         <tr>
-          <th>항목</th>
-          <th>값</th>
+          <th>{{th_item}}</th>
+          <th>{{th_value}}</th>
         </tr>
       </thead>
-      <tbody>{{unitEconomicsCards}}</tbody>
+      <tbody>{{unit{{footer_economics}}Cards}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:22px;">경제성 판단</div>
+    <div class="label" style="margin-top:22px;">{{economics_judgment_label}}</div>
     <div class="text-block">{{economicsJudgment}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Economics</span>
+      <span>{{footer_economics}}</span>
     </div>
   </section>
 
     <section class="page section-cover">
-    <div class="section-kicker">SECTION 04</div>
-    <div class="section-cover-title">실행, 운영, 중단 기준</div>
+    <div class="section-kicker">{{section04_kicker}}</div>
+    <div class="section-cover-title">{{section04_cover_title}}</div>
     <div class="section-cover-desc">
-      좋은 아이디어도 실행 기준이 없으면 실패합니다.
-      이 섹션은 어떻게 팔고, 어떻게 운영하고, 언제 멈출지를 숫자로 정리합니다.
+      {{section04_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Section 04</span>
+      <span>{{footer_section04}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">4-1. 비즈니스 모델</div>
+    <div class="section-title">{{section04_01_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>수익 레이어</th>
-          <th>예시</th>
-          <th>목적</th>
+          <th>{{th_revenue_layer}}</th>
+          <th>{{th_example}}</th>
+          <th>{{th_purpose}}</th>
         </tr>
       </thead>
       <tbody>{{businessModelRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">모델 판단</div>
+    <div class="label" style="margin-top:26px;">{{model_judgment_label}}</div>
     <div class="text-block">{{modelJudgment}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Business Model</span>
+      <span>{{footer_business_model}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">4-2. 마케팅 전략</div>
+    <div class="section-title">{{section04_02_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>채널</th>
-          <th>적합도</th>
-          <th>역할</th>
-          <th>이유</th>
+          <th>{{th_channel}}</th>
+          <th>{{th_fit}}</th>
+          <th>{{th_role}}</th>
+          <th>{{th_reason}}</th>
         </tr>
       </thead>
       <tbody>{{marketingChannelRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:22px;">콘텐츠 플레이북</div>
+    <div class="label" style="margin-top:22px;">{{content_playbook_label}}</div>
     <ul class="bullet-list">{{contentPlaybookItems}}</ul>
 
-    <div class="label" style="margin-top:22px;">마케팅 테스트</div>
+    <div class="label" style="margin-top:22px;">{{marketing_test_label}}</div>
     <table>
       <thead>
         <tr>
-          <th>기간</th>
-          <th>실행</th>
-          <th>성공 지표</th>
+          <th>{{th_period}}</th>
+          <th>{{th_execution}}</th>
+          <th>{{th_success_metric}}</th>
         </tr>
       </thead>
       <tbody>{{marketingTestRows}}</tbody>
@@ -779,45 +773,45 @@
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Marketing Strategy</span>
+      <span>{{footer_marketing_strategy}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">4-3. 실행 계획</div>
+    <div class="section-title">{{section04_03_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>단계</th>
-          <th>실행 내용</th>
-          <th>핵심 KPI</th>
+          <th>{{th_step}}</th>
+          <th>{{th_execution_content}}</th>
+          <th>{{th_core_kpi}}</th>
         </tr>
       </thead>
       <tbody>{{executionRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">운영 원칙</div>
+    <div class="label" style="margin-top:26px;">{{operating_rule_label}}</div>
     <div class="text-block">{{operatingRule}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Execution Plan</span>
+      <span>{{footer_execution_plan}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">4-4. 수익 시뮬레이션</div>
+    <div class="section-title">{{section04_04_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>시나리오</th>
-          <th>고객 수</th>
-          <th>월 매출</th>
-          <th>마케팅 비용</th>
-          <th>예상 이익</th>
-          <th>판단</th>
+          <th>{{th_scenario}}</th>
+          <th>{{th_customer_count}}</th>
+          <th>{{th_monthly_revenue}}</th>
+          <th>{{th_marketing_cost}}</th>
+          <th>{{th_expected_profit}}</th>
+          <th>{{th_judgment}}</th>
         </tr>
       </thead>
       <tbody>{{profitSimulationRows}}</tbody>
@@ -825,33 +819,33 @@
 
     {{profitSimulationChart}}
 
-    <div class="label" style="margin-top:24px;">손익분기점</div>
+    <div class="label" style="margin-top:24px;">{{break_even_point_label}}</div>
     <div class="text-block">{{breakEvenPoint}}</div>
 
-    <div class="label" style="margin-top:20px;">수익성 판단</div>
+    <div class="label" style="margin-top:20px;">{{profit_judgment_label}}</div>
     <div class="text-block">{{profitJudgment}}</div>
 
-    <div class="label" style="margin-top:20px;">현금흐름 리스크</div>
+    <div class="label" style="margin-top:20px;">{{cash_risk_label}}</div>
     <div class="verdict">{{cashRisk}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Profit Simulation</span>
+      <span>{{footer_profit_simulation}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">4-5 / 4-6. 리스크 시스템 & Kill 조건</div>
+    <div class="section-title">{{section04_05_title}}</div>
 
     <div class="split-grid">
       <div class="soft-panel">
-        <div class="soft-panel-title">리스크 시스템</div>
+        <div class="soft-panel-title">{{risk_system_title}}</div>
         <table>
           <thead>
             <tr>
-              <th>리스크</th>
-              <th>영향</th>
-              <th>대응책</th>
+              <th>{{th_risk}}</th>
+              <th>{{th_impact}}</th>
+              <th>{{th_countermeasure}}</th>
             </tr>
           </thead>
           <tbody>{{riskRows}}</tbody>
@@ -859,13 +853,13 @@
       </div>
 
       <div class="soft-panel">
-        <div class="soft-panel-title">Kill 조건</div>
+        <div class="soft-panel-title">{{kill_criteria_title}}</div>
         <table>
           <thead>
             <tr>
-              <th>지표</th>
-              <th>중단 기준</th>
-              <th>조치</th>
+              <th>{{th_metric}}</th>
+              <th>{{th_stop_criteria}}</th>
+              <th>{{th_measure}}</th>
             </tr>
           </thead>
           <tbody>{{killCriteriaRows}}</tbody>
@@ -873,70 +867,69 @@
       </div>
     </div>
 
-    <div class="label" style="margin-top:22px;">중단 결정</div>
+    <div class="label" style="margin-top:22px;">{{stop_decision_label}}</div>
     <div class="text-block">{{stopDecision}}</div>
 
-    <div class="label" style="margin-top:18px;">전환 결정</div>
+    <div class="label" style="margin-top:18px;">{{pivot_decision_label}}</div>
     <div class="text-block">{{pivotDecision}}</div>
 
-    <div class="label" style="margin-top:18px;">확장 결정</div>
+    <div class="label" style="margin-top:18px;">{{scale_decision_label}}</div>
     <div class="verdict">{{scaleDecision}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Risk & Kill Criteria</span>
+      <span>{{footer_risk_kill_criteria}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">4-7. GO 판단 기준</div>
+    <div class="section-title">{{section04_07_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>지표</th>
-          <th>통과 조건</th>
-          <th>의사결정 의미</th>
+          <th>{{th_metric}}</th>
+          <th>{{th_pass_condition}}</th>
+          <th>{{th_decision_meaning}}</th>
         </tr>
       </thead>
       <tbody>{{goThresholdRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:26px;">GO / NO-GO 체크리스트</div>
+    <div class="label" style="margin-top:26px;">{{go_checklist_label}}</div>
     <div class="checklist">{{goChecklistItems}}</div>
 
-    <div class="label" style="margin-top:26px;">최종 규칙</div>
+    <div class="label" style="margin-top:26px;">{{final_rule_label}}</div>
     <div class="verdict">{{finalRule}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>GO Threshold</span>
+      <span>{{footer_go_threshold}}</span>
     </div>
   </section>
 
   <section class="page section-cover">
-    <div class="section-kicker">SECTION 05</div>
-    <div class="section-cover-title">검증, 신뢰도, 부록</div>
+    <div class="section-kicker">{{section05_kicker}}</div>
+    <div class="section-cover-title">{{section05_cover_title}}</div>
     <div class="section-cover-desc">
-      이 섹션은 숫자의 민감도, 데이터 신뢰도, 참고 기준을 정리합니다.
-      보고서의 결론이 어떤 가정 위에 세워졌는지 확인하는 구간입니다.
+      {{section05_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Section 05</span>
+      <span>{{footer_section05}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">5-1. CAC / LTV 민감도 분석</div>
+    <div class="section-title">{{section05_01_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>시나리오</th>
+          <th>{{th_scenario}}</th>
           <th>CAC</th>
           <th>LTV</th>
-          <th>판단</th>
+          <th>{{th_judgment}}</th>
         </tr>
       </thead>
       <tbody>{{cacLtvRows}}</tbody>
@@ -944,49 +937,49 @@
 
     {{cacLtvRiskChart}}
 
-    <div class="label" style="margin-top:24px;">손익분기 경계선</div>
+    <div class="label" style="margin-top:24px;">{{critical_break_point_label}}</div>
     <div class="text-block">{{criticalBreakPoint}}</div>
 
-    <div class="label" style="margin-top:24px;">창업자 경고</div>
+    <div class="label" style="margin-top:24px;">{{founder_warning_label}}</div>
     <div class="verdict">{{founderWarning}}</div>
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>CAC / LTV Sensitivity</span>
+      <span>{{footer_cac_ltv_sensitivity}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">5-2. 데이터 신뢰도</div>
+    <div class="section-title">{{section05_02_title}}</div>
 
     <div class="big-metric">
-      <div class="big-metric-title">DATA CONFIDENCE</div>
+      <div class="big-metric-title">{{data_confidence_label}}</div>
       <div class="big-metric-value">{{dataConfidenceLevel}}</div>
     </div>
 
-    <div class="label" style="margin-top:22px;">요약</div>
+    <div class="label" style="margin-top:22px;">{{summary_label}}</div>
     <div class="text-block">{{dataConfidenceSummary}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>자료 유형</th>
-          <th>신뢰도</th>
-          <th>해석</th>
+          <th>{{th_source_type}}</th>
+          <th>{{th_confidence}}</th>
+          <th>{{th_interpretation}}</th>
         </tr>
       </thead>
       <tbody>{{sourceQualityRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:22px;">한계</div>
+    <div class="label" style="margin-top:22px;">{{limitations_label}}</div>
     <ul class="bullet-list">{{dataLimitItems}}</ul>
 
-    <div class="label" style="margin-top:22px;">참고 링크</div>
+    <div class="label" style="margin-top:22px;">{{reference_links_label}}</div>
     <table>
       <thead>
         <tr>
-          <th>자료명</th>
-          <th>링크</th>
+          <th>{{th_source_name}}</th>
+          <th>{{th_link}}</th>
         </tr>
       </thead>
       <tbody>{{referenceLinkRows}}</tbody>
@@ -994,33 +987,33 @@
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Data Confidence</span>
+      <span>{{footer_data_confidence}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">5-3. 부록</div>
+    <div class="section-title">{{section05_03_title}}</div>
 
     <table>
       <thead>
         <tr>
-          <th>데이터 항목</th>
-          <th>출처 / 기준</th>
-          <th>사용 목적</th>
+          <th>{{th_data_item}}</th>
+          <th>{{th_source_standard}}</th>
+          <th>{{th_usage_purpose}}</th>
         </tr>
       </thead>
       <tbody>{{dataSourceRows}}</tbody>
     </table>
 
-    <div class="label" style="margin-top:24px;">가정</div>
+    <div class="label" style="margin-top:24px;">{{assumptions_label}}</div>
     <ul class="bullet-list">{{assumptionItems}}</ul>
 
-    <div class="label" style="margin-top:22px;">참고 링크</div>
+    <div class="label" style="margin-top:22px;">{{reference_links_label}}</div>
     <table>
       <thead>
         <tr>
-          <th>자료명</th>
-          <th>링크</th>
+          <th>{{th_source_name}}</th>
+          <th>{{th_link}}</th>
         </tr>
       </thead>
       <tbody>{{referenceLinkRows}}</tbody>
@@ -1028,7 +1021,7 @@
 
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>Appendix</span>
+      <span>{{footer_appendix}}</span>
     </div>
   </section>
 </body>
