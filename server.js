@@ -1067,7 +1067,12 @@ function buildHtmlFromTemplate(report, locale) {
         finalRule: report.finalRule,
     }
 
-    html = replacePlaceholders(html, data)
+    const templateData = {
+    ...locale,
+    ...data
+}
+
+html = applyTemplateVars(html, templateData)
 
     html = html
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
@@ -1208,36 +1213,45 @@ function loadLocale(lang) {
     return JSON.parse(fs.readFileSync(filePath, "utf8"))
 }
 
+function getByPath(obj, pathKey) {
+    return pathKey.split(".").reduce((acc, key) => {
+        if (acc && Object.prototype.hasOwnProperty.call(acc, key)) {
+            return acc[key]
+        }
+        return undefined
+    }, obj)
+}
+
+function applyTemplateVars(html, data = {}) {
+    return html.replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (match, key) => {
+        const value = getByPath(data, key)
+
+        if (value === undefined || value === null) {
+            console.warn(`[TEMPLATE_MISSING_KEY] ${key}`)
+            return ""
+        }
+
+        return String(value)
+    })
+}
+
 function normalizeLanguage(lang) {
     const supported = ["ko", "en", "ja", "zh", "mn"]
     return supported.includes(lang) ? lang : "en"
 }
 
 function flattenLabels(labels) {
-    const flat = {}
-    Object.entries(labels || {}).forEach(([k, v]) => {
-        flat[`label.${k}`] = v
-    })
-    return flat
+    return {
+        label: labels || {},
+        labels: labels || {},
+    }
 }
 
 function flattenNotes(notes) {
-    const flat = {}
-    Object.entries(notes || {}).forEach(([k, v]) => {
-        flat[`note.${k}`] = v
-    })
-    return flat
-}
-
-function replacePlaceholders(html, data) {
-    let output = html
-    Object.entries(data).forEach(([key, value]) => {
-        output = output.replace(
-            new RegExp(`{{${key}}}`, "g"),
-            esc(String(value ?? ""))
-        )
-    })
-    return output
+    return {
+        note: notes || {},
+        fixedNotes: notes || {},
+    }
 }
 
 function rows(items) {
