@@ -946,29 +946,28 @@ function buildHtmlFromTemplate(report, locale) {
 
     const funnel = normalizeFunnel(report.marketFunnel)
     const lockedMessage =
-        report?.lockedSections?.message ||
-        "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
+    report?.lockedSections?.message ||
+    t(locale, "locked.message", "Core data and execution strategy are available in the paid report.")
+    const lockedTitle = t(locale, "locked.title", "Paid report only")
 
-        const scoreGuideRows = [
-        ["85~100", "매우 좋음", "강한 GO 후보. 확장 검토 가능"],
-        ["70~84", "좋음", "조건이 맞으면 GO 가능"],
-        ["50~69", "보통 / 검증 필요", "HOLD. 작은 테스트 후 판단"],
-        ["30~49", "위험", "NO GO 가능성 높음. 구조 재설계 필요"],
-        ["0~29", "매우 위험", "즉시 중단 또는 전면 재검토"],
-    ]
+        const benchmarkRows = getLocaleTable(locale, "tables.benchmarkRows", [
+    ["BarkBox", "US dog subscription box", "Creates subscription enjoyment through themed boxes, toys, and treats."],
+    ["Butternut Box", "UK personalized pet food subscription", "Strong personalized recommendation and recurring delivery structure."],
+    ["Premium pet food DTC brands", "DTC repeat-purchase model", "Uses ingredient trust, reviews, and recurring delivery benefits to drive repeat purchase."],
+])
 
-    const customerOpportunityRows = [
-        ["구매 감정", "반려견에게 더 좋은 것을 주고 싶은 욕구가 강함", "첫 구매 전환을 만들 수 있음"],
-        ["선물성", "귀엽고 프리미엄한 패키지는 선물 수요와 잘 맞음", "체험박스·시즌박스에 유리"],
-        ["반복 구매", "강아지가 잘 먹는 제품은 반복 구매 가능성이 있음", "구독 전환의 근거가 될 수 있음"],
-        ["콘텐츠 적합성", "반려견 반응 영상은 숏폼 콘텐츠와 잘 맞음", "인스타그램·유튜브 쇼츠 테스트에 유리"],
-    ]
+    const customerOpportunityRows = getLocaleTable(locale, "tables.customerOpportunityRows", [
+    ["Purchase emotion", "The customer has a strong desire to give something better.", "Can create first-purchase conversion."],
+    ["Giftability", "A premium package can fit gift demand.", "Useful for trial boxes and seasonal boxes."],
+    ["Repeat purchase", "If the product works well, repeat purchase is possible.", "Can support subscription conversion."],
+    ["Content fit", "Customer reaction content works well in short-form channels.", "Useful for Instagram, TikTok, and YouTube Shorts tests."],
+])
 
-    const benchmarkRows = [
-        ["BarkBox", "미국 반려견 구독박스", "테마형 박스와 장난감·간식 조합으로 구독 재미를 만듦"],
-        ["Butternut Box", "영국 맞춤형 펫푸드 구독", "반려견 정보 기반 맞춤 추천과 정기배송 구조가 강점"],
-        ["프리미엄 펫푸드 DTC 브랜드", "자사몰 중심 반복구매 모델", "성분 신뢰, 후기, 정기배송 혜택으로 재구매를 유도"],
-    ]
+    const benchmarkRows = getLocaleTable(locale, "tables.benchmarkRows", [
+    ["BarkBox", "US dog subscription box", "Creates subscription enjoyment through themed boxes, toys, and treats."],
+    ["Butternut Box", "UK personalized pet food subscription", "Strong personalized recommendation and recurring delivery structure."],
+    ["Premium pet food DTC brands", "DTC repeat-purchase model", "Uses ingredient trust, reviews, and recurring delivery benefits to drive repeat purchase."],
+])
 
     const referenceLinks = [
         ["농림축산식품부", "https://www.mafra.go.kr"],
@@ -1081,7 +1080,7 @@ function buildHtmlFromTemplate(report, locale) {
         .replace(
             "{{tamSamSomRows}}",
             report?.lockedSections?.tamSamSom
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.tamSamSom)
         )
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
@@ -1089,7 +1088,7 @@ function buildHtmlFromTemplate(report, locale) {
         .replace(
     "{{competitionRows}}",
     report?.lockedSections?.competition
-        ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
         : rows(report.competitionMap)
 )
 .replace(
@@ -1105,19 +1104,19 @@ function buildHtmlFromTemplate(report, locale) {
 .replace(
     "{{unitEconomicsRows}}",
     report?.lockedSections?.economics
-        ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
         : rows(report.unitEconomicsTable)
 )
         .replace(
-            "{{unitEconomicsRows}}",
-            report?.lockedSections?.unitEconomics
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
-                : rows(report.unitEconomicsTable)
-        )
+    "{{unitEconomicsRows}}",
+    report?.lockedSections?.unitEconomics
+        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        : rows(report.unitEconomicsTable)
+)
         .replace(
             "{{marketingChannelRows}}",
             report?.lockedSections?.marketing
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage)}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.marketingStrategy.channelFit)
         )
         .replace(
@@ -1129,7 +1128,7 @@ function buildHtmlFromTemplate(report, locale) {
         .replace(
             "{{marketingTestRows}}",
             report?.lockedSections?.marketing
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.marketingStrategy.thirtyDayMarketingTest)
         )
         .replace(
@@ -1139,19 +1138,19 @@ function buildHtmlFromTemplate(report, locale) {
         .replace(
             "{{riskRows}}",
             report?.lockedSections?.risk
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.riskSystem)
         )
         .replace(
             "{{executionRows}}",
             report?.lockedSections?.execution
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.executionPlan)
         )
         .replace(
             "{{goThresholdRows}}",
             report?.lockedSections?.goThreshold
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage)}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.goThreshold)
         )
         .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
@@ -1171,10 +1170,10 @@ function buildHtmlFromTemplate(report, locale) {
     return html
 }
 
-function lockedBox(message) {
+function lockedBox(message, title = "Paid report only") {
     return `
         <div class="locked-box">
-            <h3>🔒 유료 보고서 전용</h3>
+            <h3>🔒 ${esc(title)}</h3>
             <p>${esc(message)}</p>
         </div>
     `
@@ -1252,6 +1251,39 @@ function flattenNotes(notes) {
         note: notes || {},
         fixedNotes: notes || {},
     }
+}
+
+function flattenNotes(notes) {
+    return {
+        note: notes || {},
+        fixedNotes: notes || {},
+    }
+}
+
+// ✅ 여기부터 추가
+function t(locale, key, fallback = "") {
+    return getByPath(locale, key) ?? fallback
+}
+
+function getLocaleTable(locale, key, fallback = []) {
+    const value = getByPath(locale, key)
+    return Array.isArray(value) ? value : fallback
+}
+
+function getLocaleList(locale, key, fallback = []) {
+    const value = getByPath(locale, key)
+    return Array.isArray(value) ? value : fallback
+}
+// ✅ 여기까지 추가
+
+function rows(items) {
+    if (!Array.isArray(items)) return ""
+    return items
+        .map((row) => {
+            const cells = Array.isArray(row) ? row : Object.values(row)
+            return `<tr>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`
+        })
+        .join("")
 }
 
 function rows(items) {
