@@ -950,12 +950,13 @@ function buildHtmlFromTemplate(report, locale) {
     t(locale, "locked.message", "Core data and execution strategy are available in the paid report.")
     const lockedTitle = t(locale, "locked.title", "Paid report only")
 
-        const benchmarkRows = getLocaleTable(locale, "tables.benchmarkRows", [
-    ["BarkBox", "US dog subscription box", "Creates subscription enjoyment through themed boxes, toys, and treats."],
-    ["Butternut Box", "UK personalized pet food subscription", "Strong personalized recommendation and recurring delivery structure."],
-    ["Premium pet food DTC brands", "DTC repeat-purchase model", "Uses ingredient trust, reviews, and recurring delivery benefits to drive repeat purchase."],
+       const scoreGuideRows = getLocaleTable(locale, "tables.scoreGuideRows", [
+    ["85~100", "Excellent", "Strong GO candidate. Scaling may be considered."],
+    ["70~84", "Good", "GO is possible if key conditions are met."],
+    ["50~69", "Average / Needs validation", "HOLD. Decide after a small test."],
+    ["30~49", "Risky", "High NO GO probability. Redesign the structure."],
+    ["0~29", "Very risky", "Stop immediately or fully reconsider."],
 ])
-
     const customerOpportunityRows = getLocaleTable(locale, "tables.customerOpportunityRows", [
     ["Purchase emotion", "The customer has a strong desire to give something better.", "Can create first-purchase conversion."],
     ["Giftability", "A premium package can fit gift demand.", "Useful for trial boxes and seasonal boxes."],
@@ -1101,12 +1102,6 @@ function buildHtmlFromTemplate(report, locale) {
 // 👇 여기 추가 (이 위치가 정확함)
 .replace("{{benchmarkRows}}", rows(benchmarkRows))
 
-.replace(
-    "{{unitEconomicsRows}}",
-    report?.lockedSections?.economics
-        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
-        : rows(report.unitEconomicsTable)
-)
         .replace(
     "{{unitEconomicsRows}}",
     report?.lockedSections?.unitEconomics
@@ -1246,12 +1241,6 @@ function flattenLabels(labels) {
     }
 }
 
-function flattenNotes(notes) {
-    return {
-        note: notes || {},
-        fixedNotes: notes || {},
-    }
-}
 
 function flattenNotes(notes) {
     return {
