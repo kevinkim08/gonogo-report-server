@@ -182,5 +182,77 @@
   },
   "footer": {
     "left": "GoNoGo™ Business Decision Report"
+  },
+  "locked": {
+    "title": "Paid report only",
+    "message": "Core data and execution strategy are available in the paid report."
+  },
+  "tables": {
+    "scoreGuideRows": [
+      [
+        "85~100",
+        "Excellent",
+        "Strong GO candidate. Scaling may be considered."
+      ],
+      [
+        "70~84",
+        "Good",
+        "GO is possible if key conditions are met."
+      ],
+      [
+        "50~69",
+        "Average / Needs validation",
+        "HOLD. Decide after a small test."
+      ],
+      [
+        "30~49",
+        "Risky",
+        "High NO GO probability. Redesign the structure."
+      ],
+      [
+        "0~29",
+        "Very risky",
+        "Stop immediately or fully reconsider."
+      ]
+    ],
+    "customerOpportunityRows": [
+      [
+        "Purchase emotion",
+        "The customer has a strong desire to give something better.",
+        "Can create first-purchase conversion."
+      ],
+      [
+        "Giftability",
+        "A premium package can fit gift demand.",
+        "Useful for trial boxes and seasonal boxes."
+      ],
+      [
+        "Repeat purchase",
+        "If the product works well, repeat purchase is possible.",
+        "Can support subscription conversion."
+      ],
+      [
+        "Content fit",
+        "Customer reaction content works well in short-form channels.",
+        "Useful for Instagram, TikTok, and YouTube Shorts tests."
+      ]
+    ],
+    "benchmarkRows": [
+      [
+        "BarkBox",
+        "US dog subscription box",
+        "Creates subscription enjoyment through themed boxes, toys, and treats."
+      ],
+      [
+        "Butternut Box",
+        "UK personalized pet food subscription",
+        "Strong personalized recommendation and recurring delivery structure."
+      ],
+      [
+        "Premium pet food DTC brands",
+        "DTC repeat-purchase model",
+        "Uses ingredient trust, reviews, and recurring delivery benefits to drive repeat purchase."
+      ]
+    ]
   }
 }
