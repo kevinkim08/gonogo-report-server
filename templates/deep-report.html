@@ -298,13 +298,23 @@ td, th {
     }
 
     .chart-row {
-      display: grid;
-      grid-template-columns: 80px 1fr 120px;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 14px;
-      font-size: 12px;
-    }
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) minmax(150px, 0.42fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 11px;
+}
+
+.chart-value {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-align: right;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
 
     .chart-row:last-child { margin-bottom: 0; }
 
@@ -437,6 +447,19 @@ html[lang="ja"] table,
 html[lang="zh"] table,
 html[lang="mn"] table {
   font-size: 11px;
+}
+
+html[lang="ja"] .chart-row,
+html[lang="zh"] .chart-row,
+html[lang="mn"] .chart-row {
+  grid-template-columns: 60px minmax(0, 1fr) minmax(170px, 0.5fr);
+}
+
+html[lang="ja"] .chart-value,
+html[lang="zh"] .chart-value,
+html[lang="mn"] .chart-value {
+  font-size: 10px;
+  line-height: 1.35;
 }
     
   </style>
