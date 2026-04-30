@@ -305,6 +305,12 @@ Narrative depth rules (CRITICAL):
 - The report must not feel shallow.
 - Narrative fields are the core of decision quality.
 
+structureSummary:
+- 3 to 4 sentences
+- Rewrite the business diagnosis table into a connected business story.
+- Explain how the business actually operates in reality.
+- Include business type, revenue model, entry difficulty, bottleneck, and validation logic.
+
 For the following fields, write deeper, structured explanations:
 
 marketInsight:
@@ -429,15 +435,16 @@ Return this exact JSON shape:
   ],
 
   "businessDiagnosis": {
-    "industryType": "",
-    "businessModelType": "",
-    "countryMarketBehavior": "",
-    "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
-    "mainBottleneck": "",
-    "bestFirstOffer": "",
-    "validationExperiment": "",
-    "goNoGoLogic": ""
-  },
+  "industryType": "",
+  "businessModelType": "",
+  "countryMarketBehavior": "",
+  "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
+  "mainBottleneck": "",
+  "bestFirstOffer": "",
+  "validationExperiment": "",
+  "goNoGoLogic": "",
+  "structureSummary": ""
+},
 
   "visualScores": {
     "market": 0,
@@ -1093,6 +1100,7 @@ function buildHtmlFromTemplate(report, locale) {
         bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
         validationExperiment: report.businessDiagnosis?.validationExperiment || "",
         goNoGoLogic: report.businessDiagnosis?.goNoGoLogic || "",
+        structureSummary: report.businessDiagnosis?.structureSummary || "",
 
         dataConfidenceLevel: report.dataConfidence?.overallLevel || "",
         dataConfidenceSummary: report.dataConfidence?.summary || "",
