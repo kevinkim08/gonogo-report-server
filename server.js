@@ -285,6 +285,8 @@ Critical rules:
 23. Do not use undefined.
 24. Do not use empty strings unless the field is truly impossible.
 25. Keep all table cells short and layout-safe.
+26. This rule applies ONLY to table cells.
+27. Narrative fields must be deeper and more informative.
 
 Layout safety rules:
 - Table cells must be short.
@@ -297,6 +299,47 @@ Layout safety rules:
 - Avoid repeating the same sentence across multiple cells.
 - Numbers, ranges, and decisions should be concise.
 - Use clear, founder-friendly wording.
+
+Narrative depth rules (CRITICAL):
+
+- The report must not feel shallow.
+- Narrative fields are the core of decision quality.
+
+For the following fields, write deeper, structured explanations:
+
+marketInsight:
+- 3 to 4 sentences
+- Explain: market structure → limitation → real opportunity → strategic implication
+
+economicsJudgment:
+- 3 to 4 sentences
+- Explain: cost structure → CAC pressure → margin reality → survival condition
+
+modelJudgment:
+- 3 to 4 sentences
+- Explain: why this model works or fails → structural weakness → how to fix
+
+operatingRule:
+- 2 to 3 sentences
+- Must define a clear decision rule (what to track and when to stop)
+
+profitJudgment:
+- 3 to 4 sentences
+- Explain: scaling condition → risk → realistic expectation
+
+breakEvenPoint:
+- 2 to 3 sentences
+- Explain: when business becomes viable → key threshold → constraint
+
+Additional rules:
+- Each explanation must include:
+  1. Cause
+  2. Business meaning
+  3. Action implication
+
+- Avoid generic phrases such as "this is important" or "this is needed"
+- Avoid repeating the same logic across sections
+- Each section must provide a different angle of insight
 
 Array stability rules:
 - glossary must contain exactly 7 items.
@@ -329,6 +372,12 @@ Language output rules:
 - Do not mix Korean into English, Japanese, Chinese, or Mongolian reports.
 - Keep business terms such as CAC, LTV, TAM, SAM, SOM, AOV in English.
 - For Japanese, Chinese, and Mongolian, keep sentences compact to protect PDF layout.
+
+Narrative tone rules:
+- Write like a strategy consultant, not a content writer
+- Be direct, specific, and decision-oriented
+- Avoid storytelling, focus on judgment
+- Each paragraph should help a founder decide "go / pivot / stop"
 
 Country strategy rules:
 - ko: Korea-first. Consider Naver, Kakao, Coupang, SmartStore, Instagram, YouTube Shorts, local payment behavior, Korean price sensitivity.
