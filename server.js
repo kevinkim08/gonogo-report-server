@@ -948,8 +948,9 @@ function buildHtmlFromTemplate(report, locale) {
     const lockedMessage =
     report?.lockedSections?.message ||
     t(locale, "locked.message", "Core data and execution strategy are available in the paid report.")
-    const lockedTitle = t(locale, "locked.title", "Paid report only")
 
+    const lockedTitle = t(locale, "locked.title", "Paid report only")
+    
        const scoreGuideRows = getLocaleTable(locale, "tables.scoreGuideRows", [
     ["85~100", "Excellent", "Strong GO candidate. Scaling may be considered."],
     ["70~84", "Good", "GO is possible if key conditions are met."],
@@ -1095,11 +1096,10 @@ function buildHtmlFromTemplate(report, locale) {
 .replace(
     "{{competitionConclusion}}",
     report?.lockedSections?.competition
-        ? esc("상세 경쟁 분석은 유료 보고서에서 확인 가능합니다.")
+        ? esc(lockedMessage)
         : esc(report.competitionConclusion)
 )
 
-// 👇 여기 추가 (이 위치가 정확함)
 .replace("{{benchmarkRows}}", rows(benchmarkRows))
 
         .replace(
@@ -1115,11 +1115,11 @@ function buildHtmlFromTemplate(report, locale) {
                 : rows(report.marketingStrategy.channelFit)
         )
         .replace(
-            "{{contentPlaybookItems}}",
-            report?.lockedSections?.marketing
-                ? `<li>${esc("콘텐츠 전략은 유료 보고서에서 확인 가능합니다.")}</li>`
-                : listItems(report.marketingStrategy.contentPlaybook)
-        )
+    "{{contentPlaybookItems}}",
+    report?.lockedSections?.marketing
+        ? `<li>${esc(lockedMessage)}</li>`
+        : listItems(report.marketingStrategy.contentPlaybook)
+)
         .replace(
             "{{marketingTestRows}}",
             report?.lockedSections?.marketing
@@ -1275,15 +1275,6 @@ function rows(items) {
         .join("")
 }
 
-function rows(items) {
-    if (!Array.isArray(items)) return ""
-    return items
-        .map((row) => {
-            const cells = Array.isArray(row) ? row : Object.values(row)
-            return `<tr>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`
-        })
-        .join("")
-}
 
 function getStatusClass(value) {
     const v = String(value || "").toLowerCase()
