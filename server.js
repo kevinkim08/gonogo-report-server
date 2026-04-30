@@ -274,6 +274,61 @@ Critical rules:
 12. All scores must be numbers from 0 to 100.
 13. Keep table cells concise but meaningful.
 14. Make the report directly useful for founder decision-making.
+15. You must return every field in the exact JSON structure.
+16. Never omit required keys.
+17. Never rename keys.
+18. Never add new top-level keys.
+19. Every array must keep the required number of rows.
+20. Every table row must keep the required number of columns.
+21. If data is uncertain, write a conservative assumption instead of leaving it blank.
+22. Do not use null.
+23. Do not use undefined.
+24. Do not use empty strings unless the field is truly impossible.
+25. Keep all table cells short and layout-safe.
+
+Layout safety rules:
+- Table cells must be short.
+- Each table cell should be 8 to 18 words maximum in English.
+- For Japanese, Chinese, and Mongolian, keep table cells shorter than English.
+- Do not write full paragraphs inside table cells.
+- Long explanations must go only into text fields such as marketInsight, buyingTrigger, economicsJudgment, modelJudgment, operatingRule, finalRule, founderWarning.
+- Do not put line breaks inside table cells.
+- Do not use very long compound phrases inside table cells.
+- Avoid repeating the same sentence across multiple cells.
+- Numbers, ranges, and decisions should be concise.
+- Use clear, founder-friendly wording.
+
+Array stability rules:
+- glossary must contain exactly 7 items.
+- decisionMatrix must contain exactly 4 rows.
+- marketCards must contain exactly 4 rows.
+- marketFunnel must contain exactly 3 items: TAM, SAM, SOM.
+- tamSamSom must contain exactly 3 rows.
+- customerTruth must contain exactly 3 rows.
+- competitionMap must contain exactly 4 rows.
+- unitEconomicsCards must contain exactly 4 rows.
+- unitEconomicsTable must contain exactly 4 rows.
+- marketingStrategy.channelFit must contain exactly 4 rows.
+- marketingStrategy.contentPlaybook must contain exactly 5 items.
+- marketingStrategy.thirtyDayMarketingTest must contain exactly 3 rows.
+- businessModel.revenueLayers must contain exactly 3 rows.
+- riskSystem must contain exactly 3 rows.
+- executionPlan must contain exactly 3 rows.
+- goThreshold must contain exactly 4 rows.
+- goChecklist must contain exactly 4 items.
+- dataConfidence.sourceQuality must contain exactly 3 rows.
+- dataConfidence.limits must contain exactly 3 items.
+- sensitivityAnalysis.cacLtvTable must contain exactly 3 rows.
+- profitSimulation.monthlyScenarioTable must contain exactly 3 rows.
+- killCriteria.rules must contain exactly 4 rows.
+- appendix.dataSources must contain exactly 3 rows.
+- appendix.assumptions must contain exactly 4 items.
+
+Language output rules:
+- All user-facing values must be written in the final report language.
+- Do not mix Korean into English, Japanese, Chinese, or Mongolian reports.
+- Keep business terms such as CAC, LTV, TAM, SAM, SOM, AOV in English.
+- For Japanese, Chinese, and Mongolian, keep sentences compact to protect PDF layout.
 
 Country strategy rules:
 - ko: Korea-first. Consider Naver, Kakao, Coupang, SmartStore, Instagram, YouTube Shorts, local payment behavior, Korean price sensitivity.
