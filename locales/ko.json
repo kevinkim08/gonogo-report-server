@@ -34,7 +34,7 @@
   "footer_section03": "섹션 03",
   "footer_section04": "섹션 04",
   "footer_section05": "섹션 05",
-  "founder_decision_label": "대표 의사결정 중요",
+  "founder_decision_label": "대표 의사결정",
   "founder_warning_label": "대표 경고",
   "go_checklist_label": "GO / NO-GO 체크리스트",
   "html_title": "GoNoGo 보고서",
@@ -43,10 +43,10 @@
   "market_insight_label": "시장 해석",
   "marketing_test_label": "마케팅 테스트",
   "model_judgment_label": "모델 판단",
-  "negative_signal_title": "부정 신호 고객이 사지 않는 이유",
+  "negative_signal_title": "부정 신호: 고객이 사지 않는 이유",
   "operating_rule_label": "운영 원칙",
   "pivot_decision_label": "피벗 판단",
-  "positive_signal_title": "긍정 신호 고객이 사는 이유",
+  "positive_signal_title": "긍정 신호: 고객이 사는 이유",
   "profit_judgment_label": "수익성 판단",
   "reference_links_label": "참고 링크",
   "risk_system_title": "리스크 시스템",
@@ -57,7 +57,7 @@
   "section01_02_note": "이 페이지는 사업 아이디어를 산업 유형, 수익 모델, 시장 진입 난이도로 분류해 이후 분석의 기준선을 설정합니다.",
   "section01_02_title": "1-2. 사업 구조 진단",
   "section01_cover_desc": "이 섹션은 보고서에서 사용하는 핵심 용어와 사업 구조를 정의합니다. 숫자의 의미를 이해해야 GO / HOLD / NO GO 판단을 정확히 읽을 수 있습니다.",
-  "section01_cover_title": "보고서를 읽는 방법",
+  "section01_cover_title": "이 보고서를 읽는 방법",
   "section01_kicker": "SECTION 01",
   "section02_01_title": "2-1 / 2-2. 고객 반응 가능성 vs 실제 고객 문제",
   "section02_03_note": "이 판단은 단순 분석이 아닙니다. 실제 돈과 시간을 투자할지 결정하는 기준입니다. 감정이 아니라 숫자와 구조로 결정해야 합니다.",
@@ -218,7 +218,7 @@
     "customerOpportunityRows": [
       [
         "구매 감정",
-        "고객은 더 나은 것을 주고 싶은 욕구가 강함",
+        "고객에게 더 좋은 것을 주고 싶은 욕구가 강함",
         "첫 구매 전환을 만들 수 있음"
       ],
       [
@@ -228,13 +228,13 @@
       ],
       [
         "반복 구매",
-        "제품 만족도가 높으면 반복 구매 가능성이 있음",
+        "제품 만족도가 높으면 반복 구매 가능",
         "구독 전환의 근거가 될 수 있음"
       ],
       [
         "콘텐츠 적합성",
         "고객 반응 콘텐츠는 숏폼 채널과 잘 맞음",
-        "인스타그램·틱톡·유튜브 쇼츠 테스트에 유리"
+        "Instagram, TikTok, YouTube Shorts 테스트에 유리"
       ]
     ],
     "benchmarkRows": [
@@ -250,7 +250,7 @@
       ],
       [
         "프리미엄 펫푸드 DTC 브랜드",
-        "자사몰 중심 반복구매 모델",
+        "DTC 반복구매 모델",
         "성분 신뢰, 후기, 정기배송 혜택으로 재구매를 유도"
       ]
     ]
