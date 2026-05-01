@@ -1169,6 +1169,7 @@ function buildHtmlFromTemplate(report, locale) {
 
         competitionPositionChart: competitionPositionChart(report.competitionMap),
         riskHeatmap: riskHeatmap(report.riskSystem),
+        executionTimeline: executionTimeline(report.executionPlan),
         
     }
 
@@ -1250,6 +1251,9 @@ function buildHtmlFromTemplate(report, locale) {
                 ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.executionPlan)
         )
+
+.replace("{{executionTimeline}}", executionTimeline(report.executionPlan))
+        
         .replace(
             "{{goThresholdRows}}",
             report?.lockedSections?.goThreshold
@@ -1776,6 +1780,52 @@ function riskHeatmap(rows) {
                     ">
                         <b>${title}</b><br/>
                         <span>${desc}</span>
+                    </div>
+                `
+            }).join("")}
+
+        </div>
+    </div>
+    `
+}
+
+function executionTimeline(rows) {
+    if (!Array.isArray(rows)) return ""
+
+    return `
+    <div class="chart-box">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+            
+            ${rows.map((row, index) => {
+                const phase = esc(row?.[0] || "")
+                const action = esc(row?.[1] || "")
+                const goal = esc(row?.[2] || "")
+
+                return `
+                    <div style="
+                        display:flex;
+                        gap:12px;
+                        align-items:flex-start;
+                    ">
+                        <div style="
+                            min-width:70px;
+                            font-weight:bold;
+                            color:#2f7d57;
+                        ">
+                            ${phase}
+                        </div>
+
+                        <div style="
+                            flex:1;
+                            background:#f6faf7;
+                            padding:10px;
+                            border-radius:8px;
+                            border:1px solid #d8e7dc;
+                            font-size:11px;
+                        ">
+                            <div><b>Action:</b> ${action}</div>
+                            <div><b>Goal:</b> ${goal}</div>
+                        </div>
                     </div>
                 `
             }).join("")}
