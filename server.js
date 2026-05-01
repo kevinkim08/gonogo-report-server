@@ -1168,6 +1168,8 @@ function buildHtmlFromTemplate(report, locale) {
         decisionChart: buildDecisionChart(report),
 
         competitionPositionChart: competitionPositionChart(report.competitionMap),
+        riskHeatmap: riskHeatmap(report.riskSystem),
+        
     }
 
    const templateData = {
@@ -1239,6 +1241,9 @@ function buildHtmlFromTemplate(report, locale) {
                 ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.riskSystem)
         )
+
+        .replace("{{riskHeatmap}}", riskHeatmap(report.riskSystem))
+        
         .replace(
             "{{executionRows}}",
             report?.lockedSections?.execution
@@ -1729,6 +1734,51 @@ function competitionPositionChart(map) {
 
             <div style="position:absolute; left:10px; top:10px; font-size:10px;">High Value</div>
             <div style="position:absolute; left:10px; bottom:30px; font-size:10px;">Low Value</div>
+
+        </div>
+    </div>
+    `
+}
+
+function riskHeatmap(rows) {
+    if (!Array.isArray(rows)) return ""
+
+    return `
+    <div class="chart-box">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            
+            ${rows.map((row) => {
+                const title = esc(row?.[0] || "")
+                const desc = esc(row?.[1] || "")
+
+                // 간단한 위험도 추정
+                let level = "MEDIUM"
+                if (desc.includes("높") || desc.includes("high") || desc.includes("위험")) {
+                    level = "HIGH"
+                } else if (desc.includes("낮") || desc.includes("low")) {
+                    level = "LOW"
+                }
+
+                const color =
+                    level === "HIGH"
+                        ? "#ff5a5a"
+                        : level === "MEDIUM"
+                        ? "#ffb84d"
+                        : "#4cd964"
+
+                return `
+                    <div style="
+                        background:${color};
+                        color:#fff;
+                        padding:12px;
+                        border-radius:8px;
+                        font-size:11px;
+                    ">
+                        <b>${title}</b><br/>
+                        <span>${desc}</span>
+                    </div>
+                `
+            }).join("")}
 
         </div>
     </div>
