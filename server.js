@@ -496,6 +496,7 @@ Return this exact JSON shape:
   ],
 
   "buyingTrigger": "",
+"customerSummary": ""
 
   "competitionMap": [
     ["", "", "", ""],
