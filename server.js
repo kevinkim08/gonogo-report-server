@@ -1168,9 +1168,9 @@ function buildHtmlFromTemplate(report, locale) {
         decisionChart: buildDecisionChart(report),
     }
 
-    const templateData = {
-    ...data,
-    locale
+   const templateData = {
+    ...locale,
+    ...data
 }
 
     html = html
