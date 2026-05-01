@@ -1361,7 +1361,12 @@ function applyTemplateVars(html, data = {}) {
             return ""
         }
 
-        return String(value)
+        // 🔥 핵심 수정
+        if (typeof value === "string" && value.includes("<div")) {
+            return value
+        }
+
+        return esc(value)
     })
 }
 
