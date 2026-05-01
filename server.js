@@ -1675,7 +1675,25 @@ function validateTemplateKeys(html, templateData, blockKeys = []) {
         return !(key in templateData)
     })
 
-/* 🔥 여기 아래 추가 */
+    const extraKeys = Object.keys(templateData).filter(
+        (key) => !htmlKeys.includes(key)
+    )
+
+    if (missingKeys.length > 0) {
+        console.log("[MISSING_TEMPLATE_KEYS]", missingKeys)
+    }
+
+    if (extraKeys.length > 0) {
+        console.log("[EXTRA_TEMPLATE_KEYS]", extraKeys)
+    }
+
+    return {
+        missingKeys,
+        extraKeys,
+    }
+}
+
+/* 🔥 완전히 밖으로 분리 */
 function competitionPositionChart(map) {
     if (!Array.isArray(map)) return ""
 
@@ -1715,24 +1733,6 @@ function competitionPositionChart(map) {
         </div>
     </div>
     `
-}
-    
-    const extraKeys = Object.keys(templateData).filter(
-        (key) => !htmlKeys.includes(key)
-    )
-
-    if (missingKeys.length > 0) {
-        console.log("[MISSING_TEMPLATE_KEYS]", missingKeys)
-    }
-
-    if (extraKeys.length > 0) {
-        console.log("[EXTRA_TEMPLATE_KEYS]", extraKeys)
-    }
-
-    return {
-        missingKeys,
-        extraKeys,
-    }
 }
 
 function checklistItems(items) {
