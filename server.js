@@ -824,6 +824,10 @@ function normalizeDeepReport(report, input) {
             goNoGoLogic:
                 report?.businessDiagnosis?.goNoGoLogic ||
                 "CAC, 전환율, 재구매율이 기준을 넘을 때만 확장합니다.",
+            structureSummary:
+    report?.businessDiagnosis?.structureSummary ||
+    "이 사업은 고객 반응, 수익 구조, 진입 난이도를 함께 검증해야 하는 구조입니다. 초기에는 큰 확장보다 작은 테스트로 구매 전환과 반복 구매 가능성을 확인해야 합니다.",
+            
         },
         
         glossary: safeArray(
@@ -1168,6 +1172,7 @@ function buildHtmlFromTemplate(report, locale) {
 
         marketInsight: report.marketInsight,
         buyingTrigger: report.buyingTrigger,
+        customerSummary: report.customerSummary || "",
 
         cacValue: unit.CAC || "",
         ltvValue: unit.LTV || "",
