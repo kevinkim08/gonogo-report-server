@@ -1999,20 +1999,6 @@ app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`)
 })
 
-function buildDecisionChart(report) {
-  const m = report.marketScore || 60
-  const p = report.profitabilityScore || 50
-  const e = report.executionScore || 55
-  const r = report.riskScore || 40
-
-  return `
-  <div class="chart-box">
-    ${buildBar("Market", m)}
-    ${buildBar("Profitability", p)}
-    ${buildBar("Execution", e)}
-    ${buildBar("Risk", r, true)}
-  </div>`
-}
 
 function buildBar(label, value, danger = false) {
   return `
