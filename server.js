@@ -1166,6 +1166,8 @@ function buildHtmlFromTemplate(report, locale) {
         operatingRule: report.operatingRule,
         finalRule: report.finalRule,
         decisionChart: buildDecisionChart(report),
+
+        competitionPositionChart: competitionPositionChart(report.competitionMap),
     }
 
    const templateData = {
@@ -1175,6 +1177,7 @@ function buildHtmlFromTemplate(report, locale) {
 
     html = html
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
+        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
         .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
@@ -1672,6 +1675,48 @@ function validateTemplateKeys(html, templateData, blockKeys = []) {
         return !(key in templateData)
     })
 
+/* 🔥 여기 아래 추가 */
+function competitionPositionChart(map) {
+    if (!Array.isArray(map)) return ""
+
+    return `
+    <div class="chart-box">
+        <div style="position: relative; height: 240px; background: #f6faf7; border:1px solid #d8e7dc;">
+            
+            ${map.map((row, i) => {
+                const name = esc(row[0] || "")
+                const x = (i % 2) * 60 + 20
+                const y = Math.floor(i / 2) * 60 + 20
+
+                return `
+                    <div style="
+                        position:absolute;
+                        left:${x}%;
+                        top:${y}%;
+                        transform:translate(-50%, -50%);
+                        background:#2f7d57;
+                        color:#fff;
+                        padding:6px 10px;
+                        font-size:10px;
+                        border-radius:6px;
+                        white-space:nowrap;
+                    ">
+                        ${name}
+                    </div>
+                `
+            }).join("")}
+
+            <div style="position:absolute; left:10px; bottom:10px; font-size:10px;">Low Price</div>
+            <div style="position:absolute; right:10px; bottom:10px; font-size:10px;">High Price</div>
+
+            <div style="position:absolute; left:10px; top:10px; font-size:10px;">High Value</div>
+            <div style="position:absolute; left:10px; bottom:30px; font-size:10px;">Low Value</div>
+
+        </div>
+    </div>
+    `
+}
+    
     const extraKeys = Object.keys(templateData).filter(
         (key) => !htmlKeys.includes(key)
     )
