@@ -1450,20 +1450,35 @@ function getRiskScoreClass(score) {
 function marketFunnelChart(items) {
     if (!Array.isArray(items)) return ""
 
+    const normalized = items.map((item) => {
+        const label = item?.label || ""
+        const value = item?.value || ""
+        const score = Math.max(8, Math.min(100, Number(item?.score || 0)))
+
+        return { label, value, score }
+    })
+
     return `
-        <div class="chart-box">
-            ${items.map((item) => {
-                const score = Math.max(5, Math.min(100, Number(item.score || 0)))
-                return `
-                    <div class="chart-row">
-                        <div class="chart-label">${esc(item.label || "")}</div>
-                        <div class="chart-track">
-                            <div class="chart-fill" style="width:${score}%"></div>
+        <div class="market-funnel-box">
+            ${normalized
+                .map((item, index) => {
+                    const levelClass =
+                        index === 0 ? "funnel-tam" :
+                        index === 1 ? "funnel-sam" :
+                        "funnel-som"
+
+                    return `
+                        <div class="market-funnel-row ${levelClass}">
+                            <div class="market-funnel-label">${esc(item.label)}</div>
+                            <div class="market-funnel-track">
+                                <div class="market-funnel-fill" style="width:${item.score}%">
+                                    <span>${esc(item.value)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="chart-value">${esc(item.value || "")}</div>
-                    </div>
-                `
-            }).join("")}
+                    `
+                })
+                .join("")}
         </div>
     `
 }
