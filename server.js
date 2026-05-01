@@ -355,7 +355,7 @@ Additional rules:
 - Each section must provide a different angle of insight
 
 Array stability rules:
-- glossary must contain exactly 7 items.
+- glossary must contain exactly 5 items.
 - decisionMatrix must contain exactly 4 rows.
 - marketCards must contain exactly 4 rows.
 - marketFunnel must contain exactly 3 items: TAM, SAM, SOM.
@@ -1169,8 +1169,8 @@ function buildHtmlFromTemplate(report, locale) {
     }
 
     const templateData = {
-    ...locale,
-    ...data
+    ...data,
+    locale
 }
 
     html = html
@@ -1321,9 +1321,9 @@ function applyTemplateVars(html, data = {}) {
         const value = getByPath(data, key)
 
         if (value === undefined || value === null) {
-            console.warn(`[TEMPLATE_MISSING_KEY] ${key}`)
-            return ""
-        }
+    console.error(`[TEMPLATE_MISSING_KEY] ${key}`)
+    return `[MISSING:${key}]`
+}
 
         // HTML 블록은 그대로 삽입
         if (typeof value === "string" && value.trim().startsWith("<")) {
