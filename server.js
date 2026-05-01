@@ -838,35 +838,6 @@ function normalizeDeepReport(report, input) {
             
         },
         
-        glossary: safeArray(
-            report?.glossary,
-            getDefaultGlossary(input.language || "ko")
-        ),
-
-        businessDiagnosis: {
-            industryType:
-                report?.businessDiagnosis?.industryType || "Consumer product / commerce",
-            businessModelType:
-                report?.businessDiagnosis?.businessModelType || "Direct sales with optional subscription",
-            countryMarketBehavior:
-                report?.businessDiagnosis?.countryMarketBehavior ||
-                "구매 채널과 가격 민감도 검증이 필요합니다.",
-            marketEntryDifficulty:
-                report?.businessDiagnosis?.marketEntryDifficulty || "MEDIUM",
-            mainBottleneck:
-                report?.businessDiagnosis?.mainBottleneck ||
-                "초기 고객획득비와 반복구매 검증",
-            bestFirstOffer:
-                report?.businessDiagnosis?.bestFirstOffer ||
-                "첫 구매 전환용 번들 상품",
-            validationExperiment:
-                report?.businessDiagnosis?.validationExperiment ||
-                "30일 소액 광고와 사전 주문 테스트",
-            goNoGoLogic:
-                report?.businessDiagnosis?.goNoGoLogic ||
-                "CAC, 전환율, 재구매율이 기준을 넘을 때만 확장합니다.",
-        },
-        
         visualScores: {
             market: toScore(report?.visualScores?.market, sample.visualScores.market),
             profitability: toScore(
