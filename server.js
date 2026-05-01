@@ -794,23 +794,16 @@ function normalizeDeepReport(report, input) {
 
     return {
         cover: {
-            brandName: report?.cover?.brandName || input.brandName,
-            decision: report?.cover?.decision || "HOLD",
-            score: Number.isFinite(report?.cover?.score)
-                ? report.cover.score
-                : 50,
-            subtitle: report?.cover?.subtitle || input.productService,
-            oneLineVerdict:
-                report?.cover?.oneLineVerdict ||
-                sample.cover.oneLineVerdict,
-
-            // 👇 여기가 정답 위치
-    marketScore: report?.marketScore || 60,
-    profitabilityScore: report?.profitabilityScore || 50,
-    executionScore: report?.executionScore || 55,
-    riskScore: report?.riskScore || 40,
-            
-        },
+    brandName: report?.cover?.brandName || input.brandName,
+    decision: report?.cover?.decision || "HOLD",
+    score: Number.isFinite(report?.cover?.score)
+        ? report.cover.score
+        : 50,
+    subtitle: report?.cover?.subtitle || input.productService,
+    oneLineVerdict:
+        report?.cover?.oneLineVerdict ||
+        sample.cover.oneLineVerdict,
+},
 
         glossary: safeArray(
             report?.glossary,
@@ -1361,11 +1354,12 @@ function applyTemplateVars(html, data = {}) {
             return ""
         }
 
-        // 🔥 핵심 수정
-        if (typeof value === "string" && value.includes("<div")) {
+        // HTML 블록은 그대로 삽입
+        if (typeof value === "string" && value.trim().startsWith("<")) {
             return value
         }
 
+        // 일반 텍스트는 안전하게 escape
         return esc(value)
     })
 }
@@ -1541,6 +1535,37 @@ function cacLtvRiskChart(rowsData) {
                     </div>
                 `
             }).join("")}
+        </div>
+    `
+}
+
+// ✅ 여기 추가
+function buildDecisionChart(report) {
+    const market = toScore(report?.visualScores?.market, 60)
+    const profitability = toScore(report?.visualScores?.profitability, 50)
+    const execution = toScore(report?.visualScores?.execution, 55)
+    const risk = toScore(report?.visualScores?.risk, 40)
+
+    return `
+        <div class="chart-box">
+            ${decisionBar("Market", market)}
+            ${decisionBar("Profitability", profitability)}
+            ${decisionBar("Execution", execution)}
+            ${decisionBar("Risk Pressure", risk, true)}
+        </div>
+    `
+}
+
+function decisionBar(label, value, danger = false) {
+    const safeValue = Math.max(0, Math.min(100, Number(value) || 0))
+
+    return `
+        <div class="chart-row">
+            <div class="chart-label">${esc(label)}</div>
+            <div class="chart-track">
+                <div class="chart-fill ${danger ? "danger" : ""}" style="width:${safeValue}%"></div>
+            </div>
+            <div class="chart-value">${safeValue} / 100</div>
         </div>
     `
 }
