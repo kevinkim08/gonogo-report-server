@@ -1258,11 +1258,42 @@ function buildHtmlFromTemplate(report, locale) {
 .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
 .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
 
-    html = applyTemplateVars(html, templateData)
-    
-    html = html.replace(/{{[^}]+}}/g, "")
+    validateTemplateKeys(html, templateData, [
+    "glossaryRows",
+    "scoreGuideRows",
+    "marketFunnelChart",
+    "profitSimulationChart",
+    "cacLtvRiskChart",
+    "tamSamSomRows",
+    "customerTruthRows",
+    "customerOpportunityRows",
+    "competitionRows",
+    "competitionConclusion",
+    "benchmarkRows",
+    "unitEconomicsRows",
+    "marketingChannelRows",
+    "contentPlaybookItems",
+    "marketingTestRows",
+    "businessModelRows",
+    "riskRows",
+    "executionRows",
+    "goThresholdRows",
+    "goChecklistItems",
+    "sourceQualityRows",
+    "dataLimitItems",
+    "referenceLinkRows",
+    "cacLtvRows",
+    "profitSimulationRows",
+    "killCriteriaRows",
+    "dataSourceRows",
+    "assumptionItems",
+])
 
-    return html
+html = applyTemplateVars(html, templateData)
+
+html = html.replace(/{{[^}]+}}/g, "")
+
+return html
 }
 
 function lockedBox(message, title = "Paid report only") {
@@ -1621,6 +1652,42 @@ function glossaryRows(items) {
 function listItems(items) {
     if (!Array.isArray(items)) return ""
     return items.map((i) => `<li>${esc(i)}</li>`).join("")
+}
+
+function extractTemplateKeys(html) {
+    const matches = html.match(/{{\s*[^}]+\s*}}/g) || []
+
+    return [...new Set(
+        matches.map((m) =>
+            m.replace(/[{}]/g, "").trim()
+        )
+    )]
+}
+
+function validateTemplateKeys(html, templateData, blockKeys = []) {
+    const htmlKeys = extractTemplateKeys(html)
+
+    const missingKeys = htmlKeys.filter((key) => {
+        if (blockKeys.includes(key)) return false
+        return !(key in templateData)
+    })
+
+    const extraKeys = Object.keys(templateData).filter(
+        (key) => !htmlKeys.includes(key)
+    )
+
+    if (missingKeys.length > 0) {
+        console.log("[MISSING_TEMPLATE_KEYS]", missingKeys)
+    }
+
+    if (extraKeys.length > 0) {
+        console.log("[EXTRA_TEMPLATE_KEYS]", extraKeys)
+    }
+
+    return {
+        missingKeys,
+        extraKeys,
+    }
 }
 
 function checklistItems(items) {
