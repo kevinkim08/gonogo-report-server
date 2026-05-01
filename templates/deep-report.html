@@ -534,7 +534,91 @@ html[lang="mn"] .market-funnel-fill {
   justify-content: center;
   text-align: center;
 }
-    
+
+/* === core decision chart === */
+
+.decision-chart-box {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #d8e7dc;
+  background: #f6faf7;
+}
+
+.decision-chart-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.decision-chart-kicker {
+  font-size: 10px;
+  font-weight: 900;
+  color: #4d6b5c;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.decision-chart-title {
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.35;
+  color: #102018;
+}
+
+.decision-chart-score {
+  font-size: 24px;
+  font-weight: 900;
+  color: #2f7d57;
+  white-space: nowrap;
+}
+
+.decision-bar-row {
+  display: grid;
+  grid-template-columns: 94px minmax(0, 1fr) 90px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.decision-bar-row:last-child {
+  margin-bottom: 0;
+}
+
+.decision-bar-label {
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.decision-bar-track {
+  height: 12px;
+  background: #e1ebe5;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.decision-bar-fill {
+  height: 100%;
+  background: #2f7d57;
+  border-radius: 999px;
+}
+
+.decision-bar-fill.light {
+  background: #d8b85a;
+}
+
+.decision-bar-fill.danger {
+  background: #b94a48;
+}
+
+.decision-bar-value {
+  font-size: 10.5px;
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
   </style>
 </head>
 
