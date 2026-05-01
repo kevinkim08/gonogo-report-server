@@ -503,7 +503,7 @@ Return this exact JSON shape:
   ],
 
   "buyingTrigger": "",
-"customerSummary": ""
+"customerSummary": "",
 
   "competitionMap": [
     ["", "", "", ""],
