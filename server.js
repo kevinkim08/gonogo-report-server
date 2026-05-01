@@ -302,6 +302,13 @@ Layout safety rules:
 
 Narrative depth rules (CRITICAL):
 
+customerSummary:
+- 3 to 4 sentences
+- Summarize both positive buying signals and negative hesitation signals.
+- Explain what actually makes the customer buy.
+- Explain what blocks the customer from buying.
+- End with the most important validation point.
+
 - The report must not feel shallow.
 - Narrative fields are the core of decision quality.
 
@@ -889,6 +896,9 @@ function normalizeDeepReport(report, input) {
 
         customerTruth: safeArray(report?.customerTruth, sample.customerTruth),
         buyingTrigger: report?.buyingTrigger || sample.buyingTrigger,
+        customerSummary:
+    report?.customerSummary ||
+    "고객은 구매 이유와 망설이는 이유를 동시에 가지고 있습니다. 따라서 초기에는 긍정 반응만 보지 말고, 실제 구매를 막는 가격·신뢰·필요성 장벽을 함께 검증해야 합니다.",
 
         competitionMap: safeArray(
             report?.competitionMap,
