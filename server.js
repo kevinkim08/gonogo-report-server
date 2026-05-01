@@ -803,6 +803,13 @@ function normalizeDeepReport(report, input) {
             oneLineVerdict:
                 report?.cover?.oneLineVerdict ||
                 sample.cover.oneLineVerdict,
+
+            // 👇 여기가 정답 위치
+    marketScore: report?.marketScore || 60,
+    profitabilityScore: report?.profitabilityScore || 50,
+    executionScore: report?.executionScore || 55,
+    riskScore: report?.riskScore || 40,
+            
         },
 
         glossary: safeArray(
@@ -1194,6 +1201,7 @@ function buildHtmlFromTemplate(report, locale) {
         modelJudgment: report.businessModel.modelJudgment,
         operatingRule: report.operatingRule,
         finalRule: report.finalRule,
+        decisionChart: buildDecisionChart(report),
     }
 
     const templateData = {
@@ -1933,3 +1941,29 @@ function getSampleReport(lang = "ko") {
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`)
 })
+
+function buildDecisionChart(report) {
+  const m = report.marketScore || 60
+  const p = report.profitabilityScore || 50
+  const e = report.executionScore || 55
+  const r = report.riskScore || 40
+
+  return `
+  <div class="chart-box">
+    ${buildBar("Market", m)}
+    ${buildBar("Profitability", p)}
+    ${buildBar("Execution", e)}
+    ${buildBar("Risk", r, true)}
+  </div>`
+}
+
+function buildBar(label, value, danger = false) {
+  return `
+  <div class="chart-row">
+    <div class="chart-label">${label}</div>
+    <div class="chart-track">
+      <div class="chart-fill ${danger ? "danger" : ""}" style="width:${value}%"></div>
+    </div>
+    <div class="chart-value">${value}</div>
+  </div>`
+}
