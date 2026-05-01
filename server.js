@@ -1561,12 +1561,67 @@ function buildDecisionChart(report) {
     const execution = toScore(report?.visualScores?.execution, 55)
     const risk = toScore(report?.visualScores?.risk, 40)
 
+    const avg = Math.round((market + profitability + execution + (100 - risk)) / 4)
+
+    const message =
+        avg >= 70
+            ? "Decision signal is strong enough to continue validation."
+            : avg >= 50
+                ? "Decision signal is mixed. Validate before scaling."
+                : "Decision signal is weak. Redesign before spending more."
+
     return `
-        <div class="chart-box">
-            ${decisionBar("Market", market)}
-            ${decisionBar("Profitability", profitability)}
-            ${decisionBar("Execution", execution)}
+        <div class="decision-chart-box">
+            <div class="decision-chart-head">
+                <div>
+                    <div class="decision-chart-kicker">Decision Signal</div>
+                    <div class="decision-chart-title">${esc(message)}</div>
+                </div>
+                <div class="decision-chart-score">${avg}/100</div>
+            </div>
+
+            ${decisionBar("Market", market, false)}
+            ${decisionBar("Profitability", profitability, false)}
+            ${decisionBar("Execution", execution, false)}
             ${decisionBar("Risk Pressure", risk, true)}
+        </div>
+    `
+}
+
+function decisionBar(label, value, danger = false) {
+    const safeValue = Math.max(0, Math.min(100, Number(value) || 0))
+
+    const status = danger
+        ? safeValue >= 70
+            ? "HIGH"
+            : safeValue >= 50
+                ? "WATCH"
+                : "LOW"
+        : safeValue >= 70
+            ? "GOOD"
+            : safeValue >= 50
+                ? "WATCH"
+                : "WEAK"
+
+    const cls = danger
+        ? safeValue >= 70
+            ? "danger"
+            : safeValue >= 50
+                ? "light"
+                : ""
+        : safeValue >= 70
+            ? ""
+            : safeValue >= 50
+                ? "light"
+                : "danger"
+
+    return `
+        <div class="decision-bar-row">
+            <div class="decision-bar-label">${esc(label)}</div>
+            <div class="decision-bar-track">
+                <div class="decision-bar-fill ${cls}" style="width:${safeValue}%"></div>
+            </div>
+            <div class="decision-bar-value">${safeValue} · ${esc(status)}</div>
         </div>
     `
 }
