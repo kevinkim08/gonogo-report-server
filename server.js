@@ -1626,20 +1626,6 @@ function decisionBar(label, value, danger = false) {
     `
 }
 
-function decisionBar(label, value, danger = false) {
-    const safeValue = Math.max(0, Math.min(100, Number(value) || 0))
-
-    return `
-        <div class="chart-row">
-            <div class="chart-label">${esc(label)}</div>
-            <div class="chart-track">
-                <div class="chart-fill ${danger ? "danger" : ""}" style="width:${safeValue}%"></div>
-            </div>
-            <div class="chart-value">${safeValue} / 100</div>
-        </div>
-    `
-}
-
 function parseMoney(v) {
     const raw = String(v || "")
     const cleaned = raw.replace(/[^\d.-]/g, "")
