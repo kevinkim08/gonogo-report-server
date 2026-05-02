@@ -219,4 +219,25 @@
   },
   "structure_summary_label": "结构摘要",
   "model_deep_dive_label": "模式深度分析"
+  ,
+"chart": {
+  "decisionSignal": "决策信号",
+  "decisionStrong": "决策信号较强，可以继续验证。",
+  "decisionMixed": "决策信号混合，扩张前需要验证。",
+  "decisionWeak": "决策信号较弱，继续投入前应重构方案。",
+  "market": "市场",
+  "profitability": "盈利能力",
+  "execution": "执行力",
+  "riskPressure": "风险压力",
+  "good": "良好",
+  "watch": "观察",
+  "weak": "较弱",
+  "high": "高",
+  "low": "低",
+  "revenue": "收入",
+  "marketingCost": "营销成本",
+  "profit": "利润",
+  "riskHeatmap": "风险热力图",
+  "executionTimeline": "执行时间线"
+}
 }
