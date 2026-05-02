@@ -1108,7 +1108,10 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
-        .replace("{{profitSimulationChart}}",profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale))
+        .replaceAll(
+    "{{profitSimulationChart}}",
+    profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
+)
        .replace("{{cacLtvRiskChart}}",cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale))
         .replace(
             "{{tamSamSomRows}}",
