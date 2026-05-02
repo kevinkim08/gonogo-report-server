@@ -60,16 +60,16 @@
   "section01_cover_desc": "This section defines the core terms and business structure used in the report. Understanding the meaning of the numbers is required to read the GO / HOLD / NO GO decision correctly.",
   "section01_cover_title": "How to Read This Report",
   "section01_kicker": "SECTION 01",
-  "section02_01_title": "2-1 / 2-2. Customer Response Potential vs Real Customer Problem",
+  "section02_01_title": "2-1. Why Customers Buy vs Why They Don’t",
   "section02_03_note": "This judgment is not simple analysis. It is the standard for deciding whether to invest real money and time. Decide by numbers and structure, not emotion.",
-  "section02_03_title": "2-3. Core Decision",
+  "section02_03_title": "2-2. Core Decision",
   "section02_cover_desc": "Customers always move between two forces: the reason to buy and the reason to hesitate. This section analyzes both the forces that create purchase and the forces that block it.",
   "section02_cover_title": "Why Customers Buy vs Why They Don’t",
   "section02_kicker": "SECTION 02",
   "section03_01_title": "3-1. Market Reality",
   "section03_02_note": "The key is not the product itself, but why customers keep buying. Subscription retention and repeat purchase reasons must be broken down.",
-  "section03_02_title": "3-2 / 3-3. Competition Map & Benchmarks",
-  "section03_04_title": "3-4. Profit Structure",
+  "section03_02_title": "3-2. Competitive Landscape & Benchmarks",
+  "section03_04_title": "3-3. Profit Structure",
   "section03_cover_desc": "More important than market size is the structure through which money actually flows. This section reviews market reality, competition, and whether the business can create real profit.",
   "section03_cover_title": "Market, Competition, and Profit Structure",
   "section03_kicker": "SECTION 03",
@@ -77,8 +77,8 @@
   "section04_02_title": "4-2. Marketing Strategy",
   "section04_03_title": "4-3. Execution Plan",
   "section04_04_title": "4-4. Profit Simulation",
-  "section04_05_title": "4-5 / 4-6. Risk System & Kill Criteria",
-  "section04_07_title": "4-7. GO Decision Criteria",
+  "section04_05_title": "4-5. Risk System & Stop Criteria",
+  "section04_07_title": "4-6. GO Decision Criteria",
   "section04_cover_desc": "Even a good idea fails without execution standards. This section defines how to sell, how to operate, and when to stop using numbers.",
   "section04_cover_title": "Execution, Operations, and Stop Criteria",
   "section04_kicker": "SECTION 04",
@@ -215,45 +215,8 @@
         "Very risky",
         "Stop immediately or fully reconsider."
       ]
-    ],
-    "customerOpportunityRows": [
-      [
-        "Purchase emotion",
-        "The customer has a strong desire to give something better.",
-        "Can create first-purchase conversion."
-      ],
-      [
-        "Giftability",
-        "A premium package can fit gift demand.",
-        "Useful for trial boxes and seasonal boxes."
-      ],
-      [
-        "Repeat purchase",
-        "If the product works well, repeat purchase is possible.",
-        "Can support subscription conversion."
-      ],
-      [
-        "Content fit",
-        "Customer reaction content works well in short-form channels.",
-        "Useful for Instagram, TikTok, and YouTube Shorts tests."
-      ]
-    ],
-    "benchmarkRows": [
-      [
-        "BarkBox",
-        "US dog subscription box",
-        "Creates subscription enjoyment through themed boxes, toys, and treats."
-      ],
-      [
-        "Butternut Box",
-        "UK personalized pet food subscription",
-        "Strong personalized recommendation and recurring delivery structure."
-      ],
-      [
-        "Premium pet food DTC brands",
-        "DTC repeat-purchase model",
-        "Uses ingredient trust, reviews, and recurring delivery benefits to drive repeat purchase."
-      ]
     ]
-  }
+  },
+  "structure_summary_label": "Structure Summary",
+  "model_deep_dive_label": "Model Deep Dive"
 }
