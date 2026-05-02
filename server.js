@@ -1126,7 +1126,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         
         operatingRule: report.operatingRule,
         finalRule: report.finalRule,
-        decisionChart: buildDecisionChart(report),
+        decisionChart: buildDecisionChart(report, locale),
 
         competitionPositionChart: competitionPositionChart(report.competitionMap),
         riskHeatmap: riskHeatmap(report.riskSystem),
@@ -1610,7 +1610,7 @@ function cacLtvRiskChart(rowsData) {
 }
 
 // ✅ 여기 추가
-function buildDecisionChart(report) {
+function buildDecisionChart(report, locale = {}) {
     const market = toScore(report?.visualScores?.market, 60)
     const profitability = toScore(report?.visualScores?.profitability, 50)
     const execution = toScore(report?.visualScores?.execution, 55)
@@ -1618,45 +1618,72 @@ function buildDecisionChart(report) {
 
     const avg = Math.round((market + profitability + execution + (100 - risk)) / 4)
 
+    const chart = locale?.chart || {}
+    const label = locale?.label || locale?.labels || {}
+
     const message =
         avg >= 70
-            ? "Decision signal is strong enough to continue validation."
+            ? chart.decisionStrong || "Decision signal is strong enough to continue validation."
             : avg >= 50
-                ? "Decision signal is mixed. Validate before scaling."
-                : "Decision signal is weak. Redesign before spending more."
+                ? chart.decisionMixed || "Decision signal is mixed. Validate before scaling."
+                : chart.decisionWeak || "Decision signal is weak. Redesign before spending more."
 
     return `
         <div class="decision-chart-box">
             <div class="decision-chart-head">
                 <div>
-                    <div class="decision-chart-kicker">Decision Signal</div>
+                    <div class="decision-chart-kicker">${esc(chart.decisionSignal || "Decision Signal")}</div>
                     <div class="decision-chart-title">${esc(message)}</div>
                 </div>
                 <div class="decision-chart-score">${avg}/100</div>
             </div>
 
-            ${decisionBar("Market", market, false)}
-            ${decisionBar("Profitability", profitability, false)}
-            ${decisionBar("Execution", execution, false)}
-            ${decisionBar("Risk Pressure", risk, true)}
+            ${decisionBar({
+                label: chart.market || label.market || "Market",
+                value: market,
+                danger: false,
+                locale,
+            })}
+
+            ${decisionBar({
+                label: chart.profitability || label.profitability || "Profitability",
+                value: profitability,
+                danger: false,
+                locale,
+            })}
+
+            ${decisionBar({
+                label: chart.execution || label.execution || "Execution",
+                value: execution,
+                danger: false,
+                locale,
+            })}
+
+            ${decisionBar({
+                label: chart.riskPressure || label.riskPressure || "Risk Pressure",
+                value: risk,
+                danger: true,
+                locale,
+            })}
         </div>
     `
 }
 
-function decisionBar(label, value, danger = false) {
+function decisionBar({ label = "", value = 0, danger = false, locale = {} }) {
     const safeValue = Math.max(0, Math.min(100, Number(value) || 0))
+    const chart = locale?.chart || {}
 
     const status = danger
         ? safeValue >= 70
-            ? "HIGH"
+            ? chart.high || "HIGH"
             : safeValue >= 50
-                ? "WATCH"
-                : "LOW"
+                ? chart.watch || "WATCH"
+                : chart.low || "LOW"
         : safeValue >= 70
-            ? "GOOD"
+            ? chart.good || "GOOD"
             : safeValue >= 50
-                ? "WATCH"
-                : "WEAK"
+                ? chart.watch || "WATCH"
+                : chart.weak || "WEAK"
 
     const cls = danger
         ? safeValue >= 70
