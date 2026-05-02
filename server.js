@@ -1253,13 +1253,6 @@ ${freePart}
 
 <section class="page section-cover">
   <div class="section-kicker">${esc(premiumKicker)}</div>
-  <div class="section-cover-title">${esc(premiumTitle)}</div>
-  <div class="section-cover-desc">
-    ${esc(premiumDesc)}
-  </div>
-  <div class="footer">
-    <span>${esc(footerLeft)}</span><section class="page section-cover">
-  <div class="section-kicker">${esc(premiumKicker)}</div>
 
   <div class="section-cover-title">
     ${esc(premiumTitle)}
@@ -1302,7 +1295,8 @@ ${freePart}
     <span>${esc(premiumFooter)}</span>
   </div>
 </section>
-
+`
+}
 function lockedBox(message, title = "Premium Insights", buttonLabel = "Premium Report") {
     return `
     <div style="
