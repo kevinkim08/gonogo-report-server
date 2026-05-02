@@ -60,16 +60,16 @@
   "section01_cover_desc": "本节定义报告中使用的核心术语和业务结构。理解数字含义后，才能正确解读GO / HOLD / NO GO判断。",
   "section01_cover_title": "如何阅读本报告",
   "section01_kicker": "SECTION 01",
-  "section02_01_title": "2-1 / 2-2. 客户反应可能性 vs 真实客户问题",
+  "section02_01_title": "2-1. 客户为什么购买与为什么不购买",
   "section02_03_note": "该判断不是简单分析，而是决定是否投入真实资金和时间的标准。应基于数字和结构，而不是情绪。",
-  "section02_03_title": "2-3. 核心判断",
+  "section02_03_title": "2-2. 核心判断",
   "section02_cover_desc": "客户始终在购买理由和犹豫理由之间移动。本节同时分析推动购买的力量和阻碍购买的力量。",
   "section02_cover_title": "客户为什么购买 vs 为什么不购买",
   "section02_kicker": "SECTION 02",
   "section03_01_title": "3-1. 市场现实",
   "section03_02_note": "关键不是产品本身，而是客户为什么持续购买。必须拆解订阅留存和复购原因。",
-  "section03_02_title": "3-2 / 3-3. 竞争格局与基准",
-  "section03_04_title": "3-4. 盈利结构",
+  "section03_02_title": "3-2. 竞争格局与基准",
+  "section03_04_title": "3-3. 盈利结构",
   "section03_cover_desc": "比市场规模更重要的是资金实际流动的结构。本节评估市场现实、竞争和真实盈利可能性。",
   "section03_cover_title": "市场、竞争与盈利结构",
   "section03_kicker": "SECTION 03",
@@ -77,8 +77,8 @@
   "section04_02_title": "4-2. 营销策略",
   "section04_03_title": "4-3. 执行计划",
   "section04_04_title": "4-4. 利润模拟",
-  "section04_05_title": "4-5 / 4-6. 风险系统与停止标准",
-  "section04_07_title": "4-7. GO判断标准",
+  "section04_05_title": "4-5. 风险系统与停止标准",
+  "section04_07_title": "4-6. GO判断标准",
   "section04_cover_desc": "即使是好想法，没有执行标准也会失败。本节用数字定义如何销售、如何运营以及何时停止。",
   "section04_cover_title": "执行、运营与停止标准",
   "section04_kicker": "SECTION 04",
@@ -215,45 +215,8 @@
         "极高风险",
         "立即停止或全面重新评估"
       ]
-    ],
-    "customerOpportunityRows": [
-      [
-        "购买情绪",
-        "客户有强烈想给更好产品的欲望",
-        "可创造首次购买转化"
-      ],
-      [
-        "礼品属性",
-        "高端包装适合礼品需求",
-        "有利于试用盒和季节盒"
-      ],
-      [
-        "复购",
-        "产品效果好时可能复购",
-        "可支持订阅转化"
-      ],
-      [
-        "内容适配",
-        "客户反应内容适合短视频渠道",
-        "适合小红书/抖音/短视频测试"
-      ]
-    ],
-    "benchmarkRows": [
-      [
-        "BarkBox",
-        "美国犬类订阅盒",
-        "通过主题盒、玩具和零食制造订阅乐趣"
-      ],
-      [
-        "Butternut Box",
-        "英国个性化宠物食品订阅",
-        "个性化推荐和定期配送结构强"
-      ],
-      [
-        "高端宠物食品DTC品牌",
-        "DTC复购模型",
-        "通过成分信任、评价和定期配送福利推动复购"
-      ]
     ]
-  }
+  },
+  "structure_summary_label": "结构摘要",
+  "model_deep_dive_label": "模式深度分析"
 }
