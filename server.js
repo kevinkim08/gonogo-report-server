@@ -1027,10 +1027,13 @@ function buildHtmlFromTemplate(report, locale) {
     const execMap = objectFromPairs(report.executiveDecision)
 
     const funnel = normalizeFunnel(report.marketFunnel)
-    const lockedMessage =
-    "You're seeing only surface-level insights. The full report contains the actual decision-making data."
+const lockedMessage =
     report?.lockedSections?.message ||
-    t(locale, "locked.message", "Core data and execution strategy are available in the paid report.")
+    t(
+        locale,
+        "locked.message",
+        "무료 보고서는 사업의 방향성과 기본 구조만 제공합니다. 고객·시장·수익·리스크·실행 전략 전체는 유료 보고서에서 확인할 수 있습니다."
+    )
 
     const lockedTitle = t(locale, "locked.title", "Paid report only")
     
