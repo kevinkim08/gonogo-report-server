@@ -52,27 +52,6 @@ app.get("/api/health", (req, res) => {
     res.json({ ok: true, status: "healthy" })
 })
 
-        const html = buildHtmlFromTemplate(sampleReport, locale)
-        const pdfBuffer = await htmlToPdf(html)
-
-        res.setHeader("Content-Type", "application/pdf")
-        res.setHeader("Content-Length", pdfBuffer.length)
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="GoNoGo_Test_Report_${language}.pdf"`
-        )
-
-        return res.end(pdfBuffer)
-    } catch (error) {
-        console.error("[TEST_PDF_ERROR]", error)
-        return res.status(500).json({
-            ok: false,
-            error: "Failed to generate test PDF.",
-            detail: String(error?.message || error),
-        })
-    }
-})
-
 app.get("/api/debug-html", async (req, res) => {
     try {
         const language = normalizeLanguage(
@@ -526,7 +505,7 @@ Return this exact JSON shape:
 ]
   },
 
-  "businessModel": {
+ "businessModel": {
   "revenueLayers": [
     ["", "", ""],
     ["", "", ""],
@@ -534,9 +513,9 @@ Return this exact JSON shape:
   ],
   "modelJudgment": "",
   "modelDeepDive": ""
-}
+},
 
-  "riskSystem": [
+"riskSystem": [
     ["", "", ""],
     ["", "", ""],
     ["", "", ""]
