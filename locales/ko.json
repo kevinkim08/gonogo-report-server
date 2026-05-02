@@ -219,4 +219,25 @@
   },
   "structure_summary_label": "구조 요약",
   "model_deep_dive_label": "모델 심화 분석"
+  ,
+"chart": {
+  "decisionSignal": "의사결정 신호",
+  "decisionStrong": "계속 검증을 진행할 만큼 의사결정 신호가 강합니다.",
+  "decisionMixed": "의사결정 신호가 혼재되어 있습니다. 확장 전 검증이 필요합니다.",
+  "decisionWeak": "의사결정 신호가 약합니다. 추가 지출 전 구조 재설계가 필요합니다.",
+  "market": "시장성",
+  "profitability": "수익성",
+  "execution": "실행력",
+  "riskPressure": "위험 압력",
+  "good": "양호",
+  "watch": "주의",
+  "weak": "약함",
+  "high": "높음",
+  "low": "낮음",
+  "revenue": "매출",
+  "marketingCost": "마케팅비",
+  "profit": "이익",
+  "riskHeatmap": "리스크 히트맵",
+  "executionTimeline": "실행 타임라인"
+}
 }
