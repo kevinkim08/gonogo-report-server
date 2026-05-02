@@ -1170,6 +1170,7 @@ function buildHtmlFromTemplate(report, locale) {
         competitionPositionChart: competitionPositionChart(report.competitionMap),
         riskHeatmap: riskHeatmap(report.riskSystem),
         executionTimeline: executionTimeline(report.executionPlan),
+        decisionSummaryBox: decisionSummaryBox(report),
         
     }
 
@@ -1180,7 +1181,6 @@ function buildHtmlFromTemplate(report, locale) {
 
     html = html
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
-        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
         .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
@@ -1193,12 +1193,9 @@ function buildHtmlFromTemplate(report, locale) {
         )
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
         .replace("{{customerOpportunityRows}}", rows(customerOpportunityRows))
-        .replace(
-    "{{competitionRows}}",
-    report?.lockedSections?.competition
-        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
-        : rows(report.competitionMap)
-)
+        .replace("{{competitionRows}}",report?.lockedSections?.competition?
+         `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`: rows(report.competitionMap))
+        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap))
 .replace(
     "{{competitionConclusion}}",
     report?.lockedSections?.competition
@@ -1237,8 +1234,11 @@ function buildHtmlFromTemplate(report, locale) {
             rows(report.businessModel.revenueLayers)
         )
         .replace(
-            "{{riskRows}}",
-            report?.lockedSections?.risk
+    "{{riskHeatmap}}",
+    report?.lockedSections?.risk
+        ? ""
+        : riskHeatmap(report.riskSystem)
+)
                 ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.riskSystem)
         )
@@ -1246,13 +1246,17 @@ function buildHtmlFromTemplate(report, locale) {
         .replace("{{riskHeatmap}}", riskHeatmap(report.riskSystem))
         
         .replace(
-            "{{executionRows}}",
-            report?.lockedSections?.execution
+    "{{executionTimeline}}",
+    report?.lockedSections?.execution
+        ? ""
+        : executionTimeline(report.executionPlan)
+)
                 ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.executionPlan)
         )
 
 .replace("{{executionTimeline}}", executionTimeline(report.executionPlan))
+        .replace("{{decisionSummaryBox}}", decisionSummaryBox(report))
         
         .replace(
             "{{goThresholdRows}}",
@@ -1830,6 +1834,68 @@ function executionTimeline(rows) {
                 `
             }).join("")}
 
+        </div>
+    </div>
+    `
+}
+
+function decisionSummaryBox(report) {
+    const decision = report?.cover?.decision || "HOLD"
+    const score = Number(report?.cover?.score || 50)
+
+    const confidence =
+        score >= 75
+            ? "HIGH CONFIDENCE"
+            : score >= 55
+                ? "MEDIUM CONFIDENCE"
+                : "LOW CONFIDENCE"
+
+    const color =
+        decision === "GO"
+            ? "#2ecc71"
+            : decision === "HOLD"
+            ? "#f39c12"
+            : "#e74c3c"
+
+    const action =
+        decision === "GO"
+            ? "Start execution immediately with controlled budget."
+            : decision === "HOLD"
+            ? "Run validation tests before scaling."
+            : "Stop or redesign the business model."
+
+    return `
+    <div class="chart-box">
+        <div style="
+            border:2px solid ${color};
+            border-radius:10px;
+            padding:16px;
+        ">
+            <div style="
+                font-size:14px;
+                font-weight:bold;
+                color:${color};
+                margin-bottom:6px;
+            ">
+                ${decision}
+            </div>
+
+            <div style="font-size:12px; margin-bottom:6px;">
+                Score: <b>${score}</b> / 100
+            </div>
+
+            <div style="font-size:11px; margin-bottom:10px;">
+                ${confidence}
+            </div>
+
+            <div style="
+                font-size:11px;
+                background:#f6f6f6;
+                padding:10px;
+                border-radius:6px;
+            ">
+                ${action}
+            </div>
         </div>
     </div>
     `
