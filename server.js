@@ -17,38 +17,39 @@ app.use(express.json({ limit: "5mb" }))
 
 import cors from "cors"
 
-app.use(
-    cors({
-        origin: (origin, callback) => {
-            // Postman / 서버 내부 요청 허용
-            if (!origin) return callback(null, true)
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true)
 
-            try {
-                const url = new URL(origin)
-                const hostname = url.hostname
+        try {
+            const { hostname } = new URL(origin)
 
-                const allowed =
-                    hostname === "localhost" ||
-                    hostname === "127.0.0.1" ||
-                    hostname.endsWith(".framer.app") ||
-                    hostname.endsWith(".framer.website") ||
-                    hostname.endsWith(".onrender.com")
+            const allowed =
+                hostname === "localhost" ||
+                hostname === "127.0.0.1" ||
+                hostname === "big-evidence-039433.framer.app" ||
+                hostname.endsWith(".framer.app") ||
+                hostname.endsWith(".framer.website") ||
+                hostname.endsWith(".onrender.com")
 
-                if (allowed) {
-                    return callback(null, true)
-                }
-
-                console.log("[CORS_BLOCKED]", origin)
-                return callback(new Error("Not allowed by CORS"))
-            } catch (err) {
-                return callback(new Error("Invalid origin"))
+            if (allowed) {
+                return callback(null, true)
             }
-        },
-        methods: ["GET", "POST", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization"],
-        credentials: false,
-    })
-)
+
+            console.log("[CORS_BLOCKED]", origin)
+            return callback(new Error("Not allowed by CORS"))
+        } catch (err) {
+            console.log("[CORS_INVALID_ORIGIN]", origin)
+            return callback(new Error("Invalid origin"))
+        }
+    },
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false,
+}
+
+app.use(cors(corsOptions))
+app.options("*", cors(corsOptions))
 
 // preflight 요청 처리 (중요)
 app.options("*", cors())
