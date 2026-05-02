@@ -287,6 +287,9 @@
     "kicker": "Paid Report",
     "title": "The full analysis is available in the paid report",
     "desc": "Customer analysis, market size, competitive structure, profit simulation, marketing strategy, risk judgment, and execution plan are available in the full report.",
-    "footer": "Paid Lock"
+    "footer": "Paid Lock",
+    "ctaTitle": "This analysis is incomplete.",
+    "ctaDesc": "Unlock the full report to see the real failure points, profit structure, customer resistance, and execution strategy.",
+    "ctaButton": "Unlock Full Report"
   }
 }
