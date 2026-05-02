@@ -1229,7 +1229,8 @@ function buildHtmlFromTemplate(report, locale) {
                 ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.marketingStrategy.thirtyDayMarketingTest)
         )
-        .replace(
+
+.replace(
     "{{businessModelRows}}",
     rows(report.businessModel.revenueLayers)
 )
@@ -1258,11 +1259,14 @@ function buildHtmlFromTemplate(report, locale) {
         : executionTimeline(report.executionPlan)
 )
 .replace("{{decisionSummaryBox}}", decisionSummaryBox(report))
-            report?.lockedSections?.goThreshold
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
-                : rows(report.goThreshold)
-        )
-        .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
+.replace(
+    "{{goThresholdRows}}",
+    report?.lockedSections?.goThreshold
+        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        : rows(report.goThreshold)
+)
+.replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
+        
 .replace("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
 .replace("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
 .replace("{{referenceLinkRows}}", rows(referenceLinks))
