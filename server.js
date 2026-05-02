@@ -96,7 +96,12 @@ app.get("/api/debug-html", async (req, res) => {
         const locale = loadLocale(language)
 
         // 🔥 핵심: GPT 제거
-        const paidReport = getSampleReport(language)
+        const paidReport = await generateDeepReportJson({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+})
 
         const finalReport =
             reportType === "free"
@@ -2061,11 +2066,34 @@ function getDefaultGlossary(lang = "ko") {
             { term: "AOV", meaning: "Average order value", whyItMatters: "Low AOV makes ads, shipping, and fulfillment harder to sustain." },
             { term: "Retention", meaning: "Customer retention", whyItMatters: "Without repeat behavior, subscription or repeat-purchase models weaken quickly." },
         ],
+        ja: [
+            { term: "TAM", meaning: "総市場規模", whyItMatters: "理論上到達可能な市場規模を示します。" },
+            { term: "SAM", meaning: "実際に狙える市場", whyItMatters: "現実的にアプローチ可能な市場です。" },
+            { term: "SOM", meaning: "初期獲得可能市場", whyItMatters: "最初の6〜12ヶ月で獲得可能な市場です。" },
+            { term: "CAC", meaning: "顧客獲得コスト", whyItMatters: "CACがLTVを上回ると成長は赤字になります。" },
+            { term: "LTV", meaning: "顧客生涯価値", whyItMatters: "LTVはCACより十分高くある必要があります。" }
+        ],
+
+        zh: [
+            { term: "TAM", meaning: "总市场规模", whyItMatters: "展示理论上可覆盖的最大市场。" },
+            { term: "SAM", meaning: "可服务市场", whyItMatters: "当前可实际进入的市场。" },
+            { term: "SOM", meaning: "可获取市场", whyItMatters: "前6-12个月可获得的市场。" },
+            { term: "CAC", meaning: "获客成本", whyItMatters: "CAC高于LTV将导致亏损增长。" },
+            { term: "LTV", meaning: "客户终身价值", whyItMatters: "必须高于CAC才能盈利增长。" }
+        ],
+
+        mn: [
+            { term: "TAM", meaning: "Нийт зах зээл", whyItMatters: "Онолын хамгийн том зах зээлийг харуулна." },
+            { term: "SAM", meaning: "Боломжит зах зээл", whyItMatters: "Одоогийн нөхцөлд хүрэх боломжтой зах зээл." },
+            { term: "SOM", meaning: "Эхний зах зээл", whyItMatters: "6-12 сард авах боломжтой зах зээл." },
+            { term: "CAC", meaning: "Хэрэглэгч авах зардал", whyItMatters: "CAC нь LTV-ээс өндөр байвал алдагдал үүснэ." },
+            { term: "LTV", meaning: "Хэрэглэгчийн үнэ цэнэ", whyItMatters: "LTV нь CAC-ээс өндөр байх ёстой." }
+        ]
     }
 
     return glossaries[lang] || glossaries.en
 }
-
+   
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`)
 })
