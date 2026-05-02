@@ -1307,7 +1307,6 @@ ${freePart}
 </html>
 `
 }
-}
 
 function lockedBox(message, title = "Premium Insights") {
     return `
