@@ -361,6 +361,7 @@ Array stability rules:
 - marketFunnel must contain exactly 3 items: TAM, SAM, SOM.
 - tamSamSom must contain exactly 3 rows.
 - customerTruth must contain exactly 3 rows.
+- customerOpportunity must contain exactly 4 rows.
 - competitionMap must contain exactly 4 rows.
 - benchmarkRows must contain exactly 3 rows.
 - unitEconomicsCards must contain exactly 4 rows.
@@ -380,6 +381,7 @@ Array stability rules:
 - killCriteria.rules must contain exactly 4 rows.
 - appendix.dataSources must contain exactly 3 rows.
 - appendix.assumptions must contain exactly 4 items.
+- referenceLinks must contain exactly 5 rows.
 
 Language output rules:
 - All user-facing values must be written in the final report language.
@@ -660,13 +662,21 @@ Return this exact JSON shape:
   },
 
   "appendix": {
-    "dataSources": [
-      ["", "", ""],
-      ["", "", ""],
-      ["", "", ""]
-    ],
-    "assumptions": ["", "", "", ""]
-  }
+  "dataSources": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+  "assumptions": ["", "", "", ""]
+},
+
+"referenceLinks": [
+  ["", ""],
+  ["", ""],
+  ["", ""],
+  ["", ""],
+  ["", ""]
+]
 }
 Glossary rules:
 - Explain important business terms used in the report.
@@ -687,6 +697,12 @@ Data confidence rules:
 - Separate public data, platform observations, and assumptions.
 - Clearly state what is uncertain.
 - Do not pretend exact data exists when it does not.
+
+Reference links rules:
+- referenceLinks must contain relevant sources for the selected country, industry, and business model.
+- Each row must contain: Source name, URL.
+- Use official statistics, market platforms, trend tools, or industry-specific sources when relevant.
+- Do not use fixed pet, food, ecommerce, or Korea-only sources unless they match the user's business input.
 
 Sensitivity analysis rules:
 - Show how the business changes when CAC rises or LTV falls.
