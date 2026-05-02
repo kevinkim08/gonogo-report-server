@@ -105,10 +105,10 @@ app.get("/api/generate-report-test", async (req, res) => {
             language,
         })
 
-        const finalReport =
-            reportType === "free"
-                ? buildFreeReportFromPaidReport(paidReport)
-                : paidReport
+       const finalReport =
+    reportType === "free"
+        ? buildFreeReportFromPaidReport(paidReport)
+        : { ...paidReport, isPaid: true, reportMode: "paid" }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
         const pdfBuffer = await htmlToPdf(html)
@@ -154,10 +154,10 @@ app.get("/api/debug-html", async (req, res) => {
             language,
         })
 
-        const finalReport =
-            reportType === "free"
-                ? buildFreeReportFromPaidReport(paidReport)
-                : paidReport
+       const finalReport =
+    reportType === "free"
+        ? buildFreeReportFromPaidReport(paidReport)
+        : { ...paidReport, isPaid: true, reportMode: "paid" }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
