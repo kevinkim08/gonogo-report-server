@@ -90,11 +90,11 @@ app.get("/api/generate-report-test", async (req, res) => {
         const language = normalizeLanguage(req.query.language || "ko")
         const reportType = req.query.reportType === "free" ? "free" : "paid"
 
-        const brandName = req.query.brandName || "NomNomBox"
-        const productService =
-            req.query.productService || "Premium pet snack subscription"
-        const targetCustomer =
-            req.query.targetCustomer || "Dog owners in urban areas"
+       const brandName = req.query.brandName || "SampleBrand"
+const productService =
+    req.query.productService || "A new product or service idea"
+const targetCustomer =
+    req.query.targetCustomer || "Target customers for this business"
 
         const locale = loadLocale(language)
 
@@ -362,6 +362,7 @@ Array stability rules:
 - tamSamSom must contain exactly 3 rows.
 - customerTruth must contain exactly 3 rows.
 - competitionMap must contain exactly 4 rows.
+- benchmarkRows must contain exactly 3 rows.
 - unitEconomicsCards must contain exactly 4 rows.
 - unitEconomicsTable must contain exactly 4 rows.
 - marketingStrategy.channelFit must contain exactly 4 rows.
@@ -501,6 +502,14 @@ Return this exact JSON shape:
     ["", "", ""],
     ["", "", ""]
   ],
+  
+"customerOpportunity": [
+  ["", "", ""],
+  ["", "", ""],
+  ["", "", ""],
+  ["", "", ""]
+],
+
 
   "buyingTrigger": "",
 "customerSummary": "",
@@ -513,6 +522,12 @@ Return this exact JSON shape:
   ],
 
   "competitionConclusion": "",
+
+  "benchmarkRows": [
+  ["", "", ""],
+  ["", "", ""],
+  ["", "", ""]
+],
 
   "unitEconomicsCards": [
     ["CAC", ""],
@@ -546,10 +561,19 @@ Return this exact JSON shape:
     ],
     "contentPlaybook": ["", "", "", "", ""],
     "thirtyDayMarketingTest": [
-      ["Week 1", "", ""],
-      ["Week 2", "", ""],
-      ["Week 3", "", ""]
-    ]
+  ["Week 1", "", ""],
+  ["Week 2", "", ""],
+  ["Week 3", "", ""],
+  ["Week 4", "", ""],
+  ["Week 5", "", ""],
+  ["Week 6", "", ""],
+  ["Week 7", "", ""],
+  ["Week 8", "", ""],
+  ["Week 9", "", ""],
+  ["Week 10", "", ""],
+  ["Week 11", "", ""],
+  ["Week 12", "", ""]
+]
   },
 
   "businessModel": {
@@ -722,7 +746,7 @@ function buildFreeReportFromPaidReport(fullReport) {
         lockedSections: {
             afterSection01: true,
             message:
-                "무료 보고서는 사업의 방향성과 기본 구조만 제공합니다. 고객·시장·수익·리스크·실행 전략 전체는 유료 보고서에서 확인할 수 있습니다.",
+                "This free report shows only the business direction and basic structure. Customer analysis, market sizing, profit structure, risk judgment, and execution strategy are available in the paid report.",
         },
     }
 }
@@ -775,245 +799,187 @@ async function generateFreeReportJson(input) {
 }
 
 function normalizeDeepReport(report, input) {
-    const sample = getSampleReport(input.language || "ko")
-
     return {
         cover: {
-    brandName: report?.cover?.brandName || input.brandName,
-    decision: report?.cover?.decision || "HOLD",
-    score: Number.isFinite(report?.cover?.score)
-        ? report.cover.score
-        : 50,
-    subtitle: report?.cover?.subtitle || input.productService,
-    oneLineVerdict:
-        report?.cover?.oneLineVerdict ||
-        sample.cover.oneLineVerdict,
-},
+            brandName: report?.cover?.brandName || input.brandName || "",
+            decision: report?.cover?.decision || "HOLD",
+            score: Number.isFinite(report?.cover?.score)
+                ? report.cover.score
+                : 50,
+            subtitle: report?.cover?.subtitle || input.productService || "",
+            oneLineVerdict: report?.cover?.oneLineVerdict || "",
+        },
 
         glossary: safeArray(
             report?.glossary,
-            getDefaultGlossary(input.language || "ko")
-        ),
+            getDefaultGlossary(input.language || "en")
+        ).slice(0, 5),
 
         businessDiagnosis: {
-            industryType:
-                report?.businessDiagnosis?.industryType || "Consumer product / commerce",
-            businessModelType:
-                report?.businessDiagnosis?.businessModelType || "Direct sales with optional subscription",
+            industryType: report?.businessDiagnosis?.industryType || "",
+            businessModelType: report?.businessDiagnosis?.businessModelType || "",
             countryMarketBehavior:
-                report?.businessDiagnosis?.countryMarketBehavior ||
-                "구매 채널과 가격 민감도 검증이 필요합니다.",
+                report?.businessDiagnosis?.countryMarketBehavior || "",
             marketEntryDifficulty:
                 report?.businessDiagnosis?.marketEntryDifficulty || "MEDIUM",
-            mainBottleneck:
-                report?.businessDiagnosis?.mainBottleneck ||
-                "초기 고객획득비와 반복구매 검증",
-            bestFirstOffer:
-                report?.businessDiagnosis?.bestFirstOffer ||
-                "첫 구매 전환용 번들 상품",
+            mainBottleneck: report?.businessDiagnosis?.mainBottleneck || "",
+            bestFirstOffer: report?.businessDiagnosis?.bestFirstOffer || "",
             validationExperiment:
-                report?.businessDiagnosis?.validationExperiment ||
-                "30일 소액 광고와 사전 주문 테스트",
-            goNoGoLogic:
-                report?.businessDiagnosis?.goNoGoLogic ||
-                "CAC, 전환율, 재구매율이 기준을 넘을 때만 확장합니다.",
-            structureSummary:
-    report?.businessDiagnosis?.structureSummary ||
-    "이 사업은 고객 반응, 수익 구조, 진입 난이도를 함께 검증해야 하는 구조입니다. 초기에는 큰 확장보다 작은 테스트로 구매 전환과 반복 구매 가능성을 확인해야 합니다.",
-            
+                report?.businessDiagnosis?.validationExperiment || "",
+            goNoGoLogic: report?.businessDiagnosis?.goNoGoLogic || "",
+            structureSummary: report?.businessDiagnosis?.structureSummary || "",
         },
-        
+
         visualScores: {
-            market: toScore(report?.visualScores?.market, sample.visualScores.market),
-            profitability: toScore(
-                report?.visualScores?.profitability,
-                sample.visualScores.profitability
-            ),
-            execution: toScore(
-                report?.visualScores?.execution,
-                sample.visualScores.execution
-            ),
-            risk: toScore(report?.visualScores?.risk, sample.visualScores.risk),
+            market: toScore(report?.visualScores?.market, 50),
+            profitability: toScore(report?.visualScores?.profitability, 50),
+            execution: toScore(report?.visualScores?.execution, 50),
+            risk: toScore(report?.visualScores?.risk, 50),
         },
 
-        decisionMatrix: safeArray(report?.decisionMatrix, sample.decisionMatrix),
+        decisionMatrix: safeArray(report?.decisionMatrix, [
+            ["MARKET", "MEDIUM"],
+            ["PROFITABILITY", "MEDIUM"],
+            ["EXECUTION", "MEDIUM"],
+            ["RISK", "MEDIUM"],
+        ]).slice(0, 4),
 
-        executiveDecision: safeArray(
-            report?.executiveDecision,
-            sample.executiveDecision
-        ),
+        executiveDecision: safeArray(report?.executiveDecision, [
+            ["Why this works", ""],
+            ["Why this fails", ""],
+            ["What to do now", ""],
+        ]).slice(0, 3),
 
-        founderDecision: report?.founderDecision || sample.founderDecision,
+        founderDecision: report?.founderDecision || "",
 
-        marketCards: safeArray(report?.marketCards, sample.marketCards),
-        marketFunnel: safeArray(report?.marketFunnel, sample.marketFunnel),
-        tamSamSom: safeArray(report?.tamSamSom, sample.tamSamSom),
-        marketInsight: report?.marketInsight || sample.marketInsight,
+        marketCards: safeArray(report?.marketCards, [
+            ["TAM", ""],
+            ["SAM", ""],
+            ["SOM", ""],
+            ["GROWTH", ""],
+        ]).slice(0, 4),
 
-        customerTruth: safeArray(report?.customerTruth, sample.customerTruth),
-        buyingTrigger: report?.buyingTrigger || sample.buyingTrigger,
-        customerSummary:
-    report?.customerSummary ||
-    "고객은 구매 이유와 망설이는 이유를 동시에 가지고 있습니다. 따라서 초기에는 긍정 반응만 보지 말고, 실제 구매를 막는 가격·신뢰·필요성 장벽을 함께 검증해야 합니다.",
+        marketFunnel: safeArray(report?.marketFunnel, [
+            { label: "TAM", value: "", score: 100 },
+            { label: "SAM", value: "", score: 60 },
+            { label: "SOM", value: "", score: 20 },
+        ]).slice(0, 3),
 
-        competitionMap: safeArray(
-            report?.competitionMap,
-            sample.competitionMap
-        ),
-        competitionConclusion:
-            report?.competitionConclusion || sample.competitionConclusion,
+        tamSamSom: safeArray(report?.tamSamSom, [
+            ["TAM", "", "", ""],
+            ["SAM", "", "", ""],
+            ["SOM", "", "", ""],
+        ]).slice(0, 3),
 
-        unitEconomicsCards: safeArray(
-            report?.unitEconomicsCards,
-            sample.unitEconomicsCards
-        ),
+        marketInsight: report?.marketInsight || "",
+
+        customerTruth: safeArray(report?.customerTruth, []).slice(0, 3),
+        customerOpportunity: safeArray(report?.customerOpportunity, []).slice(0, 4),
+        buyingTrigger: report?.buyingTrigger || "",
+        customerSummary: report?.customerSummary || "",
+
+        competitionMap: safeArray(report?.competitionMap, []).slice(0, 4),
+        competitionConclusion: report?.competitionConclusion || "",
+        benchmarkRows: safeArray(report?.benchmarkRows, []).slice(0, 3),
+
+        unitEconomicsCards: safeArray(report?.unitEconomicsCards, [
+            ["CAC", ""],
+            ["LTV", ""],
+            ["AOV", ""],
+            ["REPEAT", ""],
+        ]).slice(0, 4),
 
         unitEconomicsScore: {
-            ltvToCac:
-                report?.unitEconomicsScore?.ltvToCac ||
-                sample.unitEconomicsScore.ltvToCac,
-            payback:
-                report?.unitEconomicsScore?.payback ||
-                sample.unitEconomicsScore.payback,
-            margin:
-                report?.unitEconomicsScore?.margin ||
-                sample.unitEconomicsScore.margin,
-            status:
-                report?.unitEconomicsScore?.status ||
-                sample.unitEconomicsScore.status,
+            ltvToCac: report?.unitEconomicsScore?.ltvToCac || "",
+            payback: report?.unitEconomicsScore?.payback || "",
+            margin: report?.unitEconomicsScore?.margin || "",
+            status: report?.unitEconomicsScore?.status || "WATCH",
         },
 
-        unitEconomicsTable: safeArray(
-            report?.unitEconomicsTable,
-            sample.unitEconomicsTable
-        ),
-
-        economicsJudgment:
-            report?.economicsJudgment || sample.economicsJudgment,
+        unitEconomicsTable: safeArray(report?.unitEconomicsTable, []).slice(0, 4),
+        economicsJudgment: report?.economicsJudgment || "",
 
         marketingStrategy: {
             channelFit: safeArray(
                 report?.marketingStrategy?.channelFit,
-                sample.marketingStrategy.channelFit
-            ),
+                []
+            ).slice(0, 4),
             contentPlaybook: safeArray(
                 report?.marketingStrategy?.contentPlaybook,
-                sample.marketingStrategy.contentPlaybook
-            ),
+                []
+            ).slice(0, 5),
             thirtyDayMarketingTest: safeArray(
                 report?.marketingStrategy?.thirtyDayMarketingTest,
-                sample.marketingStrategy.thirtyDayMarketingTest
-            ),
+                []
+            ).slice(0, 12),
         },
-                businessModel: {
+
+        businessModel: {
             revenueLayers: safeArray(
                 report?.businessModel?.revenueLayers,
-                sample.businessModel.revenueLayers
-            ),
-            modelJudgment:
-                report?.businessModel?.modelJudgment ||
-                sample.businessModel.modelJudgment,
+                []
+            ).slice(0, 3),
+            modelJudgment: report?.businessModel?.modelJudgment || "",
         },
 
-        riskSystem: safeArray(report?.riskSystem, sample.riskSystem),
-        executionPlan: safeArray(report?.executionPlan, sample.executionPlan),
-        operatingRule: report?.operatingRule || sample.operatingRule,
+        riskSystem: safeArray(report?.riskSystem, []).slice(0, 3),
+        executionPlan: safeArray(report?.executionPlan, []).slice(0, 3),
+        operatingRule: report?.operatingRule || "",
 
-        goThreshold: safeArray(report?.goThreshold, sample.goThreshold),
-        goChecklist: safeArray(report?.goChecklist, sample.goChecklist),
-        finalRule: report?.finalRule || sample.finalRule,
+        goThreshold: safeArray(report?.goThreshold, []).slice(0, 4),
+        goChecklist: safeArray(report?.goChecklist, [
+            { label: "CAC", status: "WATCH" },
+            { label: "Conversion", status: "WATCH" },
+            { label: "Repeat Purchase", status: "WATCH" },
+            { label: "Margin", status: "WATCH" },
+        ]).slice(0, 4),
+
+        finalRule: report?.finalRule || "",
 
         dataConfidence: {
             overallLevel: report?.dataConfidence?.overallLevel || "MEDIUM",
-            summary:
-                report?.dataConfidence?.summary ||
-                "현재 보고서는 공개 자료, 플랫폼 관찰, 보수적 가정을 함께 사용했습니다.",
+            summary: report?.dataConfidence?.summary || "",
             sourceQuality: safeArray(
                 report?.dataConfidence?.sourceQuality,
-                [
-                    ["공개 통계", "MEDIUM", "시장 방향성 판단에는 유효하지만 세부 카테고리 수치는 제한적입니다."],
-                    ["플랫폼 관찰", "MEDIUM", "가격대와 경쟁 구도 판단에는 유효하지만 실제 판매량은 추정입니다."],
-                    ["사업 가정", "LOW", "CAC, LTV, 유지율은 실제 테스트 전까지 변동 가능성이 큽니다."],
-                ]
-            ),
-            limits: safeArray(
-                report?.dataConfidence?.limits,
-                [
-                    "정확한 경쟁사 매출은 공개되지 않았습니다.",
-                    "광고비와 전환율은 소재, 계정, 시즌에 따라 크게 달라집니다.",
-                    "초기 테스트 전까지 LTV와 재구매율은 가정값입니다.",
-                ]
-            ),
+                []
+            ).slice(0, 3),
+            limits: safeArray(report?.dataConfidence?.limits, []).slice(0, 3),
         },
 
         sensitivityAnalysis: {
             cacLtvTable: safeArray(
                 report?.sensitivityAnalysis?.cacLtvTable,
-                [
-                    ["Low CAC", "15,000원", "90,000원", "GO 가능"],
-                    ["Base CAC", "25,000원", "75,000원", "조건부 HOLD"],
-                    ["High CAC", "45,000원", "60,000원", "NO GO 위험"],
-                ]
-            ),
+                []
+            ).slice(0, 3),
             criticalBreakPoint:
-                report?.sensitivityAnalysis?.criticalBreakPoint ||
-                "LTV/CAC가 2배 아래로 내려가면 광고 확장은 위험합니다.",
+                report?.sensitivityAnalysis?.criticalBreakPoint || "",
             founderWarning:
-                report?.sensitivityAnalysis?.founderWarning ||
-                "CAC가 상승했을 때도 이익이 남는지 먼저 확인해야 합니다.",
+                report?.sensitivityAnalysis?.founderWarning || "",
         },
 
         profitSimulation: {
             monthlyScenarioTable: safeArray(
                 report?.profitSimulation?.monthlyScenarioTable,
-                [
-                    ["Conservative", "100명", "2,990,000원", "2,000,000원", "적자 가능", "검증만 가능"],
-                    ["Base", "300명", "8,970,000원", "6,000,000원", "소폭 흑자/본전", "주의 필요"],
-                    ["Aggressive", "700명", "20,930,000원", "14,000,000원", "흑자 가능", "리텐션 전제"],
-                ]
-            ),
-            breakEvenPoint:
-                report?.profitSimulation?.breakEvenPoint ||
-                "초기에는 광고비와 물류비 때문에 손익분기까지 최소 2~3개월이 필요합니다.",
-            profitJudgment:
-                report?.profitSimulation?.profitJudgment ||
-                "이 사업은 초기부터 큰 이익을 내기 어렵고, 재구매율이 확인될 때만 확장 가능합니다.",
-            cashRisk:
-                report?.profitSimulation?.cashRisk ||
-                "광고비를 먼저 쓰고 회수는 나중에 발생하므로 초기 현금흐름 리스크가 큽니다.",
+                []
+            ).slice(0, 3),
+            breakEvenPoint: report?.profitSimulation?.breakEvenPoint || "",
+            profitJudgment: report?.profitSimulation?.profitJudgment || "",
+            cashRisk: report?.profitSimulation?.cashRisk || "",
         },
 
         killCriteria: {
-            rules: safeArray(
-                report?.killCriteria?.rules,
-                [
-                    ["CAC", "목표 CAC의 150% 초과", "광고 확장 중단"],
-                    ["Conversion", "구매 전환율 1% 미만", "랜딩/상품 제안 재설계"],
-                    ["Repeat", "60일 재구매율 15% 미만", "구독 모델 중단"],
-                    ["Margin", "기여이익률 20% 미만", "가격/원가/배송 구조 재조정"],
-                ]
-            ),
-            stopDecision:
-                report?.killCriteria?.stopDecision ||
-                "핵심 지표 2개 이상이 기준 미달이면 사업 확장을 중단합니다.",
-            pivotDecision:
-                report?.killCriteria?.pivotDecision ||
-                "전환율은 있으나 재구매가 약하면 구독이 아니라 단품/번들 모델로 전환합니다.",
-            scaleDecision:
-                report?.killCriteria?.scaleDecision ||
-                "CAC, 전환율, 재구매율, 마진이 모두 기준을 넘을 때만 광고비를 증액합니다.",
+            rules: safeArray(report?.killCriteria?.rules, []).slice(0, 4),
+            stopDecision: report?.killCriteria?.stopDecision || "",
+            pivotDecision: report?.killCriteria?.pivotDecision || "",
+            scaleDecision: report?.killCriteria?.scaleDecision || "",
         },
-        
+
         appendix: {
-            dataSources: safeArray(
-                report?.appendix?.dataSources,
-                sample.appendix.dataSources
-            ),
-            assumptions: safeArray(
-                report?.appendix?.assumptions,
-                sample.appendix.assumptions
-            ),
+            dataSources: safeArray(report?.appendix?.dataSources, []).slice(0, 3),
+            assumptions: safeArray(report?.appendix?.assumptions, []).slice(0, 4),
         },
+
+        referenceLinks: safeArray(report?.referenceLinks, []).slice(0, 5),
     }
 }
 
@@ -1026,44 +992,37 @@ function buildHtmlFromTemplate(report, locale) {
     const unit = objectFromPairs(report.unitEconomicsCards)
     const execMap = objectFromPairs(report.executiveDecision)
 
-    const funnel = normalizeFunnel(report.marketFunnel)
+   const funnel = normalizeFunnel(report.marketFunnel)
+
 const lockedMessage =
     report?.lockedSections?.message ||
     t(
         locale,
         "locked.message",
-        "무료 보고서는 사업의 방향성과 기본 구조만 제공합니다. 고객·시장·수익·리스크·실행 전략 전체는 유료 보고서에서 확인할 수 있습니다."
+        "Core data and execution strategy are available in the paid report."
     )
 
-    const lockedTitle = t(locale, "locked.title", "Paid report only")
-    
-       const scoreGuideRows = getLocaleTable(locale, "tables.scoreGuideRows", [
+const lockedTitle = t(locale, "locked.title", "Paid report only")
+
+const scoreGuideRows = getLocaleTable(locale, "tables.scoreGuideRows", [
     ["85~100", "Excellent", "Strong GO candidate. Scaling may be considered."],
     ["70~84", "Good", "GO is possible if key conditions are met."],
     ["50~69", "Average / Needs validation", "HOLD. Decide after a small test."],
     ["30~49", "Risky", "High NO GO probability. Redesign the structure."],
     ["0~29", "Very risky", "Stop immediately or fully reconsider."],
 ])
-    const customerOpportunityRows = getLocaleTable(locale, "tables.customerOpportunityRows", [
-    ["Purchase emotion", "The customer has a strong desire to give something better.", "Can create first-purchase conversion."],
-    ["Giftability", "A premium package can fit gift demand.", "Useful for trial boxes and seasonal boxes."],
-    ["Repeat purchase", "If the product works well, repeat purchase is possible.", "Can support subscription conversion."],
-    ["Content fit", "Customer reaction content works well in short-form channels.", "Useful for Instagram, TikTok, and YouTube Shorts tests."],
-])
 
-    const benchmarkRows = getLocaleTable(locale, "tables.benchmarkRows", [
-    ["BarkBox", "US dog subscription box", "Creates subscription enjoyment through themed boxes, toys, and treats."],
-    ["Butternut Box", "UK personalized pet food subscription", "Strong personalized recommendation and recurring delivery structure."],
-    ["Premium pet food DTC brands", "DTC repeat-purchase model", "Uses ingredient trust, reviews, and recurring delivery benefits to drive repeat purchase."],
-])
+const customerOpportunityRows = Array.isArray(report?.customerOpportunity)
+    ? report.customerOpportunity
+    : []
 
-    const referenceLinks = [
-        ["농림축산식품부", "https://www.mafra.go.kr"],
-        ["통계청", "https://kostat.go.kr"],
-        ["네이버 쇼핑", "https://shopping.naver.com"],
-        ["쿠팡", "https://www.coupang.com"],
-        ["Google Trends", "https://trends.google.com"],
-    ]
+const benchmarkRows = Array.isArray(report?.benchmarkRows)
+    ? report.benchmarkRows
+    : []
+
+const referenceLinks = Array.isArray(report?.referenceLinks)
+    ? report.referenceLinks
+    : []
 
     const data = {
 
@@ -1077,7 +1036,6 @@ const lockedMessage =
         goNoGoLogic: report.businessDiagnosis?.goNoGoLogic || "",
         
         structureSummary: report.businessDiagnosis?.structureSummary || "",
-        structure_summary_label: "구조 요약",
 
         dataConfidenceLevel: report.dataConfidence?.overallLevel || "",
         dataConfidenceSummary: report.dataConfidence?.summary || "",
@@ -1155,7 +1113,6 @@ const lockedMessage =
         economicsJudgment: report.economicsJudgment,
         
         modelJudgment: report.businessModel.modelJudgment,
-        model_deep_dive_label: "모델 심화 분석",
         
         operatingRule: report.operatingRule,
         finalRule: report.finalRule,
@@ -1322,7 +1279,6 @@ return html
 
 function keepFreeReportOnly(html) {
     const splitPoint = "<!-- FREE_REPORT_END -->"
-
     const index = html.indexOf(splitPoint)
 
     if (index === -1) {
@@ -1337,9 +1293,9 @@ ${freePart}
 
 <section class="page section-cover">
   <div class="section-kicker">PREMIUM REPORT</div>
-  <div class="section-cover-title">이후 분석은 유료 보고서에서 확인할 수 있습니다</div>
+  <div class="section-cover-title">Full analysis is available in the paid report</div>
   <div class="section-cover-desc">
-    고객 분석, 시장 규모, 경쟁 구조, 수익 시뮬레이션, 마케팅 전략, 리스크 판단, 실행 계획은 결제 후 전체 보고서에서 제공됩니다.
+    Customer analysis, market sizing, competitive structure, profit simulation, marketing strategy, risk judgment, and execution plan are unlocked in the full report.
   </div>
   <div class="footer">
     <span>GoNoGo™</span>
@@ -1350,6 +1306,7 @@ ${freePart}
 </body>
 </html>
 `
+}
 }
 
 function lockedBox(message, title = "Premium Insights") {
@@ -1366,7 +1323,7 @@ function lockedBox(message, title = "Premium Insights") {
             font-weight:bold;
             margin-bottom:6px;
         ">
-            🔒 ${title}
+            ${esc(title)}
         </div>
 
         <div style="
@@ -1374,31 +1331,7 @@ function lockedBox(message, title = "Premium Insights") {
             color:#555;
             margin-bottom:10px;
         ">
-            ${message}
-        </div>
-
-        <div style="
-            font-size:11px;
-            color:#333;
-            margin-bottom:12px;
-        ">
-            Full report unlocks:
-            <br/>
-            • Market size & growth validation
-            <br/>
-            • Real CAC vs LTV economics
-            <br/>
-            • Risk breakdown & mitigation strategy
-            <br/>
-            • Step-by-step execution plan
-        </div>
-
-        <div style="
-            font-size:10px;
-            color:#888;
-            margin-bottom:12px;
-        ">
-            This is not a generic report. It is a decision-grade business analysis.
+            ${esc(message)}
         </div>
 
         <div style="
@@ -1410,7 +1343,7 @@ function lockedBox(message, title = "Premium Insights") {
             font-size:12px;
             font-weight:bold;
         ">
-            Unlock Full Report →
+            Premium Report
         </div>
     </div>
     `
