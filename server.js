@@ -85,16 +85,16 @@ app.get("/api/test-pdf", async (req, res) => {
     }
 })
 
-app.get("/api/generate-report-test", async (req, res) => {
+app.get("/api/debug-html", async (req, res) => {
     try {
         const language = normalizeLanguage(req.query.language || "ko")
         const reportType = req.query.reportType === "free" ? "free" : "paid"
 
-       const brandName = req.query.brandName || "SampleBrand"
-const productService =
-    req.query.productService || "A new product or service idea"
-const targetCustomer =
-    req.query.targetCustomer || "Target customers for this business"
+        const brandName = req.query.brandName || "SampleBrand"
+        const productService =
+            req.query.productService || "A new product or service idea"
+        const targetCustomer =
+            req.query.targetCustomer || "Target customers for this business"
 
         const locale = loadLocale(language)
 
@@ -105,30 +105,24 @@ const targetCustomer =
             language,
         })
 
-       const finalReport =
-    reportType === "free"
-        ? buildFreeReportFromPaidReport(paidReport)
-        : { ...paidReport, isPaid: true, reportMode: "paid" }
+        const finalReport =
+            reportType === "free"
+                ? buildFreeReportFromPaidReport(paidReport)
+                : { ...paidReport, isPaid: true, reportMode: "paid" }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
-        const pdfBuffer = await htmlToPdf(html)
 
-        const safeBrand = sanitizeFileName(brandName)
+        console.log("[DEBUG_HTML_LENGTH]", html.length)
+        console.log("[DEBUG_HTML_PREVIEW]", html.slice(0, 500))
 
-        res.setHeader("Content-Type", "application/pdf")
-        res.setHeader("Content-Length", pdfBuffer.length)
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="GoNoGo_${reportType}_Report_${safeBrand}_${language}.pdf"`
-        )
-
-        return res.end(pdfBuffer)
+        res.setHeader("Content-Type", "text/html; charset=utf-8")
+        return res.send(html)
     } catch (error) {
-        console.error("[GENERATE_REPORT_TEST_ERROR]", error)
+        console.error("[DEBUG_HTML_ERROR]", error)
 
         return res.status(500).json({
             ok: false,
-            error: "Failed to generate test report.",
+            error: "DEBUG_HTML_FAILED",
             detail: String(error?.message || error),
         })
     }
