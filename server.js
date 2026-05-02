@@ -1043,6 +1043,7 @@ function buildHtmlFromTemplate(report, locale) {
 
     const funnel = normalizeFunnel(report.marketFunnel)
     const lockedMessage =
+    "You're seeing only surface-level insights. The full report contains the actual decision-making data."
     report?.lockedSections?.message ||
     t(locale, "locked.message", "Core data and execution strategy are available in the paid report.")
 
@@ -1314,12 +1315,67 @@ html = html.replace(/{{[^}]+}}/g, "")
 return html
 }
 
-function lockedBox(message, title = "Paid report only") {
+function lockedBox(message, title = "Premium Insights") {
     return `
-        <div class="locked-box">
-            <h3>🔒 ${esc(title)}</h3>
-            <p>${esc(message)}</p>
+    <div style="
+        border:1px solid #e0e0e0;
+        border-radius:10px;
+        padding:18px;
+        background:#fafafa;
+        text-align:center;
+    ">
+        <div style="
+            font-size:13px;
+            font-weight:bold;
+            margin-bottom:6px;
+        ">
+            🔒 ${title}
         </div>
+
+        <div style="
+            font-size:11px;
+            color:#555;
+            margin-bottom:10px;
+        ">
+            ${message}
+        </div>
+
+        <div style="
+            font-size:11px;
+            color:#333;
+            margin-bottom:12px;
+        ">
+            Full report unlocks:
+            <br/>
+            • Market size & growth validation
+            <br/>
+            • Real CAC vs LTV economics
+            <br/>
+            • Risk breakdown & mitigation strategy
+            <br/>
+            • Step-by-step execution plan
+        </div>
+
+        <div style="
+            font-size:10px;
+            color:#888;
+            margin-bottom:12px;
+        ">
+            This is not a generic report. It is a decision-grade business analysis.
+        </div>
+
+        <div style="
+            display:inline-block;
+            padding:10px 14px;
+            background:#2f7d57;
+            color:#fff;
+            border-radius:6px;
+            font-size:12px;
+            font-weight:bold;
+        ">
+            Unlock Full Report →
+        </div>
+    </div>
     `
 }
 
