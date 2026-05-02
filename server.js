@@ -58,11 +58,11 @@ app.get("/api/test-pdf", async (req, res) => {
         const locale = loadLocale(language)
 
         const sampleReport = normalizeDeepReport(getSampleReport(language), {
-            brandName: "NomNomBox",
-            productService: "Premium pet-food sample subscription",
-            targetCustomer: "Online dog owners",
-            language,
-        })
+    brandName: "SampleBrand",
+    productService: "A new product or service idea",
+    targetCustomer: "Target customers for this business",
+    language,
+})
 
         const html = buildHtmlFromTemplate(sampleReport, locale)
         const pdfBuffer = await htmlToPdf(html)
