@@ -211,7 +211,7 @@ app.post("/api/generate-report", async (req, res) => {
     normalizedReportType === "paid"
         ? { ...paidReport, isPaid: true, reportMode: "paid" }
         : buildFreeReportFromPaidReport(paidReport)
-
+        
         const html = buildHtmlFromTemplate(finalReport, locale)
         const pdfBuffer = await htmlToPdf(html)
 
