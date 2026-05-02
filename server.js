@@ -1502,8 +1502,8 @@ function getRiskScoreClass(score) {
     return "status-green"
 }
 
-function marketFunnelChart(items) {
-    if (!Array.isArray(items)) return ""
+function marketFunnelChart(items = [], locale = {}) {
+    if (!Array.isArray(items) || items.length === 0) return ""
 
     const normalized = items.map((item) => {
         const label = item?.label || ""
@@ -1525,11 +1525,12 @@ function marketFunnelChart(items) {
                     return `
                         <div class="market-funnel-row ${levelClass}">
                             <div class="market-funnel-label">${esc(item.label)}</div>
+
                             <div class="market-funnel-track">
-                                <div class="market-funnel-fill" style="width:${item.score}%">
-                                    <span>${esc(item.value)}</span>
-                                </div>
+                                <div class="market-funnel-fill" style="width:${item.score}%"></div>
                             </div>
+
+                            <div class="market-funnel-value">${esc(item.value)}</div>
                         </div>
                     `
                 })
