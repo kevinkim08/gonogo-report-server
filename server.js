@@ -15,37 +15,15 @@ const __dirname = path.dirname(__filename)
 
 app.use(express.json({ limit: "5mb" }))
 
-const corsOptions = {
-    origin: (origin, callback) => {
-        if (!origin) return callback(null, true)
+app.use(
+    cors({
+        origin: true,
+        methods: ["GET", "POST", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+    })
+)
 
-        try {
-            const { hostname } = new URL(origin)
-
-            const allowed =
-                hostname === "localhost" ||
-                hostname === "127.0.0.1" ||
-                hostname === "big-evidence-039433.framer.app" ||
-                hostname.endsWith(".framer.app") ||
-                hostname.endsWith(".framer.website") ||
-                hostname.endsWith(".onrender.com")
-
-            if (allowed) return callback(null, true)
-
-            console.log("[CORS_BLOCKED]", origin)
-            return callback(new Error("Not allowed by CORS"))
-        } catch (err) {
-            console.log("[CORS_INVALID_ORIGIN]", origin)
-            return callback(new Error("Invalid origin"))
-        }
-    },
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false,
-}
-
-app.use(cors(corsOptions))
-app.options("*", cors(corsOptions))
+app.options("*", cors())
 
 // preflight 요청 처리 (중요)
 app.options("*", cors())
