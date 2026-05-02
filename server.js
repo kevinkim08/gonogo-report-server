@@ -1004,16 +1004,16 @@ function buildHtmlFromTemplate(report, locale) {
 
    const funnel = normalizeFunnel(report.marketFunnel)
 
-const lockedMessage =
+const lockedMessage = t(
+    locale,
+    "locked.message",
     report?.lockedSections?.message ||
-    t(
-        locale,
-        "locked.message",
         "Core data and execution strategy are available in the paid report."
-    )
+)
 
 const lockedTitle = t(locale, "locked.title", "Paid report only")
-
+const lockedButton = t(locale, "locked.button", "Premium Report")
+    
 const scoreGuideRows = getLocaleTable(locale, "tables.scoreGuideRows", [
     ["85~100", "Excellent", "Strong GO candidate. Scaling may be considered."],
     ["70~84", "Good", "GO is possible if key conditions are met."],
@@ -1128,10 +1128,10 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         finalRule: report.finalRule,
         decisionChart: buildDecisionChart(report, locale),
 
-        competitionPositionChart: competitionPositionChart(report.competitionMap),
+        competitionPositionChart: competitionPositionChart(report.competitionMap, locale),
         riskHeatmap: riskHeatmap(report.riskSystem, locale),
         executionTimeline: executionTimeline(report.executionPlan, locale),
-        decisionSummaryBox: decisionSummaryBox(report),
+        decisionSummaryBox: decisionSummaryBox(report, locale),
         
     }
 
@@ -1152,18 +1152,21 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
     "{{profitSimulationChart}}",
     profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
 )
-        .replace("{{cacLtvRiskChart}}", cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable))
+       .replace(
+    "{{cacLtvRiskChart}}",
+    cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale)
+)
         .replace(
             "{{tamSamSomRows}}",
             report?.lockedSections?.tamSamSom
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.tamSamSom)
         )
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
         .replace("{{customerOpportunityRows}}", rows(customerOpportunityRows))
         .replace("{{competitionRows}}",report?.lockedSections?.competition?
-         `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`: rows(report.competitionMap))
-        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap))
+         `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`: rows(report.competitionMap))
+        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap, locale))
 .replace(
     "{{competitionConclusion}}",
     report?.lockedSections?.competition
@@ -1176,13 +1179,13 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         .replace(
     "{{unitEconomicsRows}}",
     report?.lockedSections?.unitEconomics
-        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
         : rows(report.unitEconomicsTable)
 )
         .replace(
             "{{marketingChannelRows}}",
             report?.lockedSections?.marketing
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.marketingStrategy.channelFit)
         )
         .replace(
@@ -1194,7 +1197,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         .replace(
             "{{marketingTestRows}}",
             report?.lockedSections?.marketing
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.marketingStrategy.thirtyDayMarketingTest)
         )
 
@@ -1205,7 +1208,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
 .replace(
     "{{riskRows}}",
     report?.lockedSections?.risk
-        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
         : rows(report.riskSystem)
 )
 .replace(
@@ -1217,7 +1220,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
 .replace(
     "{{executionRows}}",
     report?.lockedSections?.execution
-        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
         : rows(report.executionPlan)
 )
 .replace(
@@ -1226,11 +1229,11 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         ? ""
         : executionTimeline(report.executionPlan, locale)
 )
-.replace("{{decisionSummaryBox}}", decisionSummaryBox(report))
+.replace("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
 .replace(
     "{{goThresholdRows}}",
     report?.lockedSections?.goThreshold
-        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
         : rows(report.goThreshold)
 )
 .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
@@ -1281,7 +1284,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
 html = applyTemplateVars(html, templateData)
 
     if (report?.reportMode === "free") {
-    html = keepFreeReportOnly(html)
+    html = keepFreeReportOnly(html, locale)
 }
 
 html = html.replace(/{{[^}]+}}/g, "")
@@ -1289,7 +1292,7 @@ html = html.replace(/{{[^}]+}}/g, "")
 return html
 }
 
-function keepFreeReportOnly(html) {
+function keepFreeReportOnly(html, locale = {}) {
     const splitPoint = "<!-- FREE_REPORT_END -->"
     const index = html.indexOf(splitPoint)
 
@@ -1300,18 +1303,32 @@ function keepFreeReportOnly(html) {
 
     const freePart = html.slice(0, index)
 
+    const premiumKicker = t(locale, "premium.kicker", "PREMIUM REPORT")
+    const premiumTitle = t(
+        locale,
+        "premium.title",
+        "Full analysis is available in the paid report"
+    )
+    const premiumDesc = t(
+        locale,
+        "premium.desc",
+        "Customer analysis, market sizing, competitive structure, profit simulation, marketing strategy, risk judgment, and execution plan are unlocked in the full report."
+    )
+    const premiumFooter = t(locale, "premium.footer", "Premium Locked")
+    const footerLeft = t(locale, "footer.left", "GoNoGo™")
+
     return `
 ${freePart}
 
 <section class="page section-cover">
-  <div class="section-kicker">PREMIUM REPORT</div>
-  <div class="section-cover-title">Full analysis is available in the paid report</div>
+  <div class="section-kicker">${esc(premiumKicker)}</div>
+  <div class="section-cover-title">${esc(premiumTitle)}</div>
   <div class="section-cover-desc">
-    Customer analysis, market sizing, competitive structure, profit simulation, marketing strategy, risk judgment, and execution plan are unlocked in the full report.
+    ${esc(premiumDesc)}
   </div>
   <div class="footer">
-    <span>GoNoGo™</span>
-    <span>Premium Locked</span>
+    <span>${esc(footerLeft)}</span>
+    <span>${esc(premiumFooter)}</span>
   </div>
 </section>
 
@@ -1320,7 +1337,7 @@ ${freePart}
 `
 }
 
-function lockedBox(message, title = "Premium Insights") {
+function lockedBox(message, title = "Premium Insights", buttonLabel = "Premium Report") {
     return `
     <div style="
         border:1px solid #e0e0e0;
@@ -1354,7 +1371,7 @@ function lockedBox(message, title = "Premium Insights") {
             font-size:12px;
             font-weight:bold;
         ">
-            Premium Report
+            ${esc(buttonLabel)}
         </div>
     </div>
     `
@@ -1596,8 +1613,11 @@ function profitSimulationChart(rowsData = [], locale = {}) {
     `
 }
 
-function cacLtvRiskChart(rowsData) {
+function cacLtvRiskChart(rowsData = [], locale = {}) {
     if (!Array.isArray(rowsData)) return ""
+
+    const chart = locale?.chart || {}
+    const ratioLabel = chart.ltvCac || "LTV/CAC"
 
     return `
         <div class="chart-box">
@@ -1615,7 +1635,7 @@ function cacLtvRiskChart(rowsData) {
                         <div class="chart-track">
                             <div class="chart-fill ${cls}" style="width:${width}%"></div>
                         </div>
-                        <div class="chart-value">LTV/CAC ${ratio.toFixed(1)}x</div>
+                        <div class="chart-value">${esc(ratioLabel)} ${ratio.toFixed(1)}x</div>
                     </div>
                 `
             }).join("")}
@@ -1785,15 +1805,22 @@ function validateTemplateKeys(html, templateData, blockKeys = []) {
 }
 
 /* 🔥 완전히 밖으로 분리 */
-function competitionPositionChart(map) {
+function competitionPositionChart(map = [], locale = {}) {
     if (!Array.isArray(map)) return ""
+
+    const chart = locale?.chart || {}
+
+    const lowPrice = chart.lowPrice || "Low Price"
+    const highPrice = chart.highPrice || "High Price"
+    const highValue = chart.highValue || "High Value"
+    const lowValue = chart.lowValue || "Low Value"
 
     return `
     <div class="chart-box">
         <div style="position: relative; height: 240px; background: #f6faf7; border:1px solid #d8e7dc;">
             
             ${map.map((row, i) => {
-                const name = esc(row[0] || "")
+                const name = esc(row?.[0] || "")
                 const x = (i % 2) * 60 + 20
                 const y = Math.floor(i / 2) * 60 + 20
 
@@ -1815,11 +1842,11 @@ function competitionPositionChart(map) {
                 `
             }).join("")}
 
-            <div style="position:absolute; left:10px; bottom:10px; font-size:10px;">Low Price</div>
-            <div style="position:absolute; right:10px; bottom:10px; font-size:10px;">High Price</div>
+            <div style="position:absolute; left:10px; bottom:10px; font-size:10px;">${esc(lowPrice)}</div>
+            <div style="position:absolute; right:10px; bottom:10px; font-size:10px;">${esc(highPrice)}</div>
 
-            <div style="position:absolute; left:10px; top:10px; font-size:10px;">High Value</div>
-            <div style="position:absolute; left:10px; bottom:30px; font-size:10px;">Low Value</div>
+            <div style="position:absolute; left:10px; top:10px; font-size:10px;">${esc(highValue)}</div>
+            <div style="position:absolute; left:10px; bottom:30px; font-size:10px;">${esc(lowValue)}</div>
 
         </div>
     </div>
@@ -1937,30 +1964,31 @@ function executionTimeline(rows = [], locale = {}) {
     `
 }
 
-function decisionSummaryBox(report) {
+function decisionSummaryBox(report, locale = {}) {
     const decision = report?.cover?.decision || "HOLD"
     const score = Number(report?.cover?.score || 50)
+    const chart = locale?.chart || {}
 
     const confidence =
         score >= 75
-            ? "HIGH CONFIDENCE"
+            ? chart.highConfidence || "HIGH CONFIDENCE"
             : score >= 55
-                ? "MEDIUM CONFIDENCE"
-                : "LOW CONFIDENCE"
+                ? chart.mediumConfidence || "MEDIUM CONFIDENCE"
+                : chart.lowConfidence || "LOW CONFIDENCE"
 
     const color =
         decision === "GO"
             ? "#2ecc71"
             : decision === "HOLD"
-            ? "#f39c12"
-            : "#e74c3c"
+                ? "#f39c12"
+                : "#e74c3c"
 
     const action =
         decision === "GO"
-            ? "Start execution immediately with controlled budget."
+            ? chart.goAction || "Start execution immediately with controlled budget."
             : decision === "HOLD"
-            ? "Run validation tests before scaling."
-            : "Stop or redesign the business model."
+                ? chart.holdAction || "Run validation tests before scaling."
+                : chart.noGoAction || "Stop or redesign the business model."
 
     return `
     <div class="chart-box">
@@ -1975,15 +2003,15 @@ function decisionSummaryBox(report) {
                 color:${color};
                 margin-bottom:6px;
             ">
-                ${decision}
+                ${esc(decision)}
             </div>
 
             <div style="font-size:12px; margin-bottom:6px;">
-                Score: <b>${score}</b> / 100
+                ${esc(locale?.scoreLabel || "Score")}: <b>${score}</b> / 100
             </div>
 
             <div style="font-size:11px; margin-bottom:10px;">
-                ${confidence}
+                ${esc(confidence)}
             </div>
 
             <div style="
@@ -1992,7 +2020,7 @@ function decisionSummaryBox(report) {
                 padding:10px;
                 border-radius:6px;
             ">
-                ${action}
+                ${esc(action)}
             </div>
         </div>
     </div>
