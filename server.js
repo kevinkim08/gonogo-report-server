@@ -93,15 +93,20 @@ app.get("/api/debug-html", async (req, res) => {
 
         const reportType = req.query.reportType === "free" ? "free" : "paid"
 
+        const brandName = req.query.brandName || "SampleBrand"
+        const productService =
+            req.query.productService || "A new product or service idea"
+        const targetCustomer =
+            req.query.targetCustomer || "Target customers for this business"
+
         const locale = loadLocale(language)
 
-        // 🔥 핵심: GPT 제거
         const paidReport = await generateDeepReportJson({
-    brandName,
-    productService,
-    targetCustomer,
-    language,
-})
+            brandName,
+            productService,
+            targetCustomer,
+            language,
+        })
 
         const finalReport =
             reportType === "free"
@@ -111,6 +116,7 @@ app.get("/api/debug-html", async (req, res) => {
         const html = buildHtmlFromTemplate(finalReport, locale)
 
         console.log("🌍 LANG:", language)
+        console.log("[DEBUG_HTML_LENGTH]", html.length)
 
         res.setHeader("Content-Type", "text/html; charset=utf-8")
         return res.send(html)
