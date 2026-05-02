@@ -87,23 +87,16 @@ app.get("/api/test-pdf", async (req, res) => {
 
 app.get("/api/debug-html", async (req, res) => {
     try {
-        const language = normalizeLanguage(req.query.language || "ko")
-        const reportType = req.query.reportType === "free" ? "free" : "paid"
+        const language = normalizeLanguage(
+            req.query.lang || req.query.language || "ko"
+        )
 
-        const brandName = req.query.brandName || "SampleBrand"
-        const productService =
-            req.query.productService || "A new product or service idea"
-        const targetCustomer =
-            req.query.targetCustomer || "Target customers for this business"
+        const reportType = req.query.reportType === "free" ? "free" : "paid"
 
         const locale = loadLocale(language)
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language,
-        })
+        // 🔥 핵심: GPT 제거
+        const paidReport = getSampleReport(language)
 
         const finalReport =
             reportType === "free"
@@ -112,8 +105,7 @@ app.get("/api/debug-html", async (req, res) => {
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
-        console.log("[DEBUG_HTML_LENGTH]", html.length)
-        console.log("[DEBUG_HTML_PREVIEW]", html.slice(0, 500))
+        console.log("🌍 LANG:", language)
 
         res.setHeader("Content-Type", "text/html; charset=utf-8")
         return res.send(html)
@@ -151,12 +143,7 @@ app.post("/api/generate-report", async (req, res) => {
         const normalizedReportType =
             reportType === "paid" || reportType === "deep" ? "paid" : "free"
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language: normalizedLanguage,
-        })
+       const paidReport = getSampleReport(language)
 
         const finalReport =
     normalizedReportType === "paid"
@@ -2077,282 +2064,6 @@ function getDefaultGlossary(lang = "ko") {
     }
 
     return glossaries[lang] || glossaries.en
-}
-
-
-function getSampleReport(lang = "ko") {
-    const samples = {
-        ko: {
-            brandName: "샘플브랜드",
-            subtitle: "프리미엄 반려동물 간식 구독 서비스",
-            oneLineVerdict: "이 사업은 검증 후 조건부로 진행해야 한다.",
-            works: "반려동물 보호자는 반복 구매 성향이 강하고 샘플 구독은 진입 장벽이 낮다.",
-            fails: "차별화가 약하면 기존 쇼핑몰과 가격 경쟁에 빠질 수 있다.",
-            now: "광고비를 크게 쓰기 전에 30명 규모의 사전 신청 테스트를 먼저 진행해야 한다.",
-            founderDecision: "확장 금지, 수요 검증 먼저",
-            marketInsight: "시장은 존재하지만 브랜드 신뢰와 재구매 구조가 핵심이다.",
-            problem: "좋은 제품을 고르기 어렵다",
-            behavior: "리뷰와 추천을 보고 구매한다",
-            meaning: "큐레이션과 신뢰가 구매 전환을 만든다",
-            buyingTrigger: "반려동물 건강 문제나 간식 교체 필요성이 생길 때 구매한다.",
-            competitor: "기존 펫커머스",
-            type: "온라인 쇼핑몰",
-            strength: "상품 수가 많다",
-            weakness: "개인화와 큐레이션이 약하다",
-            competitionConclusion: "경쟁은 높지만 샘플 구독과 큐레이션으로 차별화 가능하다.",
-            economicsJudgment: "CAC가 낮게 유지될 때만 조건부로 가능하다.",
-            content: "보호자 후기 기반 콘텐츠",
-            product: "샘플 구독 박스",
-            modelJudgment: "단품 판매보다 정기 구독과 재구매 구조가 필요하다.",
-            risk: "광고비 상승",
-            phase: "1단계",
-            operatingRule: "검증 전 확장 금지",
-            finalRule: "CAC와 재구매율 기준을 통과할 때만 GO",
-            data: "시장 규모 추정",
-            assumption: "초기 테스트는 소액 광고와 사전 신청 기준으로 판단한다.",
-        },
-
-        en: {
-            brandName: "Sample Brand",
-            subtitle: "Premium pet snack subscription service",
-            oneLineVerdict: "This business should move forward only after validation.",
-            works: "Pet owners show repeat-purchase behavior, and sample subscriptions lower the first-purchase barrier.",
-            fails: "Without differentiation, the business may fall into price competition with existing pet commerce platforms.",
-            now: "Before scaling ad spend, run a pre-order test with at least 30 potential buyers.",
-            founderDecision: "Do not scale yet. Validate demand first.",
-            marketInsight: "The market exists, but trust, curation, and repeat purchase structure are critical.",
-            problem: "It is hard to choose reliable pet products",
-            behavior: "Buyers rely on reviews and recommendations",
-            meaning: "Curation and trust can increase conversion",
-            buyingTrigger: "Purchase happens when owners notice a health issue or need to replace snacks.",
-            competitor: "Existing pet commerce platforms",
-            type: "Online marketplace",
-            strength: "Large product selection",
-            weakness: "Weak personalization and curation",
-            competitionConclusion: "Competition is high, but sample subscription and curation can create differentiation.",
-            economicsJudgment: "This works only if CAC remains controlled.",
-            content: "Owner-review-based content",
-            product: "Sample subscription box",
-            modelJudgment: "A subscription and repeat-purchase model is stronger than one-time product sales.",
-            risk: "Rising advertising cost",
-            phase: "Phase 1",
-            operatingRule: "Do not scale before validation.",
-            finalRule: "GO only if CAC and repeat purchase metrics pass.",
-            data: "Market size estimate",
-            assumption: "Early validation should be judged by small-budget ads and pre-order intent.",
-        },
-
-        ja: {
-            brandName: "サンプルブランド",
-            subtitle: "プレミアムペットおやつ定期便サービス",
-            oneLineVerdict: "この事業は検証後に条件付きで進めるべきである。",
-            works: "ペットオーナーは継続購入傾向があり、サンプル定期便は初回購入の心理的ハードルを下げる。",
-            fails: "差別化が弱い場合、既存のペットECとの価格競争に巻き込まれる可能性がある。",
-            now: "広告費を拡大する前に、30人規模の事前申込テストを実施すべきである。",
-            founderDecision: "拡大禁止。まず需要検証を行う。",
-            marketInsight: "市場は存在するが、信頼、キュレーション、継続購入構造が重要である。",
-            problem: "信頼できるペット商品を選びにくい",
-            behavior: "購入者はレビューや推薦を参考にする",
-            meaning: "キュレーションと信頼が購入転換を高める",
-            buyingTrigger: "健康不安やおやつの切り替えが必要になった時に購入が起きる。",
-            competitor: "既存ペットEC",
-            type: "オンラインマーケットプレイス",
-            strength: "商品数が多い",
-            weakness: "個別提案とキュレーションが弱い",
-            competitionConclusion: "競争は高いが、サンプル定期便とキュレーションで差別化できる。",
-            economicsJudgment: "CACを低く維持できる場合のみ条件付きで成立する。",
-            content: "飼い主レビュー中心のコンテンツ",
-            product: "サンプル定期便ボックス",
-            modelJudgment: "単品販売よりも定期便と継続購入モデルが必要である。",
-            risk: "広告費の上昇",
-            phase: "第1段階",
-            operatingRule: "検証前に拡大しない。",
-            finalRule: "CACと継続購入率が基準を満たす場合のみGO。",
-            data: "市場規模推定",
-            assumption: "初期検証は少額広告と事前申込意向で判断する。",
-        },
-
-        zh: {
-            brandName: "样本品牌",
-            subtitle: "高端宠物零食订阅服务",
-            oneLineVerdict: "该业务应在验证后有条件推进。",
-            works: "宠物主人具有较强复购倾向，样品订阅可以降低首次购买门槛。",
-            fails: "如果差异化不足，容易陷入与现有宠物电商的价格竞争。",
-            now: "在扩大广告预算前，应先进行30人规模的预订测试。",
-            founderDecision: "不要急于扩张，先验证真实需求。",
-            marketInsight: "市场存在，但信任、精选能力和复购结构是关键。",
-            problem: "难以选择可靠的宠物产品",
-            behavior: "消费者依赖评价和推荐进行购买",
-            meaning: "精选和信任可以提升转化率",
-            buyingTrigger: "当宠物出现健康问题或需要更换零食时，会触发购买。",
-            competitor: "现有宠物电商平台",
-            type: "线上商城",
-            strength: "商品数量多",
-            weakness: "个性化和精选能力较弱",
-            competitionConclusion: "竞争较强，但样品订阅和精选模式可以形成差异化。",
-            economicsJudgment: "只有在CAC可控的情况下才具备条件性可行性。",
-            content: "基于宠物主人评价的内容",
-            product: "样品订阅盒",
-            modelJudgment: "相比单品销售，订阅和复购模型更重要。",
-            risk: "广告成本上升",
-            phase: "第一阶段",
-            operatingRule: "验证前禁止扩张。",
-            finalRule: "只有当CAC和复购率达标时才GO。",
-            data: "市场规模估算",
-            assumption: "早期验证应基于小额广告和预订意向判断。",
-        },
-
-        mn: {
-            brandName: "Жишээ брэнд",
-            subtitle: "Дээд зэрэглэлийн тэжээвэр амьтны амттан захиалгын үйлчилгээ",
-            oneLineVerdict: "Энэ бизнесийг зөвхөн баталгаажуулалтын дараа нөхцөлтэйгээр эхлүүлэх хэрэгтэй.",
-            works: "Тэжээвэр амьтантай хэрэглэгчид давтан худалдан авах хандлагатай бөгөөд дээжийн захиалга нь эхний худалдан авалтын саадыг бууруулна.",
-            fails: "Ялгарал сул байвал одоо байгаа пет худалдааны платформуудтай үнийн өрсөлдөөнд орж болзошгүй.",
-            now: "Зар сурталчилгааны зардлыг өсгөхөөс өмнө 30 хэрэглэгчийн урьдчилсан захиалгын тест хийх хэрэгтэй.",
-            founderDecision: "Одоохондоо өргөжүүлэхгүй. Эхлээд эрэлтийг баталгаажуул.",
-            marketInsight: "Зах зээл байгаа боловч итгэлцэл, сонголтын чанар, давтан худалдан авалтын бүтэц чухал.",
-            problem: "Найдвартай бүтээгдэхүүн сонгоход хэцүү",
-            behavior: "Хэрэглэгчид сэтгэгдэл болон зөвлөмжид тулгуурлан худалдан авдаг",
-            meaning: "Сонголт ба итгэлцэл нь хөрвүүлэлтийг нэмэгдүүлнэ",
-            buyingTrigger: "Амьтны эрүүл мэндийн асуудал эсвэл амттан солих хэрэгцээ үүсэх үед худалдан авалт хийгдэнэ.",
-            competitor: "Одоо байгаа пет худалдааны платформууд",
-            type: "Онлайн худалдаа",
-            strength: "Бүтээгдэхүүний сонголт их",
-            weakness: "Хувь хүнд тохирсон санал болон сонголт сул",
-            competitionConclusion: "Өрсөлдөөн өндөр боловч дээжийн захиалга ба сонголтын чанараар ялгарах боломжтой.",
-            economicsJudgment: "CAC бага түвшинд хадгалагдсан тохиолдолд л нөхцөлтэйгээр боломжтой.",
-            content: "Эзэмшигчдийн сэтгэгдэлд суурилсан контент",
-            product: "Дээжийн захиалгын хайрцаг",
-            modelJudgment: "Нэг удаагийн борлуулалтаас илүү захиалга ба давтан худалдан авалтын загвар шаардлагатай.",
-            risk: "Зар сурталчилгааны зардал өсөх",
-            phase: "1-р үе шат",
-            operatingRule: "Баталгаажуулалтаас өмнө өргөжүүлэхгүй.",
-            finalRule: "CAC болон давтан худалдан авалтын үзүүлэлт тэнцсэн үед л GO.",
-            data: "Зах зээлийн хэмжээний тооцоо",
-            assumption: "Эхний тестийг бага төсөвтэй сурталчилгаа болон урьдчилсан захиалгын сонирхлоор үнэлнэ.",
-        },
-    }
-
-    const t = samples[lang] || samples.en
-
-    return {
-        cover: {
-            brandName: t.brandName,
-            decision: "HOLD",
-            score: 60,
-            subtitle: t.subtitle,
-            oneLineVerdict: t.oneLineVerdict,
-        },
-        visualScores: { market: 70, profitability: 55, execution: 60, risk: 65 },
-        decisionMatrix: [
-            ["MARKET", "HIGH"],
-            ["PROFITABILITY", "MEDIUM"],
-            ["EXECUTION", "HIGH"],
-            ["RISK", "HIGH"],
-        ],
-        executiveDecision: [
-            ["Why this works", t.works],
-            ["Why this fails", t.fails],
-            ["What to do now", t.now],
-        ],
-        founderDecision: t.founderDecision,
-        marketCards: [
-            ["TAM", "100B"],
-            ["SAM", "30B"],
-            ["SOM", "1K users"],
-            ["GROWTH", "5%"],
-        ],
-        marketFunnel: [
-            { label: "TAM", value: "100B", score: 100 },
-            { label: "SAM", value: "30B", score: 50 },
-            { label: "SOM", value: "1K users", score: 20 },
-        ],
-        tamSamSom: [
-            ["TAM", "100B", "Total addressable pet commerce demand", "Large but not fully reachable"],
-            ["SAM", "30B", "Online pet snack buyers", "Reachable through digital channels"],
-            ["SOM", "1K users", "Initial realistic test segment", "Validate before scaling"],
-        ],
-        marketInsight: t.marketInsight,
-        customerTruth: [[t.problem, t.behavior, t.meaning]],
-        buyingTrigger: t.buyingTrigger,
-        competitionMap: [[t.competitor, t.type, t.strength, t.weakness]],
-        competitionConclusion: t.competitionConclusion,
-        unitEconomicsCards: [
-            ["CAC", "50"],
-            ["LTV", "150"],
-            ["AOV", "30"],
-            ["REPEAT", "3"],
-        ],
-        unitEconomicsScore: {
-            ltvToCac: "3x",
-            payback: "2m",
-            margin: "30%",
-            status: "WATCH",
-        },
-        unitEconomicsTable: [
-            ["CAC", "Below 50", "Pass if LTV/CAC > 3", "Acquisition cost must stay controlled"],
-            ["LTV", "Above 150", "Pass if repeat purchase exists", "Subscription depends on retention"],
-            ["AOV", "Above 30", "Pass if margin covers delivery", "Low AOV can kill profit"],
-            ["Repeat", "3+", "Pass if second purchase occurs", "Repeat purchase is core"],
-        ],
-        economicsJudgment: t.economicsJudgment,
-        marketingStrategy: {
-            channelFit: [
-                ["SNS", "HIGH", "Demand validation", "Fast feedback and low-cost testing"],
-                ["Search", "MEDIUM", "Intent capture", "Works after offer clarity"],
-                ["Influencer", "WATCH", "Trust building", "Needs careful CAC control"],
-                ["Community", "HIGH", "Repeat trust", "Useful for pet owner groups"],
-            ],
-            contentPlaybook: [
-                t.content,
-                "Before/after product experience",
-                "Problem-solution comparison",
-                "Customer review capture",
-                "Trust-building educational content",
-            ],
-            thirtyDayMarketingTest: [
-                ["Week 1", "Landing page and pre-order test", "30 leads"],
-                ["Week 2", "Small-budget ad test", "CAC estimate"],
-                ["Week 3", "Offer refinement", "Conversion rate"],
-            ],
-        },
-        businessModel: {
-            revenueLayers: [
-                [t.product, "Monthly subscription", "Repeat revenue"],
-                ["Single product upsell", "Add-on purchase", "Increase AOV"],
-                ["Brand partnership", "Sponsored samples", "Additional margin"],
-            ],
-            modelJudgment: t.modelJudgment,
-        },
-        riskSystem: [
-            [t.risk, "HIGH", "Set CAC limit before scaling"],
-            ["Low repeat purchase", "HIGH", "Measure second purchase within 30 days"],
-            ["Weak differentiation", "MEDIUM", "Strengthen curation and trust proof"],
-        ],
-        executionPlan: [
-            [t.phase, "Build landing page", "Lead conversion"],
-            ["Phase 2", "Run small ad test", "CAC"],
-            ["Phase 3", "Collect repeat intent", "Retention"],
-        ],
-        operatingRule: t.operatingRule,
-        goThreshold: [
-            ["CAC", "Below target", "Scale only if acquisition cost is controlled"],
-            ["Conversion", "Above minimum rate", "Offer must prove demand"],
-            ["Repeat", "Second purchase signal", "Subscription depends on retention"],
-            ["Margin", "Positive after delivery", "Unit economics must survive fulfillment"],
-        ],
-        goChecklist: [
-            { label: "CAC", status: "WATCH" },
-            { label: "Conversion", status: "WATCH" },
-            { label: "Repeat Purchase", status: "WATCH" },
-            { label: "Margin", status: "WATCH" },
-        ],
-        finalRule: t.finalRule,
-        appendix: {
-            dataSources: [[t.data, "Public benchmark / internal assumption", "Early validation"]],
-            assumptions: [t.assumption],
-        },
-    }
 }
 
 app.listen(PORT, () => {
