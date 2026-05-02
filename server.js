@@ -15,8 +15,6 @@ const __dirname = path.dirname(__filename)
 
 app.use(express.json({ limit: "5mb" }))
 
-import cors from "cors"
-
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin) return callback(null, true)
@@ -32,9 +30,7 @@ const corsOptions = {
                 hostname.endsWith(".framer.website") ||
                 hostname.endsWith(".onrender.com")
 
-            if (allowed) {
-                return callback(null, true)
-            }
+            if (allowed) return callback(null, true)
 
             console.log("[CORS_BLOCKED]", origin)
             return callback(new Error("Not allowed by CORS"))
