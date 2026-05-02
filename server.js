@@ -366,7 +366,7 @@ Array stability rules:
 - unitEconomicsTable must contain exactly 4 rows.
 - marketingStrategy.channelFit must contain exactly 4 rows.
 - marketingStrategy.contentPlaybook must contain exactly 5 items.
-- marketingStrategy.thirtyDayMarketingTest must contain exactly 3 rows.
+- marketingStrategy.thirtyDayMarketingTest must contain exactly 12 rows and represent a 12-week / 3-month test plan.
 - businessModel.revenueLayers must contain exactly 3 rows.
 - riskSystem must contain exactly 3 rows.
 - executionPlan must contain exactly 3 rows.
@@ -1075,7 +1075,9 @@ const lockedMessage =
         bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
         validationExperiment: report.businessDiagnosis?.validationExperiment || "",
         goNoGoLogic: report.businessDiagnosis?.goNoGoLogic || "",
+        
         structureSummary: report.businessDiagnosis?.structureSummary || "",
+        structure_summary_label: "구조 요약",
 
         dataConfidenceLevel: report.dataConfidence?.overallLevel || "",
         dataConfidenceSummary: report.dataConfidence?.summary || "",
@@ -1151,7 +1153,10 @@ const lockedMessage =
         repeatValue: unit.REPEAT || "",
 
         economicsJudgment: report.economicsJudgment,
+        
         modelJudgment: report.businessModel.modelJudgment,
+        model_deep_dive_label: "모델 심화 분석",
+        
         operatingRule: report.operatingRule,
         finalRule: report.finalRule,
         decisionChart: buildDecisionChart(report),
