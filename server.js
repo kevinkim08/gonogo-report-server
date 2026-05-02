@@ -208,9 +208,9 @@ app.post("/api/generate-report", async (req, res) => {
         })
 
         const finalReport =
-            normalizedReportType === "paid"
-                ? paidReport
-                : buildFreeReportFromPaidReport(paidReport)
+    normalizedReportType === "paid"
+        ? { ...paidReport, isPaid: true, reportMode: "paid" }
+        : buildFreeReportFromPaidReport(paidReport)
 
         const html = buildHtmlFromTemplate(finalReport, locale)
         const pdfBuffer = await htmlToPdf(html)
@@ -716,28 +716,13 @@ Now generate the JSON report.
 function buildFreeReportFromPaidReport(fullReport) {
     return {
         ...fullReport,
-
-        tamSamSom: [],
-        marketFunnel: [],
-        unitEconomicsTable: [],
-        marketingStrategy: {
-            channelFit: [],
-            contentPlaybook: [],
-            thirtyDayMarketingTest: [],
-        },
-        executionPlan: [],
-        riskSystem: [],
-        goThreshold: [],
+        isPaid: false,
+        reportMode: "free",
 
         lockedSections: {
-            tamSamSom: true,
-            unitEconomics: true,
-            marketing: true,
-            execution: true,
-            risk: true,
-            goThreshold: true,
-            competition: true,
-            message: "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다.",
+            afterSection01: true,
+            message:
+                "무료 보고서는 사업의 방향성과 기본 구조만 제공합니다. 고객·시장·수익·리스크·실행 전략 전체는 유료 보고서에서 확인할 수 있습니다.",
         },
     }
 }
