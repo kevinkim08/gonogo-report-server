@@ -1129,8 +1129,8 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         decisionChart: buildDecisionChart(report, locale),
 
         competitionPositionChart: competitionPositionChart(report.competitionMap),
-        riskHeatmap: riskHeatmap(report.riskSystem),
-        executionTimeline: executionTimeline(report.executionPlan),
+        riskHeatmap: riskHeatmap(report.riskSystem, locale),
+        executionTimeline: executionTimeline(report.executionPlan, locale),
         decisionSummaryBox: decisionSummaryBox(report),
         
     }
@@ -1210,7 +1210,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
     "{{riskHeatmap}}",
     report?.lockedSections?.risk
         ? ""
-        : riskHeatmap(report.riskSystem)
+        : riskHeatmap(report.riskSystem, locale)
 )
 .replace(
     "{{executionRows}}",
@@ -1813,94 +1813,114 @@ function competitionPositionChart(map) {
     `
 }
 
-function riskHeatmap(rows) {
-    if (!Array.isArray(rows)) return ""
+function riskHeatmap(rows = [], locale = {}) {
+    if (!Array.isArray(rows) || rows.length === 0) return ""
+
+    const chart = locale?.chart || {}
+
+    const levelConfig = [
+        {
+            level: "HIGH",
+            label: chart.high || "HIGH",
+            color: "#b94a48",
+        },
+        {
+            level: "MEDIUM",
+            label: chart.watch || "WATCH",
+            color: "#d8b85a",
+        },
+        {
+            level: "LOW",
+            label: chart.low || "LOW",
+            color: "#2f7d57",
+        },
+    ]
 
     return `
-    <div class="chart-box">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            
-            ${rows.map((row) => {
-                const title = esc(row?.[0] || "")
-                const desc = esc(row?.[1] || "")
+        <div class="chart-box">
+            <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+                ${rows
+                    .slice(0, 3)
+                    .map((row, index) => {
+                        const title = esc(row?.[0] || "")
+                        const impact = esc(row?.[1] || "")
+                        const action = esc(row?.[2] || "")
 
-                // 간단한 위험도 추정
-                let level = "MEDIUM"
-                if (desc.includes("높") || desc.includes("high") || desc.includes("위험")) {
-                    level = "HIGH"
-                } else if (desc.includes("낮") || desc.includes("low")) {
-                    level = "LOW"
-                }
+                        const config = levelConfig[index] || levelConfig[1]
 
-                const color =
-                    level === "HIGH"
-                        ? "#ff5a5a"
-                        : level === "MEDIUM"
-                        ? "#ffb84d"
-                        : "#4cd964"
+                        return `
+                            <div style="
+                                border:1px solid #d8e7dc;
+                                background:#fbfdfb;
+                                padding:12px;
+                                border-left:6px solid ${config.color};
+                                font-size:11px;
+                                line-height:1.45;
+                            ">
+                                <div style="
+                                    display:flex;
+                                    justify-content:space-between;
+                                    gap:10px;
+                                    align-items:flex-start;
+                                    margin-bottom:6px;
+                                ">
+                                    <b style="font-size:12px;">${title}</b>
+                                    <span style="
+                                        color:${config.color};
+                                        font-weight:900;
+                                        white-space:nowrap;
+                                    ">
+                                        ${esc(config.label)}
+                                    </span>
+                                </div>
 
-                return `
-                    <div style="
-                        background:${color};
-                        color:#fff;
-                        padding:12px;
-                        border-radius:8px;
-                        font-size:11px;
-                    ">
-                        <b>${title}</b><br/>
-                        <span>${desc}</span>
-                    </div>
-                `
-            }).join("")}
+                                <div style="margin-bottom:5px;">
+                                    ${impact}
+                                </div>
 
+                                <div style="
+                                    color:#4b5d53;
+                                    font-size:10.5px;
+                                ">
+                                    ${action}
+                                </div>
+                            </div>
+                        `
+                    })
+                    .join("")}
+            </div>
         </div>
-    </div>
     `
 }
 
-function executionTimeline(rows) {
-    if (!Array.isArray(rows)) return ""
+function executionTimeline(rows = [], locale = {}) {
+    if (!Array.isArray(rows) || rows.length === 0) return ""
+
+    const chart = locale?.chart || {}
+    const actionLabel = chart.action || locale?.th_execution_content || "Action"
+    const goalLabel = chart.goal || locale?.th_core_kpi || "Goal"
 
     return `
-    <div class="chart-box">
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            
-            ${rows.map((row, index) => {
-                const phase = esc(row?.[0] || "")
-                const action = esc(row?.[1] || "")
-                const goal = esc(row?.[2] || "")
+        <div class="chart-box">
+            ${rows
+                .slice(0, 3)
+                .map((row, index) => {
+                    const phase = esc(row?.[0] || "")
+                    const action = esc(row?.[1] || "")
+                    const goal = esc(row?.[2] || "")
 
-                return `
-                    <div style="
-                        display:flex;
-                        gap:12px;
-                        align-items:flex-start;
-                    ">
-                        <div style="
-                            min-width:70px;
-                            font-weight:bold;
-                            color:#2f7d57;
-                        ">
-                            ${phase}
+                    return `
+                        <div class="scenario-chart">
+                            <div class="scenario-title">${index + 1}. ${phase}</div>
+                            <div class="mini-note" style="margin-top:8px;">
+                                <b>${esc(actionLabel)}:</b> ${action}<br/>
+                                <b>${esc(goalLabel)}:</b> ${goal}
+                            </div>
                         </div>
-
-                        <div style="
-                            flex:1;
-                            background:#f6faf7;
-                            padding:10px;
-                            border-radius:8px;
-                            border:1px solid #d8e7dc;
-                            font-size:11px;
-                        ">
-                            <div><b>Action:</b> ${action}</div>
-                            <div><b>Goal:</b> ${goal}</div>
-                        </div>
-                    </div>
-                `
-            }).join("")}
-
+                    `
+                })
+                .join("")}
         </div>
-    </div>
     `
 }
 
