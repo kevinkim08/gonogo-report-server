@@ -219,4 +219,25 @@
   },
   "structure_summary_label": "Structure Summary",
   "model_deep_dive_label": "Model Deep Dive"
+  ,
+"chart": {
+  "decisionSignal": "Decision Signal",
+  "decisionStrong": "Decision signal is strong enough to continue validation.",
+  "decisionMixed": "Decision signal is mixed. Validate before scaling.",
+  "decisionWeak": "Decision signal is weak. Redesign before spending more.",
+  "market": "Market",
+  "profitability": "Profitability",
+  "execution": "Execution",
+  "riskPressure": "Risk Pressure",
+  "good": "GOOD",
+  "watch": "WATCH",
+  "weak": "WEAK",
+  "high": "HIGH",
+  "low": "LOW",
+  "revenue": "Revenue",
+  "marketingCost": "Marketing Cost",
+  "profit": "Profit",
+  "riskHeatmap": "Risk Heatmap",
+  "executionTimeline": "Execution Timeline"
+}
 }
