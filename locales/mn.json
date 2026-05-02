@@ -219,4 +219,25 @@
   },
   "structure_summary_label": "Бүтцийн хураангуй",
   "model_deep_dive_label": "Моделийн гүнзгий шинжилгээ"
+  ,
+"chart": {
+  "decisionSignal": "Шийдвэрийн дохио",
+  "decisionStrong": "Шийдвэрийн дохио хангалттай хүчтэй байна.",
+  "decisionMixed": "Дохио холимог байна. Өргөжүүлэхээс өмнө шалга.",
+  "decisionWeak": "Дохио сул байна. Зардал гаргахаас өмнө бүтцийг өөрчил.",
+  "market": "Зах зээл",
+  "profitability": "Ашигт байдал",
+  "execution": "Гүйцэтгэл",
+  "riskPressure": "Эрсдэлийн дарамт",
+  "good": "САЙН",
+  "watch": "АНХААР",
+  "weak": "СУЛ",
+  "high": "ӨНДӨР",
+  "low": "БАГА",
+  "revenue": "Орлого",
+  "marketingCost": "Маркетингийн зардал",
+  "profit": "Ашиг",
+  "riskHeatmap": "Эрсдэлийн зураглал",
+  "executionTimeline": "Гүйцэтгэлийн хугацаа"
+}
 }
