@@ -1258,15 +1258,50 @@ ${freePart}
     ${esc(premiumDesc)}
   </div>
   <div class="footer">
+    <span>${esc(footerLeft)}</span><section class="page section-cover">
+  <div class="section-kicker">${esc(premiumKicker)}</div>
+
+  <div class="section-cover-title">
+    ${esc(premiumTitle)}
+  </div>
+
+  <div class="section-cover-desc">
+    ${esc(premiumDesc)}
+  </div>
+
+  <div style="
+    margin-top:28px;
+    border:2px solid #123f2b;
+    background:#f6faf7;
+    padding:22px;
+    border-radius:12px;
+  ">
+    <div style="font-size:18px;font-weight:900;margin-bottom:10px;">
+      ${esc(t(locale, "premium.ctaTitle", "This analysis is incomplete."))}
+    </div>
+
+    <div style="font-size:13px;line-height:1.7;margin-bottom:18px;">
+      ${esc(t(locale, "premium.ctaDesc", "Unlock the full report to see the real risk, profit structure, and execution strategy."))}
+    </div>
+
+    <div style="
+      display:inline-block;
+      background:#123f2b;
+      color:#fff;
+      font-weight:900;
+      font-size:14px;
+      padding:13px 18px;
+      border-radius:8px;
+    ">
+      ${esc(t(locale, "premium.ctaButton", "Unlock Full Report"))}
+    </div>
+  </div>
+
+  <div class="footer">
     <span>${esc(footerLeft)}</span>
     <span>${esc(premiumFooter)}</span>
   </div>
 </section>
-
-</body>
-</html>
-`
-}
 
 function lockedBox(message, title = "Premium Insights", buttonLabel = "Premium Report") {
     return `
