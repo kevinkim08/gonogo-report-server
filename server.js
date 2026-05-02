@@ -128,49 +128,6 @@ app.get("/api/debug-html", async (req, res) => {
     }
 })
 
-app.get("/api/debug-html", async (req, res) => {
-    try {
-        const language = normalizeLanguage(req.query.language || "ko")
-        const reportType = req.query.reportType === "free" ? "free" : "paid"
-
-        const brandName = req.query.brandName || "NomNomBox"
-        const productService =
-            req.query.productService || "Premium pet snack subscription"
-        const targetCustomer =
-            req.query.targetCustomer || "Dog owners in urban areas"
-
-        const locale = loadLocale(language)
-
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language,
-        })
-
-       const finalReport =
-    reportType === "free"
-        ? buildFreeReportFromPaidReport(paidReport)
-        : { ...paidReport, isPaid: true, reportMode: "paid" }
-
-        const html = buildHtmlFromTemplate(finalReport, locale)
-
-        console.log("[DEBUG_HTML_LENGTH]", html.length)
-        console.log("[DEBUG_HTML_PREVIEW]", html.slice(0, 500))
-
-        res.setHeader("Content-Type", "text/html; charset=utf-8")
-        return res.send(html)
-    } catch (error) {
-        console.error("[DEBUG_HTML_ERROR]", error)
-
-        return res.status(500).json({
-            ok: false,
-            error: "DEBUG_HTML_FAILED",
-            detail: String(error?.message || error),
-        })
-    }
-})
-
 app.post("/api/generate-report", async (req, res) => {
     try {
         const {
@@ -1148,14 +1105,8 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
-        .replace(
-    "{{profitSimulationChart}}",
-    profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
-)
-       .replace(
-    "{{cacLtvRiskChart}}",
-    cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale)
-)
+        .replace("{{profitSimulationChart}}",profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale))
+       .replace("{{cacLtvRiskChart}}",cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale))
         .replace(
             "{{tamSamSomRows}}",
             report?.lockedSections?.tamSamSom
@@ -1254,7 +1205,6 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
     "glossaryRows",
     "scoreGuideRows",
     "marketFunnelChart",
-    "profitSimulationChart",
     "cacLtvRiskChart",
     "tamSamSomRows",
     "customerTruthRows",
@@ -1460,7 +1410,13 @@ function flattenNotes(notes) {
 
 // ✅ 여기부터 추가
 function t(locale, key, fallback = "") {
-    return getByPath(locale, key) ?? fallback
+    const value = getByPath(locale, key)
+
+    if (value === undefined || value === null || value === "") {
+        return fallback
+    }
+
+    return value
 }
 
 function getLocaleTable(locale, key, fallback = []) {
