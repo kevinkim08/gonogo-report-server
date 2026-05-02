@@ -475,7 +475,7 @@ html[lang="mn"] .chart-value {
 
 .market-funnel-row {
   display: grid;
-  grid-template-columns: 72px 1fr;
+  grid-template-columns: 70px minmax(0, 1fr) 150px;
   gap: 12px;
   align-items: center;
   margin-bottom: 14px;
@@ -503,17 +503,16 @@ html[lang="mn"] .chart-value {
   height: 100%;
   background: #2f7d57;
   border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 12px;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 900;
-  line-height: 1.2;
-  white-space: nowrap;
 }
 
+  .market-funnel-value {
+  font-size: 11px;
+  font-weight: 800;
+  text-align: right;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
 .funnel-tam .market-funnel-fill {
   opacity: 1;
 }
@@ -526,14 +525,6 @@ html[lang="mn"] .chart-value {
   opacity: 0.65;
 }
 
-html[lang="ja"] .market-funnel-fill,
-html[lang="zh"] .market-funnel-fill,
-html[lang="mn"] .market-funnel-fill {
-  font-size: 10px;
-  white-space: normal;
-  justify-content: center;
-  text-align: center;
-}
 
 /* === core decision chart === */
 
