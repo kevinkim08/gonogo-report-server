@@ -15,26 +15,43 @@ const __dirname = path.dirname(__filename)
 
 app.use(express.json({ limit: "5mb" }))
 
+import cors from "cors"
+
 app.use(
     cors({
         origin: (origin, callback) => {
+            // Postman / 서버 내부 요청 허용
             if (!origin) return callback(null, true)
 
-            const allowed =
-                origin.includes("framer.app") ||
-                origin.includes("framer.website") ||
-                origin.includes("onrender.com") ||
-                origin.includes("localhost") ||
-                origin.includes("127.0.0.1") ||
-                origin === "https://big-evidence-039433.framer.app"
+            try {
+                const url = new URL(origin)
+                const hostname = url.hostname
 
-            if (allowed) return callback(null, true)
-            return callback(new Error("Not allowed by CORS"))
+                const allowed =
+                    hostname === "localhost" ||
+                    hostname === "127.0.0.1" ||
+                    hostname.endsWith(".framer.app") ||
+                    hostname.endsWith(".framer.website") ||
+                    hostname.endsWith(".onrender.com")
+
+                if (allowed) {
+                    return callback(null, true)
+                }
+
+                console.log("[CORS_BLOCKED]", origin)
+                return callback(new Error("Not allowed by CORS"))
+            } catch (err) {
+                return callback(new Error("Invalid origin"))
+            }
         },
         methods: ["GET", "POST", "OPTIONS"],
-        allowedHeaders: ["Content-Type"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        credentials: false,
     })
 )
+
+// preflight 요청 처리 (중요)
+app.options("*", cors())
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
