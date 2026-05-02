@@ -186,61 +186,54 @@
   },
   "locked": {
     "title": "유료 보고서 전용",
-    "message": "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다."
+    "message": "핵심 데이터와 실행 전략은 유료 보고서에서 확인 가능합니다.",
+    "button": "유료 보고서 보기"
   },
   "tables": {
     "scoreGuideRows": [
-      [
-        "85~100",
-        "매우 좋음",
-        "강한 GO 후보. 확장 검토 가능"
-      ],
-      [
-        "70~84",
-        "좋음",
-        "조건이 맞으면 GO 가능"
-      ],
-      [
-        "50~69",
-        "보통 / 검증 필요",
-        "HOLD. 작은 테스트 후 판단"
-      ],
-      [
-        "30~49",
-        "위험",
-        "NO GO 가능성 높음. 구조 재설계 필요"
-      ],
-      [
-        "0~29",
-        "매우 위험",
-        "즉시 중단 또는 전면 재검토"
-      ]
+      ["85~100", "매우 좋음", "강한 GO 후보. 확장 검토 가능"],
+      ["70~84", "좋음", "조건이 맞으면 GO 가능"],
+      ["50~69", "보통 / 검증 필요", "HOLD. 작은 테스트 후 판단"],
+      ["30~49", "위험", "NO GO 가능성 높음. 구조 재설계 필요"],
+      ["0~29", "매우 위험", "즉시 중단 또는 전면 재검토"]
     ]
   },
   "structure_summary_label": "구조 요약",
-  "model_deep_dive_label": "모델 심화 분석"
-  ,
-"chart": {
-  "decisionSignal": "의사결정 신호",
-  "decisionStrong": "계속 검증을 진행할 만큼 의사결정 신호가 강합니다.",
-  "decisionMixed": "의사결정 신호가 혼재되어 있습니다. 확장 전 검증이 필요합니다.",
-  "decisionWeak": "의사결정 신호가 약합니다. 추가 지출 전 구조 재설계가 필요합니다.",
-  "market": "시장성",
-  "profitability": "수익성",
-  "execution": "실행력",
-  "riskPressure": "위험 압력",
-  "good": "양호",
-  "watch": "주의",
-  "weak": "약함",
-  "high": "높음",
-  "low": "낮음",
-  "revenue": "매출",
-  "marketingCost": "마케팅비",
-  "profit": "이익",
-  "riskHeatmap": "리스크 히트맵",
-  "executionTimeline": "실행 타임라인"
-}
-{
+  "model_deep_dive_label": "모델 심화 분석",
+  "chart": {
+    "decisionSignal": "의사결정 신호",
+    "decisionStrong": "계속 검증을 진행할 만큼 의사결정 신호가 강합니다.",
+    "decisionMixed": "의사결정 신호가 혼재되어 있습니다. 확장 전 검증이 필요합니다.",
+    "decisionWeak": "의사결정 신호가 약합니다. 추가 지출 전 구조 재설계가 필요합니다.",
+    "market": "시장성",
+    "profitability": "수익성",
+    "execution": "실행력",
+    "riskPressure": "위험 압력",
+    "good": "양호",
+    "watch": "주의",
+    "weak": "약함",
+    "high": "높음",
+    "low": "낮음",
+    "revenue": "매출",
+    "marketingCost": "마케팅비",
+    "profit": "이익",
+    "riskHeatmap": "리스크 히트맵",
+    "executionTimeline": "실행 타임라인",
+    "highConfidence": "높은 확신도",
+    "mediumConfidence": "중간 확신도",
+    "lowConfidence": "낮은 확신도",
+    "goAction": "제한된 예산으로 즉시 실행하세요.",
+    "holdAction": "확장 전 검증을 진행하세요.",
+    "noGoAction": "사업 모델을 재설계하세요.",
+    "lowPrice": "낮은 가격",
+    "highPrice": "높은 가격",
+    "highValue": "높은 가치",
+    "lowValue": "낮은 가치",
+    "ltvCac": "LTV / CAC",
+    "risk": "리스크",
+    "action": "실행",
+    "goal": "목표"
+  },
   "toc_title": "목차",
   "toc_section01": "1. 기본 판단",
   "toc_01_01": "1-1. 보고서 핵심 용어",
@@ -270,25 +263,6 @@
   "market_positioning_label": "시장 포지셔닝",
   "execution_timeline_label": "실행 타임라인",
   "risk_heatmap_label": "리스크 히트맵",
-  "chart": {
-    "highConfidence": "높은 확신도",
-    "mediumConfidence": "중간 확신도",
-    "lowConfidence": "낮은 확신도",
-    "goAction": "제한된 예산으로 즉시 실행하세요.",
-    "holdAction": "확장 전 검증을 진행하세요.",
-    "noGoAction": "사업 모델을 재설계하세요.",
-    "lowPrice": "낮은 가격",
-    "highPrice": "높은 가격",
-    "highValue": "높은 가치",
-    "lowValue": "낮은 가치",
-    "ltvCac": "LTV / CAC",
-    "risk": "리스크",
-    "action": "실행",
-    "goal": "목표"
-  },
-  "locked": {
-    "button": "유료 보고서 보기"
-  },
   "premium": {
     "kicker": "유료 보고서",
     "title": "전체 분석은 유료 보고서에서 확인할 수 있습니다",
