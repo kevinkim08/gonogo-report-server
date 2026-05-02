@@ -148,7 +148,12 @@ app.post("/api/generate-report", async (req, res) => {
         const normalizedReportType =
             reportType === "paid" || reportType === "deep" ? "paid" : "free"
 
-       const paidReport = getSampleReport(language)
+      const paidReport = await generateDeepReportJson({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+})
 
         const finalReport =
     normalizedReportType === "paid"
