@@ -1143,13 +1143,15 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
     html = html
         
         .replace("{{modelDeepDive}}", report?.modelDeepDive || "")
-        .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
         .replace("{{referenceLinkRows}}", rows(referenceLinks))
         
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
-        .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
+        .replace(
+    "{{profitSimulationChart}}",
+    profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
+)
         .replace("{{cacLtvRiskChart}}", cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable))
         .replace(
             "{{tamSamSomRows}}",
@@ -1222,7 +1224,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
     "{{executionTimeline}}",
     report?.lockedSections?.execution
         ? ""
-        : executionTimeline(report.executionPlan)
+        : executionTimeline(report.executionPlan, locale)
 )
 .replace("{{decisionSummaryBox}}", decisionSummaryBox(report))
 .replace(
@@ -1539,8 +1541,19 @@ function marketFunnelChart(items = [], locale = {}) {
     `
 }
 
-function profitSimulationChart(rowsData) {
+function profitSimulationChart(rowsData = [], locale = {}) {
     if (!Array.isArray(rowsData)) return ""
+
+    const chart = locale?.chart || {}
+
+    const revenueLabel =
+        chart.revenue || locale?.th_monthly_revenue || "Revenue"
+
+    const marketingCostLabel =
+        chart.marketingCost || locale?.th_marketing_cost || "Marketing Cost"
+
+    const profitLabel =
+        chart.profit || locale?.th_expected_profit || "Profit"
 
     return `
         <div class="chart-box">
@@ -1560,19 +1573,19 @@ function profitSimulationChart(rowsData) {
                         <div class="scenario-title">${esc(scenario)}</div>
 
                         <div class="mini-bar-row">
-                            <span>매출</span>
+                            <span>${esc(revenueLabel)}</span>
                             <div class="chart-track"><div class="chart-fill" style="width:${revenueW}%"></div></div>
                             <b>${esc(row?.[2] || "")}</b>
                         </div>
 
                         <div class="mini-bar-row">
-                            <span>마케팅비</span>
+                            <span>${esc(marketingCostLabel)}</span>
                             <div class="chart-track"><div class="chart-fill light" style="width:${marketingW}%"></div></div>
                             <b>${esc(row?.[3] || "")}</b>
                         </div>
 
                         <div class="mini-bar-row">
-                            <span>이익</span>
+                            <span>${esc(profitLabel)}</span>
                             <div class="chart-track"><div class="chart-fill ${profit < 0 ? "danger" : ""}" style="width:${profitW}%"></div></div>
                             <b>${esc(row?.[4] || "")}</b>
                         </div>
