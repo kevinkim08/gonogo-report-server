@@ -52,18 +52,6 @@ app.get("/api/health", (req, res) => {
     res.json({ ok: true, status: "healthy" })
 })
 
-app.get("/api/test-pdf", async (req, res) => {
-    try {
-        const language = normalizeLanguage(req.query.language || "ko")
-        const locale = loadLocale(language)
-
-        const sampleReport = normalizeDeepReport(getSampleReport(language), {
-    brandName: "SampleBrand",
-    productService: "A new product or service idea",
-    targetCustomer: "Target customers for this business",
-    language,
-})
-
         const html = buildHtmlFromTemplate(sampleReport, locale)
         const pdfBuffer = await htmlToPdf(html)
 
@@ -285,6 +273,12 @@ economicsJudgment:
 modelJudgment:
 - 3 to 4 sentences
 - Explain: why this model works or fails → structural weakness → how to fix
+
+modelDeepDive:
+- 3 to 5 sentences
+- Explain the deeper business model mechanics.
+- Cover revenue logic, repeat purchase or retention logic, margin pressure, operational weakness, and the best structural improvement.
+- This must not repeat modelJudgment.
 
 operatingRule:
 - 2 to 3 sentences
@@ -533,13 +527,14 @@ Return this exact JSON shape:
   },
 
   "businessModel": {
-    "revenueLayers": [
-      ["", "", ""],
-      ["", "", ""],
-      ["", "", ""]
-    ],
-    "modelJudgment": ""
-  },
+  "revenueLayers": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+  "modelJudgment": "",
+  "modelDeepDive": ""
+}
 
   "riskSystem": [
     ["", "", ""],
@@ -885,12 +880,13 @@ function normalizeDeepReport(report, input) {
         },
 
         businessModel: {
-            revenueLayers: safeArray(
-                report?.businessModel?.revenueLayers,
-                []
-            ).slice(0, 3),
-            modelJudgment: report?.businessModel?.modelJudgment || "",
-        },
+    revenueLayers: safeArray(
+        report?.businessModel?.revenueLayers,
+        []
+    ).slice(0, 3),
+    modelJudgment: report?.businessModel?.modelJudgment || "",
+    modelDeepDive: report?.businessModel?.modelDeepDive || "",
+},
 
         riskSystem: safeArray(report?.riskSystem, []).slice(0, 3),
         executionPlan: safeArray(report?.executionPlan, []).slice(0, 3),
@@ -1102,7 +1098,7 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
 
     html = html
         
-        .replace("{{modelDeepDive}}", report?.modelDeepDive || "")
+        .replace("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
         .replace("{{referenceLinkRows}}", rows(referenceLinks))
         
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
@@ -2112,14 +2108,3 @@ app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`)
 })
 
-
-function buildBar(label, value, danger = false) {
-  return `
-  <div class="chart-row">
-    <div class="chart-label">${label}</div>
-    <div class="chart-track">
-      <div class="chart-fill ${danger ? "danger" : ""}" style="width:${value}%"></div>
-    </div>
-    <div class="chart-value">${value}</div>
-  </div>`
-}
