@@ -1295,9 +1295,45 @@ function buildHtmlFromTemplate(report, locale) {
 
 html = applyTemplateVars(html, templateData)
 
+    if (report?.reportMode === "free") {
+    html = keepFreeReportOnly(html)
+}
+
 html = html.replace(/{{[^}]+}}/g, "")
 
 return html
+}
+
+function keepFreeReportOnly(html) {
+    const splitPoint = "<!-- FREE_REPORT_END -->"
+
+    const index = html.indexOf(splitPoint)
+
+    if (index === -1) {
+        console.log("[FREE_SPLIT_POINT_NOT_FOUND]")
+        return html
+    }
+
+    const freePart = html.slice(0, index)
+
+    return `
+${freePart}
+
+<section class="page section-cover">
+  <div class="section-kicker">PREMIUM REPORT</div>
+  <div class="section-cover-title">이후 분석은 유료 보고서에서 확인할 수 있습니다</div>
+  <div class="section-cover-desc">
+    고객 분석, 시장 규모, 경쟁 구조, 수익 시뮬레이션, 마케팅 전략, 리스크 판단, 실행 계획은 결제 후 전체 보고서에서 제공됩니다.
+  </div>
+  <div class="footer">
+    <span>GoNoGo™</span>
+    <span>Premium Locked</span>
+  </div>
+</section>
+
+</body>
+</html>
+`
 }
 
 function lockedBox(message, title = "Premium Insights") {
