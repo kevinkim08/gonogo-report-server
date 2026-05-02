@@ -1230,36 +1230,34 @@ function buildHtmlFromTemplate(report, locale) {
                 : rows(report.marketingStrategy.thirtyDayMarketingTest)
         )
         .replace(
-            "{{businessModelRows}}",
-            rows(report.businessModel.revenueLayers)
-        )
-        .replace(
+    "{{businessModelRows}}",
+    rows(report.businessModel.revenueLayers)
+)
+.replace(
+    "{{riskRows}}",
+    report?.lockedSections?.risk
+        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        : rows(report.riskSystem)
+)
+.replace(
     "{{riskHeatmap}}",
     report?.lockedSections?.risk
         ? ""
         : riskHeatmap(report.riskSystem)
 )
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
-                : rows(report.riskSystem)
-        )
-
-        .replace("{{riskHeatmap}}", riskHeatmap(report.riskSystem))
-        
-        .replace(
+.replace(
+    "{{executionRows}}",
+    report?.lockedSections?.execution
+        ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
+        : rows(report.executionPlan)
+)
+.replace(
     "{{executionTimeline}}",
     report?.lockedSections?.execution
         ? ""
         : executionTimeline(report.executionPlan)
 )
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
-                : rows(report.executionPlan)
-        )
-
-.replace("{{executionTimeline}}", executionTimeline(report.executionPlan))
-        .replace("{{decisionSummaryBox}}", decisionSummaryBox(report))
-        
-        .replace(
-            "{{goThresholdRows}}",
+.replace("{{decisionSummaryBox}}", decisionSummaryBox(report))
             report?.lockedSections?.goThreshold
                 ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle)}</td></tr>`
                 : rows(report.goThreshold)
