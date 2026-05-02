@@ -219,4 +219,25 @@
   },
   "structure_summary_label": "構造要約",
   "model_deep_dive_label": "モデル詳細分析"
+  ,
+"chart": {
+  "decisionSignal": "意思決定シグナル",
+  "decisionStrong": "検証を継続するだけの強いシグナルがあります。",
+  "decisionMixed": "シグナルは混在しています。拡大前に検証が必要です。",
+  "decisionWeak": "シグナルは弱いです。追加投資前に構造を見直すべきです。",
+  "market": "市場性",
+  "profitability": "収益性",
+  "execution": "実行力",
+  "riskPressure": "リスク圧力",
+  "good": "良好",
+  "watch": "注意",
+  "weak": "弱い",
+  "high": "高い",
+  "low": "低い",
+  "revenue": "売上",
+  "marketingCost": "広告費",
+  "profit": "利益",
+  "riskHeatmap": "リスクヒートマップ",
+  "executionTimeline": "実行タイムライン"
+}
 }
