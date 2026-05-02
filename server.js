@@ -1166,6 +1166,11 @@ function buildHtmlFromTemplate(report, locale) {
 }
 
     html = html
+        
+        .replace("{{modelDeepDive}}", report?.modelDeepDive || "")
+        .replace("{{profitSimulationChart}}", profitSimulationChart(report.profitSimulation?.monthlyScenarioTable))
+        .replace("{{referenceLinkRows}}", rows(referenceLinks))
+        
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
@@ -1263,6 +1268,9 @@ function buildHtmlFromTemplate(report, locale) {
 .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
 
     validateTemplateKeys(html, templateData, [
+    "modelDeepDive",
+    "profitSimulationChart",
+    "referenceLinkRows",
     "glossaryRows",
     "scoreGuideRows",
     "marketFunnelChart",
