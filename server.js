@@ -1388,7 +1388,7 @@ html = applyTemplateVars(html, templateData)
 
     if (report?.reportMode === "free") {
     html = keepFreeReportOnly(html, locale, report)
-}}
+}
 
 html = html.replace(/{{[^}]+}}/g, "")
 
