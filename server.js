@@ -273,6 +273,37 @@ Additional rules:
 - Avoid repeating the same logic across sections
 - Each section must provide a different angle of insight
 
+Brand naming rules:
+- brandNaming must be generated as a paid report section.
+- The brand name should be created from productService and targetCustomer, not only from the user's brandName input.
+- If brandName is empty, generic, temporary, or unclear, recommend a stronger brand name.
+- Generate names that are short, memorable, easy to pronounce, and commercially usable.
+- Avoid generic names such as Best, Smart, Premium, Global, Shop, Store, Solution, Service.
+- Avoid names that are too narrow unless the business requires a niche identity.
+- Prefer names that can expand into future products, categories, or markets.
+- Naming must reflect customer desire, category signal, trust, and differentiation.
+- For ko, names may be Korean, English, or hybrid depending on market fit.
+- For en, prefer globally pronounceable English-style names.
+- For ja, prefer compact, trust-oriented, easy-to-read names.
+- For zh, prefer names that can carry meaning and social commerce appeal.
+- For mn, prefer simple, practical, easy-to-remember names.
+- Domain suggestions are strategic recommendations only.
+- Do not claim real-time domain availability.
+- availability must mean estimated likelihood only: HIGH | MEDIUM | LOW.
+- domainSuggestions must avoid trademark-sensitive famous brand terms.
+
+brandNaming:
+- brandDirection must explain the strategic naming direction in 3 to 4 sentences.
+- namingStrategy must explain the naming logic, positioning angle, and why it fits the customer.
+- keywords must contain exactly 8 short keywords.
+- nameCandidates must contain exactly 5 candidates.
+- Each nameCandidate must include name, meaning, fit, risk, and score.
+- score must be a number from 0 to 100.
+- recommendedName must choose exactly one best candidate.
+- domainSuggestions must contain exactly 5 domain ideas.
+- Each domain suggestion must include domain, reason, and availability.
+- domain availability is only an estimated likelihood, not a verified registration result.
+
 Array stability rules:
 - glossary must contain exactly 5 items.
 - decisionMatrix must contain exactly 4 rows.
@@ -301,6 +332,10 @@ Array stability rules:
 - appendix.dataSources must contain exactly 3 rows.
 - appendix.assumptions must contain exactly 4 items.
 - referenceLinks must contain exactly 5 rows.
+- brandNaming.keywords must contain exactly 8 items.
+- brandNaming.nameCandidates must contain exactly 5 items.
+- brandNaming.domainSuggestions must contain exactly 5 items.
+
 
 Language output rules:
 - All user-facing values must be written in the final report language.
@@ -333,6 +368,82 @@ Return this exact JSON shape:
     "score": 0,
     "subtitle": "",
     "oneLineVerdict": ""
+  },
+
+    "brandNaming": {
+    "brandDirection": "",
+    "namingStrategy": "",
+    "keywords": ["", "", "", "", "", "", "", ""],
+    "nameCandidates": [
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      }
+    ],
+    "recommendedName": {
+      "name": "",
+      "reason": "",
+      "positioning": "",
+      "expansionPotential": ""
+    },
+    "domainSuggestions": [
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      }
+    ]
   },
 
   "glossary": [
@@ -746,6 +857,29 @@ function normalizeDeepReport(report, input) {
             oneLineVerdict: report?.cover?.oneLineVerdict || "",
         },
 
+        brandNaming: {
+            brandDirection: report?.brandNaming?.brandDirection || "",
+            namingStrategy: report?.brandNaming?.namingStrategy || "",
+            keywords: safeArray(report?.brandNaming?.keywords, []).slice(0, 8),
+            nameCandidates: safeArray(
+                report?.brandNaming?.nameCandidates,
+                []
+            ).slice(0, 5),
+            recommendedName: {
+                name: report?.brandNaming?.recommendedName?.name || "",
+                reason: report?.brandNaming?.recommendedName?.reason || "",
+                positioning:
+                    report?.brandNaming?.recommendedName?.positioning || "",
+                expansionPotential:
+                    report?.brandNaming?.recommendedName
+                        ?.expansionPotential || "",
+            },
+            domainSuggestions: safeArray(
+                report?.brandNaming?.domainSuggestions,
+                []
+            ).slice(0, 5),
+        },
+        
         glossary: safeArray(
             report?.glossary,
             getDefaultGlossary(input.language || "en")
