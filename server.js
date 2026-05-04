@@ -1135,9 +1135,55 @@ const referenceLinks = Array.isArray(report?.referenceLinks)
         brandName: report.cover.brandName,
         decision: report.cover.decision,
         score: report.cover.score,
-        decisionClass: getStatusClass(report.cover?.decision),
-        subtitle: report.cover.subtitle,
-        oneLineVerdict: report.cover.oneLineVerdict,
+decisionClass: getStatusClass(report.cover?.decision),
+subtitle: report.cover.subtitle,
+oneLineVerdict: report.cover.oneLineVerdict,
+
+// 🔥🔥🔥 여기부터 추가 🔥🔥🔥
+
+brandDirection: report?.brandNaming?.brandDirection || "",
+namingStrategy: report?.brandNaming?.namingStrategy || "",
+
+brandKeywordCards: Array.isArray(report?.brandNaming?.keywords)
+    ? report.brandNaming.keywords.slice(0, 8).map((keyword) => `
+        <div class="card">
+            <div class="card-title">${locale.brand_keyword_label || "Keyword"}</div>
+            <div class="card-value">${keyword}</div>
+        </div>
+    `).join("")
+    : "",
+
+brandNameCandidateRows: Array.isArray(report?.brandNaming?.nameCandidates)
+    ? report.brandNaming.nameCandidates.slice(0, 5).map((item) => `
+        <tr>
+            <td>${item?.name || ""}</td>
+            <td>${item?.meaning || ""}</td>
+            <td>${item?.fit || ""}</td>
+            <td>${item?.risk || ""}</td>
+            <td>${item?.score || ""}</td>
+        </tr>
+    `).join("")
+    : "",
+
+recommendedBrandName: report?.brandNaming?.recommendedName?.name || "",
+
+recommendedBrandReason: [
+    report?.brandNaming?.recommendedName?.reason || "",
+    report?.brandNaming?.recommendedName?.positioning || "",
+    report?.brandNaming?.recommendedName?.expansionPotential || "",
+].filter(Boolean).join(" "),
+
+brandDomainRows: Array.isArray(report?.brandNaming?.domainSuggestions)
+    ? report.brandNaming.domainSuggestions.slice(0, 5).map((item) => `
+        <tr>
+            <td>${item?.domain || ""}</td>
+            <td>${item?.reason || ""}</td>
+            <td>${item?.availability || ""}</td>
+        </tr>
+    `).join("")
+    : "",
+
+// 🔥🔥🔥 여기까지 🔥🔥🔥
 
         marketLevel: matrix.MARKET || "",
         profitabilityLevel: matrix.PROFITABILITY || "",
