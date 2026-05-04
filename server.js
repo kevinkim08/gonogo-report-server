@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import crypto from "crypto"
 import OpenAI from "openai"
 import fs from "fs"
 import path from "path"
@@ -8,6 +9,45 @@ import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
 
 const app = express()
+
+const paidDownloadTokens = new Map()
+
+function createPaidDownloadToken() {
+  const token = crypto.randomBytes(24).toString("hex")
+
+  paidDownloadTokens.set(token, {
+    paid: true,
+    downloadLimit: 3,
+    downloadCount: 0,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  })
+
+  return token
+}
+
+function validatePaidDownloadToken(token) {
+  if (!token) {
+    return { ok: false, status: 401, message: "Missing download token." }
+  }
+
+  const record = paidDownloadTokens.get(token)
+
+  if (!record || !record.paid) {
+    return { ok: false, status: 403, message: "Invalid payment token." }
+  }
+
+  if (Date.now() > record.expiresAt) {
+    return { ok: false, status: 403, message: "This download link has expired." }
+  }
+
+  if (record.downloadCount >= record.downloadLimit) {
+    return { ok: false, status: 403, message: "Download limit exceeded." }
+  }
+
+  return { ok: true, record }
+}
+
 const PORT = process.env.PORT || 3000
 
 const __filename = fileURLToPath(import.meta.url)
@@ -118,6 +158,99 @@ app.post("/api/generate-report", async (req, res) => {
     productService,
     targetCustomer,
     language,
+})
+
+     app.get("/api/dev-create-paid-token", (req, res) => {
+    const token = createPaidDownloadToken()
+
+    const lang = normalizeLanguage(req.query.lang || "ko")
+
+    const downloadUrl = `${req.protocol}://${req.get(
+        "host"
+    )}/api/download-paid-pdf?token=${token}&lang=${lang}`
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8")
+    return res.send(`
+        <html>
+            <body style="font-family:Arial;padding:40px;">
+                <h1>Paid token created</h1>
+                <p>PayPal 연결 전 테스트용 다운로드 링크야.</p>
+                <p>다운로드 가능 횟수: 3회</p>
+
+                <a href="${downloadUrl}" style="
+                    display:inline-block;
+                    padding:16px 24px;
+                    background:#082818;
+                    color:white;
+                    border-radius:12px;
+                    text-decoration:none;
+                    font-weight:700;
+                ">
+                    Download Paid PDF
+                </a>
+            </body>
+        </html>
+    `)
+})   
+
+        app.get("/api/download-paid-pdf", async (req, res) => {
+    try {
+        const { token } = req.query
+        const language = normalizeLanguage(req.query.lang || "ko")
+
+        const validation = validatePaidDownloadToken(token)
+
+        if (!validation.ok) {
+            return res.status(validation.status).send(`
+                <html>
+                    <body style="font-family:Arial;padding:40px;">
+                        <h1>Download unavailable</h1>
+                        <p>${validation.message}</p>
+                    </body>
+                </html>
+            `)
+        }
+
+        validation.record.downloadCount += 1
+
+        const brandName = req.query.brandName || "PaidReport"
+        const productService =
+            req.query.productService || "A paid business report"
+        const targetCustomer =
+            req.query.targetCustomer || "Target customers"
+
+        const locale = loadLocale(language)
+
+        const paidReport = await generateDeepReportJson({
+            brandName,
+            productService,
+            targetCustomer,
+            language,
+        })
+
+        const finalReport = {
+            ...paidReport,
+            isPaid: true,
+            reportMode: "paid",
+        }
+
+        const html = buildHtmlFromTemplate(finalReport, locale)
+        const pdfBuffer = await htmlToPdf(html)
+
+        const safeBrand = sanitizeFileName(brandName)
+
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Length", pdfBuffer.length)
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="GoNoGo_Paid_Report_${safeBrand}_${language}.pdf"`
+        )
+
+        return res.end(pdfBuffer)
+    } catch (error) {
+        console.error("[DOWNLOAD_PAID_PDF_ERROR]", error)
+        return res.status(500).send("Failed to download paid PDF.")
+    }
 })
 
         const finalReport =
@@ -1422,10 +1555,10 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
     const score = Number.isFinite(report?.cover?.score) ? report.cover.score : 0
     const decision = report?.cover?.decision || "HOLD"
 
-    const checkoutUrl =
-        process.env.PAYWALL_CHECKOUT_URL ||
-        "https://your-checkout-link.com"
-
+   const checkoutUrl =
+    process.env.PAYWALL_CHECKOUT_URL ||
+    "/api/dev-create-paid-token"
+    
     return `
 ${freePart}
 
