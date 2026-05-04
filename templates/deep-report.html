@@ -698,6 +698,7 @@ html[lang="mn"] .chart-value {
     </div>
     <div>{{toc_02_01}}</div>
     <div>{{toc_02_02}}</div>
+    <div>{{toc_02_03}}</div>
 
     <div style="font-weight:900; font-size:15px; margin-top:18px;">
       {{toc_section03}}
@@ -707,7 +708,6 @@ html[lang="mn"] .chart-value {
     </div>
     <div>{{toc_03_01}}</div>
     <div>{{toc_03_02}}</div>
-    <div>{{toc_03_03}}</div>
 
     <div style="font-weight:900; font-size:15px; margin-top:18px;">
       {{toc_section04}}
@@ -718,9 +718,6 @@ html[lang="mn"] .chart-value {
     <div>{{toc_04_01}}</div>
     <div>{{toc_04_02}}</div>
     <div>{{toc_04_03}}</div>
-    <div>{{toc_04_04}}</div>
-    <div>{{toc_04_05}}</div>
-    <div>{{toc_04_06}}</div>
 
     <div style="font-weight:900; font-size:15px; margin-top:18px;">
       {{toc_section05}}
@@ -731,6 +728,19 @@ html[lang="mn"] .chart-value {
     <div>{{toc_05_01}}</div>
     <div>{{toc_05_02}}</div>
     <div>{{toc_05_03}}</div>
+    <div>{{toc_05_04}}</div>
+    <div>{{toc_05_05}}</div>
+    <div>{{toc_05_06}}</div>
+
+    <div style="font-weight:900; font-size:15px; margin-top:18px;">
+      {{toc_section06}}
+      <span style="color:#b94a48; font-weight:900; margin-left:6px; font-size:12px;">
+        {{paid_content_label}}
+      </span>
+    </div>
+    <div>{{toc_06_01}}</div>
+    <div>{{toc_06_02}}</div>
+    <div>{{toc_06_03}}</div>
   </div>
 
   <div class="verdict" style="margin-top:24px;">
@@ -917,20 +927,20 @@ html[lang="mn"] .chart-value {
 </section>
   
 <section class="page section-cover">
-  <div class="section-kicker">{{section02_kicker}}</div>
-    <div class="section-cover-title">{{section02_cover_title}}</div>
+  <div class="section-kicker">{{section03_kicker}}</div>
+    <div class="section-cover-title">{{section03_cover_title}}</div>
     <div class="section-cover-desc">
-      {{section02_cover_desc}}
+      {{section03_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>{{footer_section02}}</span>
+      <span>{{footer_section03}}</span>
     </div>
   </section>
 
-  <!-- Section 02 combined -->
+  <!-- Section 03 customer analysis -->
   <section class="page">
-    <div class="section-title">{{section02_01_title}}</div>
+    <div class="section-title">{{section03_01_title}}</div>
 
     <div class="split-grid">
       <div class="soft-panel">
@@ -975,7 +985,7 @@ html[lang="mn"] .chart-value {
 
   <!-- Core decision -->
   <section class="page">
-    <div class="section-title">{{section02_03_title}}</div>
+    <div class="section-title">{{section03_02_title}}</div>
 
     <table>
       <tbody>
@@ -1005,7 +1015,7 @@ html[lang="mn"] .chart-value {
     </div>
 
     <div class="mini-note">
-      {{section02_03_note}}
+      {{section03_02_note}}
     </div>
 
     <div class="footer">
@@ -1015,20 +1025,20 @@ html[lang="mn"] .chart-value {
   </section>
 
     <section class="page section-cover">
-    <div class="section-kicker">{{section03_kicker}}</div>
-    <div class="section-cover-title">{{section03_cover_title}}</div>
+    <div class="section-kicker">{{section04_kicker}}</div>
+    <div class="section-cover-title">{{section04_cover_title}}</div>
     <div class="section-cover-desc">
-      {{section03_cover_desc}}
+      {{section04_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>{{footer_section03}}</span>
+      <span>{{footer_section04}}</span>
     </div>
   </section>
 
-  <!-- Section 03 market reality -->
+  <!-- Section 04 market reality -->
   <section class="page">
-    <div class="section-title">{{section03_01_title}}</div>
+    <div class="section-title">{{section04_01_title}}</div>
 
     {{marketFunnelChart}}
 
@@ -1053,9 +1063,9 @@ html[lang="mn"] .chart-value {
     </div>
   </section>
 
-  <!-- Section 03 competition benchmark combined -->
+  <!-- Section 04 competition benchmark combined -->
   <section class="page">
-    <div class="section-title">{{section03_02_title}}</div>
+    <div class="section-title">{{section04_02_title}}</div>
 
     <table>
       <thead>
@@ -1067,11 +1077,10 @@ html[lang="mn"] .chart-value {
         </tr>
       </thead>
       <tbody>{{competitionRows}}</tbody>
-
-      <div class="label">{{market_positioning_label}}</div>
-{{competitionPositionChart}}
-      
     </table>
+
+    <div class="label" style="margin-top:22px;">{{market_positioning_label}}</div>
+    {{competitionPositionChart}}
 
     <div class="label" style="margin-top:22px;">{{competition_conclusion_label}}</div>
     <div class="text-block">{{competitionConclusion}}</div>
@@ -1090,7 +1099,7 @@ html[lang="mn"] .chart-value {
     </table>
 
     <div class="mini-note">
-      {{section03_02_note}}
+      {{section04_02_note}}
     </div>
 
     <div class="footer">
@@ -1099,9 +1108,9 @@ html[lang="mn"] .chart-value {
     </div>
   </section>
 
-  <!-- Section 03 economics -->
+  <!-- Section 04 economics -->
   <section class="page">
-    <div class="section-title">{{section03_04_title}}</div>
+    <div class="section-title">{{section04_03_title}}</div>
 
     {{profitSimulationChart}}
 
@@ -1125,19 +1134,19 @@ html[lang="mn"] .chart-value {
   </section>
 
     <section class="page section-cover">
-    <div class="section-kicker">{{section04_kicker}}</div>
-    <div class="section-cover-title">{{section04_cover_title}}</div>
+    <div class="section-kicker">{{section05_kicker}}</div>
+    <div class="section-cover-title">{{section05_cover_title}}</div>
     <div class="section-cover-desc">
-      {{section04_cover_desc}}
+      {{section05_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>{{footer_section04}}</span>
+      <span>{{footer_section05}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">{{section04_01_title}}</div>
+    <div class="section-title">{{section05_01_title}}</div>
 
     <table>
       <thead>
@@ -1162,7 +1171,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section04_02_title}}</div>
+    <div class="section-title">{{section05_02_title}}</div>
 
     <table>
       <thead>
@@ -1198,7 +1207,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section04_03_title}}</div>
+    <div class="section-title">{{section05_03_title}}</div>
 
     <table>
       <thead>
@@ -1214,8 +1223,6 @@ html[lang="mn"] .chart-value {
 <div class="label">{{execution_timeline_label}}</div>
 {{executionTimeline}}
 
-</div>
-
     <div class="label" style="margin-top:26px;">{{operating_rule_label}}</div>
     <div class="text-block">{{operatingRule}}</div>
 
@@ -1226,7 +1233,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section04_04_title}}</div>
+    <div class="section-title">{{section05_04_title}}</div>
 
     <table>
       <thead>
@@ -1260,7 +1267,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section04_05_title}}</div>
+    <div class="section-title">{{section05_05_title}}</div>
 
     <div class="split-grid">
       <div class="soft-panel">
@@ -1312,7 +1319,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section04_07_title}}</div>
+    <div class="section-title">{{section05_06_title}}</div>
 
     <table>
       <thead>
@@ -1338,19 +1345,19 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page section-cover">
-    <div class="section-kicker">{{section05_kicker}}</div>
-    <div class="section-cover-title">{{section05_cover_title}}</div>
+    <div class="section-kicker">{{section06_kicker}}</div>
+    <div class="section-cover-title">{{section06_cover_title}}</div>
     <div class="section-cover-desc">
-      {{section05_cover_desc}}
+      {{section06_cover_desc}}
     </div>
     <div class="footer">
       <span>{{footerLeft}}</span>
-      <span>{{footer_section05}}</span>
+      <span>{{footer_section06}}</span>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-title">{{section05_01_title}}</div>
+    <div class="section-title">{{section06_01_title}}</div>
 
     <table>
       <thead>
@@ -1379,7 +1386,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section05_02_title}}</div>
+    <div class="section-title">{{section06_02_title}}</div>
 
     <div class="big-metric">
       <div class="big-metric-title">{{data_confidence_label}}</div>
@@ -1421,7 +1428,7 @@ html[lang="mn"] .chart-value {
   </section>
 
   <section class="page">
-    <div class="section-title">{{section05_03_title}}</div>
+    <div class="section-title">{{section06_03_title}}</div>
 
     <table>
       <thead>
