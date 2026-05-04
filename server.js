@@ -1525,6 +1525,16 @@ ${freePart}
           color:#4b5d53;
         ">
           ${esc(t(locale, "premium.scoreText", "Score"))}: ${esc(String(score))} / 100
+
+<div style="
+  margin-top:6px;
+  font-size:12px;
+  font-weight:800;
+  color:#b42318;
+">
+  ${esc(t(locale, "premium.riskLine", "Execution risk is high in the current state."))}
+</div>
+          
         </div>
       </div>
 
@@ -1559,6 +1569,16 @@ ${freePart}
           opacity:0.86;
         ">
           ${esc(nameReason)}
+
+<div style="
+  margin-top:8px;
+  font-size:12px;
+  font-weight:800;
+  color:#ffd8d8;
+">
+ ${esc(t(locale, "premium.nameCheckLine", "Check whether this name is safe to use now."))}
+</div>
+          
         </div>
       </div>
     </div>
@@ -1665,6 +1685,18 @@ ${freePart}
       </div>
     </div>
 
+<div style="
+  background:#fff3f3;
+  border-left:4px solid #b42318;
+  padding:14px;
+  margin-bottom:14px;
+  font-size:13px;
+  font-weight:800;
+  color:#7a1c1c;
+">
+ ${esc(t(locale, "premium.urgencyLine", "If you do not validate this now, you may waste months moving in the wrong direction."))}
+</div>
+
     <a href="${esc(checkoutUrl)}" style="
       display:block;
       text-align:center;
@@ -1677,7 +1709,7 @@ ${freePart}
       border-radius:10px;
       letter-spacing:-0.02em;
     ">
-      ${esc(t(locale, "premium.ctaButton", "Unlock Full Report"))} — $49
+      ${esc(t(locale, "premium.ctaButton", "Check if this business is worth continuing"))} — $49
     </a>
 
     <div style="
@@ -1687,7 +1719,7 @@ ${freePart}
       color:#6a7a71;
       text-align:center;
     ">
-      ${esc(t(locale, "premium.ctaSub", "Includes brand naming, domain strategy, customer analysis, market reality, revenue structure, execution plan, and risk judgment."))}
+      ${esc(t(locale, "premium.ctaSub", "Brand name, customer reaction, and revenue structure — validate them now."))}
     </div>
   </div>
 
