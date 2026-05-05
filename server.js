@@ -1430,6 +1430,7 @@ ${buildPaidReportPromptTail()}`
 // [16] GENERATE DEEP REPORT (OPENAI CALL)
 // =========================================================
 
+
 async function generateDeepReportJson(input) {
     const { brandName, productService, targetCustomer, language } = input
 
@@ -2470,6 +2471,277 @@ body {
     text-decoration: none;
 }
 
+/* =========================================================
+   FREE CTA PAGE - UPGRADE CONVERSION
+========================================================= */
+
+.free-upgrade-page {
+    background:
+        radial-gradient(circle at 20% 16%, rgba(182,255,90,0.22), transparent 28%),
+        linear-gradient(180deg, #eef7f1 0%, #ffffff 100%);
+}
+
+.free-upgrade-wrap {
+    position: relative;
+    z-index: 2;
+}
+
+.free-upgrade-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: #0D2418;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+}
+
+.free-upgrade-title {
+    margin: 34px 0 0;
+    font-size: 48px;
+    line-height: 1.04;
+    letter-spacing: -0.075em;
+    font-weight: 950;
+    color: #0D2418;
+}
+
+.free-upgrade-desc {
+    margin-top: 18px;
+    max-width: 610px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: #53645A;
+    font-weight: 700;
+}
+
+.free-progress-card {
+    margin-top: 28px;
+    padding: 22px;
+    border-radius: 26px;
+    background: #ffffff;
+    border: 1px solid #dfe7e2;
+}
+
+.free-progress-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 950;
+    color: #0D2418;
+    letter-spacing: 0.04em;
+}
+
+.free-progress-track {
+    margin-top: 13px;
+    height: 12px;
+    border-radius: 999px;
+    background: #e4ece7;
+    overflow: hidden;
+}
+
+.free-progress-fill {
+    height: 100%;
+    width: 65%;
+    border-radius: 999px;
+    background: #0D2418;
+}
+
+.free-progress-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #6f7e75;
+    font-weight: 800;
+}
+
+.free-upgrade-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.free-decision-card,
+.free-brand-preview-card {
+    min-height: 170px;
+    border-radius: 28px;
+    padding: 22px;
+    border: 1px solid #dfe7e2;
+}
+
+.free-decision-card {
+    background: #ffffff;
+}
+
+.free-brand-preview-card {
+    background: #0D2418;
+    color: #ffffff;
+}
+
+.free-card-label {
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    color: #6f7e75;
+    text-transform: uppercase;
+}
+
+.free-brand-preview-card .free-card-label {
+    color: rgba(255,255,255,0.58);
+}
+
+.free-decision-value {
+    margin-top: 16px;
+    font-size: 42px;
+    line-height: 0.95;
+    letter-spacing: -0.08em;
+    font-weight: 950;
+}
+
+.free-score-value {
+    margin-top: 8px;
+    font-size: 17px;
+    font-weight: 950;
+}
+
+.free-card-text {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #53645A;
+    font-weight: 700;
+}
+
+.free-brand-preview-card .free-card-text {
+    color: rgba(255,255,255,0.76);
+}
+
+.free-locked-layer {
+    position: relative;
+    margin-top: 18px;
+    height: 145px;
+    border-radius: 30px;
+    border: 1px solid #dfe7e2;
+    overflow: hidden;
+    background:
+        linear-gradient(90deg, rgba(13,36,24,0.08), rgba(13,36,24,0.02)),
+        repeating-linear-gradient(
+            45deg,
+            rgba(13,36,24,0.05),
+            rgba(13,36,24,0.05) 10px,
+            rgba(255,255,255,0.4) 10px,
+            rgba(255,255,255,0.4) 20px
+        );
+}
+
+.free-locked-layer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(7px);
+    background: rgba(255,255,255,0.46);
+}
+
+.free-locked-pill {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #dfe7e2;
+    font-size: 13px;
+    font-weight: 950;
+    color: #0D2418;
+    box-shadow: 0 18px 45px rgba(13,36,24,0.10);
+}
+
+.free-lock-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.free-lock-item {
+    min-height: 78px;
+    padding: 14px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid #dfe7e2;
+}
+
+.free-lock-item strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.35;
+    color: #0D2418;
+    font-weight: 950;
+}
+
+.free-lock-item span {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #6f7e75;
+    font-weight: 750;
+}
+
+.free-warning-box {
+    margin-top: 18px;
+    padding: 18px 20px;
+    border-radius: 22px;
+    background: #fff4ed;
+    border: 1px solid #ffd9c7;
+    color: #8a3b14;
+}
+
+.free-warning-box strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 950;
+}
+
+.free-warning-box p {
+    margin: 7px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 750;
+}
+
+.free-danger-line {
+    margin-top: 12px;
+    padding: 15px 18px;
+    border-radius: 18px;
+    background: #0D2418;
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 850;
+}
+
+.free-upgrade-button {
+    display: block;
+    margin-top: 18px;
+    width: 100%;
+    text-align: center;
+    padding: 19px 22px;
+    border-radius: 999px;
+    background: #B6FF5A;
+    color: #0D2418;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 950;
+    box-shadow: 0 18px 40px rgba(13,36,24,0.14);
+}
+
 @media print {
     body {
         background: #ffffff;
@@ -2723,30 +2995,115 @@ body {
 </section>
 
 <!-- PAGE 6: CTA -->
-<section class="page">
-    <div class="section-kicker">FULL REPORT</div>
-    <div class="section-title">Unlock the full decision report</div>
+<!-- PAGE 6: CTA -->
+<section class="page free-upgrade-page">
+    <div class="free-upgrade-wrap">
 
-    <div class="cta-card">
-        <h2>${esc(report?.freeCta?.title || "Continue to the full report")}</h2>
-        <p>${esc(report?.freeCta?.message || "")}</p>
+        <div class="free-upgrade-kicker">
+            🔒 FULL REPORT LOCKED
+        </div>
 
-        <ul class="lock-list">
-            ${ctaList}
-        </ul>
+        <h1 class="free-upgrade-title">
+            ${esc(report?.freeCta?.title || "전체 분석은 유료 보고서에서 확인할 수 있습니다")}
+        </h1>
 
-        <a class="cta-button" href="#">
-            ${esc(report?.freeCta?.buttonText || "View full report")}
+        <p class="free-upgrade-desc">
+            ${esc(
+                report?.freeCta?.message ||
+                "무료 보고서는 사업의 방향과 1차 판단까지만 제공합니다. 고객 분석, 수익 구조, 실행 전략, 리스크 대응은 전체 보고서에서 확인할 수 있습니다."
+            )}
+        </p>
+
+        <div class="free-progress-card">
+            <div class="free-progress-top">
+                <span>REPORT COMPLETION</span>
+                <span>65%</span>
+            </div>
+
+            <div class="free-progress-track">
+                <div class="free-progress-fill"></div>
+            </div>
+
+            <div class="free-progress-note">
+                Free judgment unlocked · Full execution layer locked
+            </div>
+        </div>
+
+        <div class="free-upgrade-grid">
+            <div class="free-decision-card">
+                <div class="free-card-label">CURRENT DECISION SIGNAL</div>
+
+                <div class="free-decision-value">
+                    ${esc(decision)}
+                </div>
+
+                <div class="free-score-value">
+                    Score: ${esc(score)} / 100
+                </div>
+
+                <div class="free-card-text">
+                    ${esc(report?.cover?.oneLineVerdict || "현재 사업 구조는 추가 검증이 필요합니다.")}
+                </div>
+            </div>
+
+            <div class="free-brand-preview-card">
+                <div class="free-card-label">WHAT FULL REPORT ADDS</div>
+
+                <div class="free-decision-value">
+                    FULL
+                </div>
+
+                <div class="free-score-value">
+                    Execution Strategy
+                </div>
+
+                <div class="free-card-text">
+                    실행 순서, 수익 구조, 고객 저항, 마케팅 테스트, 리스크 대응까지 연결됩니다.
+                </div>
+            </div>
+        </div>
+
+        <div class="free-locked-layer">
+            <div class="free-locked-pill">
+                🔒 Locked decision layer
+            </div>
+        </div>
+
+        <div class="free-lock-grid">
+            ${ctaItems
+                .slice(0, 6)
+                .map(
+                    (item) => `
+                        <div class="free-lock-item">
+                            <strong>🔒 ${esc(item)}</strong>
+                            <span>Full report only</span>
+                        </div>
+                    `
+                )
+                .join("")}
+        </div>
+
+        <div class="free-warning-box">
+            <strong>이 분석은 아직 완전하지 않습니다.</strong>
+            <p>
+                무료 보고서는 결정을 시작하게 해주는 미리보기입니다.
+                실제 실패 지점, 수익 조건, 고객 저항, 실행 순서는 전체 보고서에서 확인해야 합니다.
+            </p>
+        </div>
+
+        <div class="free-danger-line">
+            지금 확인하지 않으면 잘못된 방향으로 몇 달의 시간과 마케팅 비용을 낭비할 수 있습니다.
+        </div>
+
+        <a class="free-upgrade-button" href="${process.env.PAYMENT_LINK || "#"}">
+            ${esc(report?.freeCta?.buttonText || "전체 유료 보고서 열기")} — $49
         </a>
-    </div>
 
-    <div class="callout">
-        The free report shows the first decision layer. The paid report completes the remaining analysis: customer buying logic, market reality, profit simulation, execution plan, risk system, and final validation criteria.
     </div>
 
     <div class="footer">
-        <span>GoNoGo™ Business Decision Report</span>
-        <span>Page 6 / 6</span>
+        <span>GoNoGo™ Free Preview</span>
+        <span>Upgrade Required</span>
     </div>
 </section>
 
