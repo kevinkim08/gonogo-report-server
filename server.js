@@ -84,6 +84,92 @@ app.get("/api/health", (req, res) => {
     res.json({ ok: true, status: "healthy" })
 })
 
+app.get("/api/report-loading", (req, res) => {
+    const lang = normalizeLanguage(req.query.lang || "ko")
+    const reportType = req.query.reportType === "paid" ? "paid" : "free"
+
+    const params = new URLSearchParams({
+        lang,
+        reportType,
+        brandName: req.query.brandName || "",
+        productService: req.query.productService || "",
+        targetCustomer: req.query.targetCustomer || "",
+    })
+
+    const targetUrl = `/api/debug-html?${params.toString()}`
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8")
+    return res.send(`
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generating Report...</title>
+  <style>
+    body {
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#ffffff;
+      color:#0D2418;
+      font-family:Inter, system-ui, sans-serif;
+    }
+    .box {
+      width:90%;
+      max-width:420px;
+      text-align:center;
+    }
+    .logo {
+      font-size:14px;
+      font-weight:950;
+      margin-bottom:34px;
+    }
+    .spinner {
+      width:46px;
+      height:46px;
+      border:4px solid rgba(13,36,24,0.12);
+      border-top-color:#0D2418;
+      border-radius:50%;
+      margin:0 auto 24px;
+      animation:spin 0.8s linear infinite;
+    }
+    h1 {
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-0.06em;
+      margin:0 0 12px;
+    }
+    p {
+      font-size:14px;
+      line-height:1.6;
+      color:#53645A;
+      margin:0;
+    }
+    @keyframes spin {
+      to { transform:rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">GONOGO™</div>
+    <div class="spinner"></div>
+    <h1>Generating your decision report</h1>
+    <p>Analyzing market risk, customer logic, profit structure, and execution signals.</p>
+  </div>
+
+  <script>
+    setTimeout(function () {
+      window.location.replace(${JSON.stringify(targetUrl)});
+    }, 300);
+  </script>
+</body>
+</html>
+    `)
+})
+
 app.get("/api/debug-html", async (req, res) => {
     try {
         const language = normalizeLanguage(
@@ -1519,9 +1605,11 @@ brandDomainRows: Array.isArray(report?.brandNaming?.domainSuggestions)
 
 html = applyTemplateVars(html, templateData)
 
-    if (report?.reportMode === "free") {
+if (report?.reportMode === "free") {
     html = keepFreeReportOnly(html, locale, report)
 }
+
+html = injectReportBackButton(html, locale)
 
 html = html.replace(/{{[^}]+}}/g, "")
 
@@ -1862,6 +1950,38 @@ ${freePart}
   </div>
 </section>
 `
+}
+
+function injectReportBackButton(html, locale = {}) {
+    const backText = t(locale, "report.backToSite", "Back to site")
+
+    const buttonHtml = `
+<a href="https://gonogo.so/report" style="
+  position:fixed;
+  left:14px;
+  bottom:14px;
+  z-index:99999;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 16px;
+  border-radius:999px;
+  background:#0D2418;
+  color:#ffffff;
+  font-size:13px;
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:0 12px 32px rgba(13,36,24,0.22);
+">
+  ← ${esc(backText)}
+</a>
+`
+
+    if (html.includes("</body>")) {
+        return html.replace("</body>", `${buttonHtml}</body>`)
+    }
+
+    return `${html}${buttonHtml}`
 }
 
 function lockedBox(message, title = "Premium Insights", buttonLabel = "Premium Report") {
