@@ -409,6 +409,7 @@ const timer = setInterval(() => {
 </html>
 `)
 })
+
 // =========================================================
 // [08] DEBUG HTML ROUTE
 // =========================================================
@@ -426,21 +427,34 @@ app.get("/api/debug-html", async (req, res) => {
 
         const locale = loadLocale(language)
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language,
-        })
+        let finalReport
 
-        const finalReport =
-            reportType === "free"
-                ? buildFreeReportFromPaidReport(paidReport)
-                : { ...paidReport, isPaid: true, reportMode: "paid" }
+        if (reportType === "free") {
+            finalReport = await generateFreePreviewReportJson({
+                brandName,
+                productService,
+                targetCustomer,
+                language,
+            })
+        } else {
+            const paidReport = await generateDeepReportJson({
+                brandName,
+                productService,
+                targetCustomer,
+                language,
+            })
+
+            finalReport = {
+                ...paidReport,
+                isPaid: true,
+                reportMode: "paid",
+            }
+        }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
         console.log("🌍 LANG:", language)
+        console.log("[DEBUG_HTML_TYPE]", reportType)
         console.log("[DEBUG_HTML_LENGTH]", html.length)
 
         res.setHeader("Content-Type", "text/html; charset=utf-8")
@@ -483,17 +497,29 @@ app.post("/api/generate-report", async (req, res) => {
         const normalizedReportType =
             reportType === "paid" || reportType === "deep" ? "paid" : "free"
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language: normalizedLanguage,
-        })
+        let finalReport
 
-        const finalReport =
-            normalizedReportType === "paid"
-                ? { ...paidReport, isPaid: true, reportMode: "paid" }
-                : buildFreeReportFromPaidReport(paidReport)
+        if (normalizedReportType === "free") {
+            finalReport = await generateFreePreviewReportJson({
+                brandName,
+                productService,
+                targetCustomer,
+                language: normalizedLanguage,
+            })
+        } else {
+            const paidReport = await generateDeepReportJson({
+                brandName,
+                productService,
+                targetCustomer,
+                language: normalizedLanguage,
+            })
+
+            finalReport = {
+                ...paidReport,
+                isPaid: true,
+                reportMode: "paid",
+            }
+        }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
         const pdfBuffer = await htmlToPdf(html)
@@ -1190,89 +1216,49 @@ Language / Market: ${language}
 Critical rules:
 
 Output VALID JSON only.
-
 No markdown.
-
 No explanation outside JSON.
-
 Use the exact JSON shape provided below.
-
 Do not use placeholders.
-
 Every table cell must contain real content.
-
 Use realistic assumptions when exact data is unavailable.
-
 Clearly state assumptions in appendix.
-
 Use country-specific market logic.
-
 Be conservative, not optimistic.
-
 If the business is weak, say it clearly.
-
 All scores must be numbers from 0 to 100.
-
 Keep table cells concise but meaningful.
-
 Make the report directly useful for founder decision-making.
-
 You must return every field in the exact JSON structure.
-
 Never omit required keys.
-
 Never rename keys.
-
 Never add new top-level keys.
-
 Every array must keep the required number of rows.
-
 Every table row must keep the required number of columns.
-
 If data is uncertain, write a conservative assumption instead of leaving it blank.
-
 Do not use null.
-
 Do not use undefined.
-
 Do not use empty strings unless the field is truly impossible.
-
 Keep all table cells short and layout-safe.
-
 This rule applies ONLY to table cells.
-
 Narrative fields must be deeper and more informative.
-
 Escape all double quotes inside string values.
-
 Do not use unescaped quotation marks inside any JSON string.
-
 Do not use line breaks inside JSON string values.
-
 Do not use trailing commas.
-
 Every string value must be valid JSON-safe text.
 
 Layout safety rules:
 
 Table cells must be short.
-
 Each table cell should be 8 to 18 words maximum in English.
-
 For Japanese, Chinese, and Mongolian, keep table cells shorter than English.
-
 Do not write full paragraphs inside table cells.
-
 Long explanations must go only into text fields such as marketInsight, buyingTrigger, economicsJudgment, modelJudgment, operatingRule, finalRule, founderWarning.
-
 Do not put line breaks inside table cells.
-
 Do not use very long compound phrases inside table cells.
-
 Avoid repeating the same sentence across multiple cells.
-
 Numbers, ranges, and decisions should be concise.
-
 Use clear, founder-friendly wording.
 
 Narrative depth rules (CRITICAL):
@@ -1280,243 +1266,152 @@ Narrative depth rules (CRITICAL):
 customerSummary:
 
 3 to 4 sentences
-
 Summarize both positive buying signals and negative hesitation signals.
-
 Explain what actually makes the customer buy.
-
 Explain what blocks the customer from buying.
-
 End with the most important validation point.
-
 The report must not feel shallow.
-
 Narrative fields are the core of decision quality.
 
 structureSummary:
 
 3 to 4 sentences
-
 Rewrite the business diagnosis table into a connected business story.
-
 Explain how the business actually operates in reality.
-
 Include business type, revenue model, entry difficulty, bottleneck, and validation logic.
-
 For the following fields, write deeper, structured explanations:
 
 marketInsight:
 
 3 to 4 sentences
-
 Explain: market structure → limitation → real opportunity → strategic implication
 
 economicsJudgment:
 
 3 to 4 sentences
-
 Explain: cost structure → CAC pressure → margin reality → survival condition
 
 modelJudgment:
 
 3 to 4 sentences
-
 Explain: why this model works or fails → structural weakness → how to fix
 
 modelDeepDive:
 
 3 to 5 sentences
-
 Explain the deeper business model mechanics.
-
 Cover revenue logic, repeat purchase or retention logic, margin pressure, operational weakness, and the best structural improvement.
-
 This must not repeat modelJudgment.
 
 operatingRule:
 
 2 to 3 sentences
-
 Must define a clear decision rule (what to track and when to stop)
 
 profitJudgment:
 
 3 to 4 sentences
-
 Explain: scaling condition → risk → realistic expectation
-
 breakEvenPoint:
-
 2 to 3 sentences
-
 Explain: when business becomes viable → key threshold → constraint
 
 Additional rules:
 
 Each explanation must include:
-
 Cause
-
 Business meaning
-
 Action implication
-
 Avoid generic phrases such as "this is important" or "this is needed"
-
 Avoid repeating the same logic across sections
-
 Each section must provide a different angle of insight
 
 Brand naming rules:
 
 brandNaming must be generated as a paid report section.
-
 The brand name should be created from productService and targetCustomer, not only from the user's brandName input.
-
 If brandName is empty, generic, temporary, or unclear, recommend a stronger brand name.
-
 Generate names that are short, memorable, easy to pronounce, and commercially usable.
-
 Avoid generic names such as Best, Smart, Premium, Global, Shop, Store, Solution, Service.
-
 Avoid names that are too narrow unless the business requires a niche identity.
-
 Prefer names that can expand into future products, categories, or markets.
-
 Naming must reflect customer desire, category signal, trust, and differentiation.
-
 For ko, names may be Korean, English, or hybrid depending on market fit.
-
 For en, prefer globally pronounceable English-style names.
-
 For ja, prefer compact, trust-oriented, easy-to-read names.
-
 For zh, prefer names that can carry meaning and social commerce appeal.
-
 For mn, prefer simple, practical, easy-to-remember names.
-
 Domain suggestions are strategic recommendations only.
-
 Do not claim real-time domain availability.
-
 availability must mean estimated likelihood only: HIGH | MEDIUM | LOW.
-
 domainSuggestions must avoid trademark-sensitive famous brand terms.
 
 brandNaming:
 
 brandDirection must explain the strategic naming direction in 3 to 4 sentences.
-
 namingStrategy must explain the naming logic, positioning angle, and why it fits the customer.
-
 keywords must contain exactly 8 short keywords.
-
 nameCandidates must contain exactly 5 candidates.
-
 Each nameCandidate must include name, meaning, fit, risk, and score.
-
 score must be a number from 0 to 100.
-
 recommendedName must choose exactly one best candidate.
-
 domainSuggestions must contain exactly 5 domain ideas.
-
 Each domain suggestion must include domain, reason, and availability.
-
 domain availability is only an estimated likelihood, not a verified registration result.
 
 Array stability rules:
 
 glossary must contain exactly 5 items.
-
 decisionMatrix must contain exactly 4 rows.
-
 marketCards must contain exactly 4 rows.
-
 marketFunnel must contain exactly 3 items: TAM, SAM, SOM.
-
 tamSamSom must contain exactly 3 rows.
-
 customerTruth must contain exactly 3 rows.
-
 customerOpportunity must contain exactly 4 rows.
-
 competitionMap must contain exactly 4 rows.
-
 benchmarkRows must contain exactly 3 rows.
-
 unitEconomicsCards must contain exactly 4 rows.
-
 unitEconomicsTable must contain exactly 4 rows.
-
 marketingStrategy.channelFit must contain exactly 4 rows.
-
 marketingStrategy.contentPlaybook must contain exactly 5 items.
-
 marketingStrategy.thirtyDayMarketingTest must contain exactly 12 rows and represent a 12-week / 3-month test plan.
-
 businessModel.revenueLayers must contain exactly 3 rows.
-
 riskSystem must contain exactly 3 rows.
-
 executionPlan must contain exactly 3 rows.
-
 goThreshold must contain exactly 4 rows.
-
 goChecklist must contain exactly 4 items.
-
 dataConfidence.sourceQuality must contain exactly 3 rows.
-
 dataConfidence.limits must contain exactly 3 items.
-
 sensitivityAnalysis.cacLtvTable must contain exactly 3 rows.
-
 profitSimulation.monthlyScenarioTable must contain exactly 3 rows.
-
 killCriteria.rules must contain exactly 4 rows.
-
 appendix.dataSources must contain exactly 3 rows.
-
 appendix.assumptions must contain exactly 4 items.
-
 referenceLinks must contain exactly 5 rows.
-
 brandNaming.keywords must contain exactly 8 items.
-
 brandNaming.nameCandidates must contain exactly 5 items.
-
 brandNaming.domainSuggestions must contain exactly 5 items.
 
 Language output rules:
 
 All user-facing values must be written in the final report language.
-
 Do not mix Korean into English, Japanese, Chinese, or Mongolian reports.
-
 Keep business terms such as CAC, LTV, TAM, SAM, SOM, AOV in English.
-
 For Japanese, Chinese, and Mongolian, keep sentences compact to protect PDF layout.
 
 Narrative tone rules:
 
 Write like a strategy consultant, not a content writer
-
 Be direct, specific, and decision-oriented
-
 Avoid storytelling, focus on judgment
-
 Each paragraph should help a founder decide "go / pivot / stop"
 
 Country strategy rules:
 
 ko: Korea-first. Consider Naver, Kakao, Coupang, SmartStore, Instagram, YouTube Shorts, local payment behavior, Korean price sensitivity.
-
 en: Global / English market. Consider Google, Meta, Amazon, Shopify, TikTok, Reddit, creator ads, DTC funnel.
-
 ja: Japan-first. Consider LINE, Rakuten, Yahoo Japan, Amazon JP, trust-heavy purchase behavior, conservative adoption.
-
 zh: Chinese-speaking market. Consider WeChat, Xiaohongshu, Douyin, Tmall, group commerce, social proof, KOL/KOC.
-
 mn: Mongolia-first. Consider Facebook commerce, bank transfer, offline trust, messenger sales, low-friction purchase behavior.
 
 Important:
@@ -1585,18 +1480,222 @@ async function generateDeepReportJson(input) {
 }
 
 // =========================================================
-// [17] FREE REPORT BUILDER
+// [17] FREE PREVIEW REPORT BUILDER
 // =========================================================
 
-async function generateFreeReportJson(input) {
-    const deep = await generateDeepReportJson(input)
+// ---------------------------------------------------------
+// [17-1] FREE PREVIEW PROMPT
+// ---------------------------------------------------------
 
+function buildFreePreviewPrompt(language) {
+    const languageName = getLanguageName(language)
+
+    return `
+You are GoNoGo, a business decision report engine.
+
+Create ONLY the free preview report.
+
+Final report language: ${languageName}
+
+The free report has exactly these pages:
+1. Cover / decision board
+2. Table of contents
+3. How to read this report
+4. Glossary and score guide
+5. Business structure diagnosis
+6. Paid upgrade CTA page
+
+Return VALID JSON only.
+No markdown.
+Do not generate paid sections.
+Do not generate marketing strategy, risk system, profit simulation, execution plan, sensitivity analysis, appendix, or full customer analysis.
+
+Required JSON shape:
+
+{
+  "cover": {
+    "brandName": "",
+    "decision": "GO | HOLD | NO GO",
+    "score": 0,
+    "subtitle": "",
+    "oneLineVerdict": ""
+  },
+  "visualScores": {
+    "market": 0,
+    "profitability": 0,
+    "execution": 0,
+    "risk": 0
+  },
+  "decisionMatrix": [
+    ["MARKET", "LOW | MEDIUM | HIGH"],
+    ["PROFITABILITY", "LOW | MEDIUM | HIGH"],
+    ["EXECUTION", "LOW | MEDIUM | HIGH"],
+    ["RISK", "LOW | MEDIUM | HIGH"]
+  ],
+  "unitEconomicsScore": {
+    "ltvToCac": "",
+    "payback": "",
+    "margin": "",
+    "status": "PASS | WATCH | FAIL"
+  },
+  "glossary": [
+    { "term": "TAM", "meaning": "", "whyItMatters": "" },
+    { "term": "SAM", "meaning": "", "whyItMatters": "" },
+    { "term": "SOM", "meaning": "", "whyItMatters": "" },
+    { "term": "CAC", "meaning": "", "whyItMatters": "" },
+    { "term": "LTV", "meaning": "", "whyItMatters": "" }
+  ],
+  "businessDiagnosis": {
+    "industryType": "",
+    "businessModelType": "",
+    "countryMarketBehavior": "",
+    "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
+    "mainBottleneck": "",
+    "bestFirstOffer": "",
+    "validationExperiment": "",
+    "goNoGoLogic": "",
+    "structureSummary": ""
+  },
+  "freeCta": {
+    "title": "",
+    "message": "",
+    "lockedItems": ["", "", "", "", "", ""],
+    "buttonText": ""
+  }
+}
+
+Rules:
+- Keep the report useful and trustworthy.
+- Do NOT summarize full paid sections.
+- Focus on decision, glossary, and structure only.
+- Be direct and conservative.
+`
+}
+
+// ---------------------------------------------------------
+// [17-2] GENERATE FREE PREVIEW REPORT (GPT CALL)
+// ---------------------------------------------------------
+
+async function generateFreePreviewReportJson(input) {
+    const systemPrompt = buildFreePreviewPrompt(input.language)
+
+    const userPrompt = JSON.stringify({
+        brandName: input.brandName,
+        productService: input.productService,
+        targetCustomer: input.targetCustomer,
+        language: input.language,
+        reportType: "free-preview",
+    })
+
+    const completion = await openai.chat.completions.create({
+        model: process.env.OPENAI_FREE_MODEL || "gpt-4o-mini",
+        messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+    })
+
+    const raw = completion.choices?.[0]?.message?.content
+
+    if (!raw) throw new Error("Empty OpenAI free preview response.")
+
+    let parsed
+
+    try {
+        parsed = JSON.parse(raw)
+    } catch (parseError) {
+        console.error("[FREE_PREVIEW_JSON_PARSE_ERROR]", parseError)
+        console.error("[FREE_PREVIEW_JSON_RAW]", raw)
+
+        throw new Error(
+            `Invalid free preview JSON: ${String(parseError?.message || parseError)}`
+        )
+    }
+
+    return normalizeFreePreviewReport(parsed, input)
+}
+
+// ---------------------------------------------------------
+// [17-3] NORMALIZE FREE PREVIEW REPORT
+// ---------------------------------------------------------
+
+function normalizeFreePreviewReport(report, input) {
     return {
-        ...deep,
         cover: {
-            ...deep.cover,
-            subtitle: `${deep.cover.subtitle} — Free Decision Sample`,
+            brandName: report?.cover?.brandName || input.brandName || "",
+            decision: report?.cover?.decision || "HOLD",
+            score: toScore(report?.cover?.score, 50),
+            subtitle: report?.cover?.subtitle || input.productService || "",
+            oneLineVerdict: report?.cover?.oneLineVerdict || "",
         },
+
+        visualScores: {
+            market: toScore(report?.visualScores?.market, 50),
+            profitability: toScore(report?.visualScores?.profitability, 50),
+            execution: toScore(report?.visualScores?.execution, 50),
+            risk: toScore(report?.visualScores?.risk, 50),
+        },
+
+        decisionMatrix: safeArray(report?.decisionMatrix, [
+            ["MARKET", "MEDIUM"],
+            ["PROFITABILITY", "MEDIUM"],
+            ["EXECUTION", "MEDIUM"],
+            ["RISK", "MEDIUM"],
+        ]).slice(0, 4),
+
+        unitEconomicsScore: {
+            ltvToCac: report?.unitEconomicsScore?.ltvToCac || "",
+            payback: report?.unitEconomicsScore?.payback || "",
+            margin: report?.unitEconomicsScore?.margin || "",
+            status: report?.unitEconomicsScore?.status || "WATCH",
+        },
+
+        glossary: safeArray(
+            report?.glossary,
+            getDefaultGlossary(input.language || "en")
+        ).slice(0, 5),
+
+        businessDiagnosis: {
+            industryType: report?.businessDiagnosis?.industryType || "",
+            businessModelType: report?.businessDiagnosis?.businessModelType || "",
+            countryMarketBehavior:
+                report?.businessDiagnosis?.countryMarketBehavior || "",
+            marketEntryDifficulty:
+                report?.businessDiagnosis?.marketEntryDifficulty || "MEDIUM",
+            mainBottleneck: report?.businessDiagnosis?.mainBottleneck || "",
+            bestFirstOffer: report?.businessDiagnosis?.bestFirstOffer || "",
+            validationExperiment:
+                report?.businessDiagnosis?.validationExperiment || "",
+            goNoGoLogic: report?.businessDiagnosis?.goNoGoLogic || "",
+            structureSummary:
+                report?.businessDiagnosis?.structureSummary || "",
+        },
+
+        freeCta: {
+            title:
+                report?.freeCta?.title ||
+                "Unlock the full decision report",
+
+            message:
+                report?.freeCta?.message ||
+                "Full report includes customer, market, profit, execution, and risk analysis.",
+
+            lockedItems: safeArray(report?.freeCta?.lockedItems, [
+                "Customer analysis",
+                "Market & competition",
+                "Unit economics",
+                "Marketing strategy",
+                "Execution plan",
+                "Risk system",
+            ]).slice(0, 6),
+
+            buttonText:
+                report?.freeCta?.buttonText || "View full report",
+        },
+
+        isPaid: false,
+        reportMode: "free-preview",
     }
 }
 
@@ -1974,11 +2073,696 @@ function normalizeDeepReport(report, input) {
         ]).slice(0, 5),
     }
 }
+
+// =========================================================
+// [20-A] BUILD FREE PREVIEW HTML
+// =========================================================
+
+// =========================================================
+// [20-A] BUILD FREE PREVIEW HTML
+// =========================================================
+
+function buildFreePreviewHtml(report, locale) {
+    const matrix = objectFromPairs(report?.decisionMatrix || [])
+    const glossary = Array.isArray(report?.glossary) ? report.glossary : []
+
+    const decision = report?.cover?.decision || "HOLD"
+    const score = toScore(report?.cover?.score, 50)
+
+    const marketScore = toScore(report?.visualScores?.market, 50)
+    const profitabilityScore = toScore(report?.visualScores?.profitability, 50)
+    const executionScore = toScore(report?.visualScores?.execution, 50)
+    const riskScore = toScore(report?.visualScores?.risk, 50)
+
+    const ctaItems = Array.isArray(report?.freeCta?.lockedItems)
+        ? report.freeCta.lockedItems
+        : []
+
+    const glossaryRows = glossary
+        .slice(0, 5)
+        .map(
+            (item) => `
+<tr>
+    <td>${esc(item?.term || "")}</td>
+    <td>${esc(item?.meaning || "")}</td>
+    <td>${esc(item?.whyItMatters || "")}</td>
+</tr>`
+        )
+        .join("")
+
+    const ctaList = ctaItems
+        .slice(0, 6)
+        .map((item) => `<li>${esc(item)}</li>`)
+        .join("")
+
+    return `
+<!doctype html>
+<html lang="${esc(locale?.lang || "ko")}">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GoNoGo Free Preview Report</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f4f6f2;
+    color: #0D2418;
+    font-family: ${locale?.fontFamily || "Inter, Arial, sans-serif"};
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.page {
+    width: 794px;
+    min-height: 1123px;
+    margin: 0 auto 24px;
+    padding: 54px 56px;
+    background: #ffffff;
+    position: relative;
+    overflow: hidden;
+    page-break-after: always;
+}
+
+.page:last-child {
+    page-break-after: auto;
+}
+
+.brand-mark {
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+}
+
+.muted {
+    color: #6f7e75;
+}
+
+.big-decision {
+    margin-top: 96px;
+    font-size: 88px;
+    line-height: 0.9;
+    letter-spacing: -0.09em;
+    font-weight: 950;
+}
+
+.score {
+    margin-top: 26px;
+    font-size: 26px;
+    font-weight: 900;
+}
+
+.title {
+    margin-top: 20px;
+    font-size: 34px;
+    line-height: 1.14;
+    letter-spacing: -0.055em;
+    font-weight: 950;
+}
+
+.subtitle {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.65;
+    color: #53645A;
+    font-weight: 700;
+}
+
+.grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 44px;
+}
+
+.card {
+    border: 1px solid #dfe7e2;
+    border-radius: 18px;
+    padding: 16px 14px;
+    background: #fbfcfa;
+}
+
+.card-label {
+    font-size: 11px;
+    color: #66766d;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.card-value {
+    margin-top: 8px;
+    font-size: 20px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+}
+
+.score-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 34px;
+}
+
+.score-card {
+    border: 1px solid #dfe7e2;
+    border-radius: 22px;
+    padding: 18px;
+    background: #ffffff;
+}
+
+.score-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.bar-bg {
+    margin-top: 12px;
+    height: 9px;
+    background: #e8eee9;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #0D2418;
+    border-radius: 999px;
+}
+
+.footer {
+    position: absolute;
+    left: 56px;
+    right: 56px;
+    bottom: 34px;
+    display: flex;
+    justify-content: space-between;
+    color: #839087;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.section-kicker {
+    font-size: 13px;
+    font-weight: 950;
+    color: #6f7e75;
+    letter-spacing: 0.08em;
+}
+
+.section-title {
+    margin-top: 16px;
+    font-size: 48px;
+    line-height: 1.04;
+    letter-spacing: -0.075em;
+    font-weight: 950;
+}
+
+.section-desc {
+    margin-top: 20px;
+    max-width: 580px;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #53645A;
+    font-weight: 650;
+}
+
+.toc {
+    margin-top: 54px;
+    border-top: 2px solid #0D2418;
+}
+
+.toc-row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid #e2e9e4;
+    align-items: center;
+}
+
+.toc-num {
+    font-size: 13px;
+    font-weight: 950;
+    color: #839087;
+}
+
+.toc-title {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: #eef4ef;
+    color: #0D2418;
+    font-size: 11px;
+    font-weight: 950;
+}
+
+.badge.locked {
+    background: #0D2418;
+    color: #ffffff;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 28px;
+    font-size: 13px;
+}
+
+.table th {
+    text-align: left;
+    background: #0D2418;
+    color: #ffffff;
+    padding: 12px 12px;
+    font-size: 12px;
+}
+
+.table td {
+    border-bottom: 1px solid #e2e9e4;
+    padding: 13px 12px;
+    vertical-align: top;
+    line-height: 1.55;
+}
+
+.table td:first-child {
+    font-weight: 900;
+    width: 120px;
+}
+
+.callout {
+    margin-top: 34px;
+    padding: 22px;
+    border-radius: 24px;
+    background: #f3f7f4;
+    border: 1px solid #dde7df;
+    font-size: 15px;
+    line-height: 1.7;
+    font-weight: 700;
+    color: #314138;
+}
+
+.diagnosis {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    border: 1px solid #dfe7e2;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+.diagnosis div {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5ece7;
+    line-height: 1.55;
+    font-size: 13px;
+}
+
+.diagnosis div:nth-child(odd) {
+    background: #f4f7f5;
+    font-weight: 950;
+}
+
+.diagnosis div:nth-last-child(-n+2) {
+    border-bottom: none;
+}
+
+.summary-box {
+    margin-top: 28px;
+    padding: 24px;
+    border-radius: 26px;
+    background: #0D2418;
+    color: #ffffff;
+}
+
+.summary-box h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    letter-spacing: -0.04em;
+}
+
+.summary-box p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.82);
+}
+
+.cta-card {
+    margin-top: 48px;
+    padding: 34px;
+    border-radius: 34px;
+    background: #0D2418;
+    color: #ffffff;
+}
+
+.cta-card h2 {
+    margin: 0;
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.075em;
+}
+
+.cta-card p {
+    margin: 18px 0 0;
+    color: rgba(255,255,255,0.78);
+    font-size: 16px;
+    line-height: 1.7;
+    font-weight: 650;
+}
+
+.lock-list {
+    margin-top: 28px;
+    display: grid;
+    gap: 12px;
+    padding: 0;
+    list-style: none;
+}
+
+.lock-list li {
+    padding: 15px 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.09);
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.cta-button {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 16px 22px;
+    border-radius: 999px;
+    background: #B6FF5A;
+    color: #0D2418;
+    font-size: 14px;
+    font-weight: 950;
+    text-decoration: none;
+}
+
+@media print {
+    body {
+        background: #ffffff;
+    }
+
+    .page {
+        margin: 0;
+        width: 794px;
+        min-height: 1123px;
+        box-shadow: none;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PAGE 1: COVER -->
+<section class="page">
+    <div class="brand-mark">GONOGO™</div>
+
+    <div class="big-decision">${esc(decision)}</div>
+    <div class="score">${esc(score)} / 100</div>
+
+    <div class="title">
+        ${esc(report?.cover?.brandName || "")}<br />
+        Free Business Decision Report
+    </div>
+
+    <div class="subtitle">
+        ${esc(report?.cover?.subtitle || "")}<br />
+        ${esc(report?.cover?.oneLineVerdict || "")}
+    </div>
+
+    <div class="grid-4">
+        <div class="card">
+            <div class="card-label">Market</div>
+            <div class="card-value">${esc(matrix.MARKET || "")}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Profitability</div>
+            <div class="card-value">${esc(matrix.PROFITABILITY || "")}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Execution</div>
+            <div class="card-value">${esc(matrix.EXECUTION || "")}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Risk</div>
+            <div class="card-value">${esc(matrix.RISK || "")}</div>
+        </div>
+    </div>
+
+    <div class="score-grid">
+        <div class="score-card">
+            <div class="score-row"><span>Market score</span><span>${marketScore}/100</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${marketScore}%"></div></div>
+        </div>
+        <div class="score-card">
+            <div class="score-row"><span>Profitability score</span><span>${profitabilityScore}/100</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${profitabilityScore}%"></div></div>
+        </div>
+        <div class="score-card">
+            <div class="score-row"><span>Execution score</span><span>${executionScore}/100</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${executionScore}%"></div></div>
+        </div>
+        <div class="score-card">
+            <div class="score-row"><span>Risk pressure</span><span>${riskScore}/100</span></div>
+            <div class="bar-bg"><div class="bar-fill" style="width:${riskScore}%"></div></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>GoNoGo™ Business Decision Report</span>
+        <span>Page 1 / 6</span>
+    </div>
+</section>
+
+<!-- PAGE 2: TABLE OF CONTENTS -->
+<section class="page">
+    <div class="section-kicker">FREE PREVIEW</div>
+    <div class="section-title">Table of contents</div>
+    <div class="section-desc">
+        This free report provides the first decision layer only. The paid report unlocks the full customer, market, profit, execution, and risk analysis.
+    </div>
+
+    <div class="toc">
+        <div class="toc-row">
+            <div class="toc-num">01</div>
+            <div class="toc-title">Cover / decision board</div>
+            <div class="badge">FREE</div>
+        </div>
+        <div class="toc-row">
+            <div class="toc-num">02</div>
+            <div class="toc-title">Report structure and reading guide</div>
+            <div class="badge">FREE</div>
+        </div>
+        <div class="toc-row">
+            <div class="toc-num">03</div>
+            <div class="toc-title">Key terms and score guide</div>
+            <div class="badge">FREE</div>
+        </div>
+        <div class="toc-row">
+            <div class="toc-num">04</div>
+            <div class="toc-title">Business structure diagnosis</div>
+            <div class="badge">FREE</div>
+        </div>
+        <div class="toc-row">
+            <div class="toc-num">05</div>
+            <div class="toc-title">Customer, market, profit, execution and risk analysis</div>
+            <div class="badge locked">PAID</div>
+        </div>
+    </div>
+
+    <div class="callout">
+        The free report is designed to answer one question first: “Is this business idea worth deeper analysis?”
+        The paid report answers the next question: “How should this be validated, executed, or stopped?”
+    </div>
+
+    <div class="footer">
+        <span>GoNoGo™ Business Decision Report</span>
+        <span>Page 2 / 6</span>
+    </div>
+</section>
+
+<!-- PAGE 3: HOW TO READ -->
+<section class="page">
+    <div class="section-kicker">SECTION 01</div>
+    <div class="section-title">How to read this report</div>
+    <div class="section-desc">
+        This section defines the core business terms and the judgment baseline. A business idea should not be judged only by how attractive it sounds. It should be judged by demand, margin, execution difficulty, and risk pressure.
+    </div>
+
+    <div class="callout">
+        The score is not a prediction. It is a decision signal based on the current idea structure.
+        A high score means the idea deserves validation. A low score means the structure needs redesign before spending money.
+    </div>
+
+    <div class="score-grid">
+        <div class="score-card">
+            <div class="card-label">Decision</div>
+            <div class="card-value">${esc(decision)}</div>
+        </div>
+        <div class="score-card">
+            <div class="card-label">LTV / CAC</div>
+            <div class="card-value">${esc(report?.unitEconomicsScore?.ltvToCac || "")}</div>
+        </div>
+        <div class="score-card">
+            <div class="card-label">Payback</div>
+            <div class="card-value">${esc(report?.unitEconomicsScore?.payback || "")}</div>
+        </div>
+        <div class="score-card">
+            <div class="card-label">Profit status</div>
+            <div class="card-value">${esc(report?.unitEconomicsScore?.status || "")}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <span>GoNoGo™ Business Decision Report</span>
+        <span>Page 3 / 6</span>
+    </div>
+</section>
+
+<!-- PAGE 4: GLOSSARY -->
+<section class="page">
+    <div class="section-kicker">1-1</div>
+    <div class="section-title">Key terms and score guide</div>
+    <div class="section-desc">
+        These terms explain how the report reads the business idea. Understanding them helps separate a popular idea from a viable business.
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Meaning</th>
+                <th>Why it matters</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${glossaryRows}
+        </tbody>
+    </table>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Score range</th>
+                <th>Judgment</th>
+                <th>Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>85~100</td><td>Excellent</td><td>Strong GO candidate. Scaling may be considered.</td></tr>
+            <tr><td>70~84</td><td>Good</td><td>GO is possible if key conditions are met.</td></tr>
+            <tr><td>50~69</td><td>Needs validation</td><td>HOLD. Decide after a small test.</td></tr>
+            <tr><td>30~49</td><td>Risky</td><td>High NO GO probability. Redesign the structure.</td></tr>
+            <tr><td>0~29</td><td>Very risky</td><td>Stop immediately or fully reconsider.</td></tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <span>GoNoGo™ Business Decision Report</span>
+        <span>Page 4 / 6</span>
+    </div>
+</section>
+
+<!-- PAGE 5: BUSINESS DIAGNOSIS -->
+<section class="page">
+    <div class="section-kicker">1-2</div>
+    <div class="section-title">Business structure diagnosis</div>
+    <div class="section-desc">
+        This page classifies the business idea by industry, business model, customer behavior, entry difficulty, and first validation logic.
+    </div>
+
+    <div class="diagnosis">
+        <div>Industry type</div>
+        <div>${esc(report?.businessDiagnosis?.industryType || "")}</div>
+
+        <div>Business model type</div>
+        <div>${esc(report?.businessDiagnosis?.businessModelType || "")}</div>
+
+        <div>Country market behavior</div>
+        <div>${esc(report?.businessDiagnosis?.countryMarketBehavior || "")}</div>
+
+        <div>Market entry difficulty</div>
+        <div>${esc(report?.businessDiagnosis?.marketEntryDifficulty || "")}</div>
+
+        <div>Main bottleneck</div>
+        <div>${esc(report?.businessDiagnosis?.mainBottleneck || "")}</div>
+
+        <div>Best first offer</div>
+        <div>${esc(report?.businessDiagnosis?.bestFirstOffer || "")}</div>
+
+        <div>Validation experiment</div>
+        <div>${esc(report?.businessDiagnosis?.validationExperiment || "")}</div>
+
+        <div>Go / No-Go logic</div>
+        <div>${esc(report?.businessDiagnosis?.goNoGoLogic || "")}</div>
+    </div>
+
+    <div class="summary-box">
+        <h3>Structure summary</h3>
+        <p>${esc(report?.businessDiagnosis?.structureSummary || "")}</p>
+    </div>
+
+    <div class="footer">
+        <span>GoNoGo™ Business Decision Report</span>
+        <span>Page 5 / 6</span>
+    </div>
+</section>
+
+<!-- PAGE 6: CTA -->
+<section class="page">
+    <div class="section-kicker">FULL REPORT</div>
+    <div class="section-title">Unlock the full decision report</div>
+
+    <div class="cta-card">
+        <h2>${esc(report?.freeCta?.title || "Continue to the full report")}</h2>
+        <p>${esc(report?.freeCta?.message || "")}</p>
+
+        <ul class="lock-list">
+            ${ctaList}
+        </ul>
+
+        <a class="cta-button" href="#">
+            ${esc(report?.freeCta?.buttonText || "View full report")}
+        </a>
+    </div>
+
+    <div class="callout">
+        The free report shows the first decision layer. The paid report completes the remaining analysis: customer buying logic, market reality, profit simulation, execution plan, risk system, and final validation criteria.
+    </div>
+
+    <div class="footer">
+        <span>GoNoGo™ Business Decision Report</span>
+        <span>Page 6 / 6</span>
+    </div>
+</section>
+
+</body>
+</html>
+`
+}
 // =========================================================
 // [20] BUILD HTML FROM TEMPLATE
 // =========================================================
 
 function buildHtmlFromTemplate(report, locale) {
+    if (report?.reportMode === "free-preview") {
+        return buildFreePreviewHtml(report, locale)
+    }
+
     const templatePath = path.join(__dirname, "templates", "deep-report.html")
     let html = fs.readFileSync(templatePath, "utf8")
 
