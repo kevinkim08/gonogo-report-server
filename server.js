@@ -3667,88 +3667,70 @@ ${freePart}
 <section class="page free-paid-cta-page">
   <div class="free-paid-wrap">
 
-    <div class="free-paid-kicker">
-      ${esc(t(locale, "premium.kicker", "FULL REPORT LOCKED"))}
+    <!-- 1. 현재 판단 -->
+    <div class="free-paid-signal">
+      <div class="free-paid-label">
+        ${esc(t(locale, "premium.signalLabel", "CURRENT DECISION"))}
+      </div>
+      <h1>${esc(decision)}</h1>
+      <div class="free-paid-score">
+        ${esc(t(locale, "scoreLabel", "Score"))}: ${esc(score)} / 100
+      </div>
+      <p>${esc(verdict)}</p>
     </div>
 
-    <h1 class="free-paid-title">
-      ${esc(t(locale, "premium.title", "Unlock the full business decision report"))}
-    </h1>
-
-    <p class="free-paid-desc">
-      ${esc(t(locale, "premium.desc", "This preview shows the decision signal and brand direction only. The full report unlocks customer truth, revenue structure, risk logic, and execution planning."))}
-    </p>
-
-    <div class="free-paid-progress-card">
-      <div class="free-paid-progress-head">
-        <strong>${esc(t(locale, "premium.progressLabel", "REPORT COMPLETION"))}</strong>
-        <span>35%</span>
-      </div>
-
-      <div class="free-paid-progress-track">
-        <div class="free-paid-progress-fill"></div>
-      </div>
-
-      <div class="free-paid-progress-note">
-        ${esc(t(locale, "premium.progressNote", "Preview unlocked · Strategy locked"))}
-      </div>
-    </div>
-
-    <div class="free-paid-grid">
-      <div class="free-paid-signal-card">
-        <p>${esc(t(locale, "premium.signalLabel", "CURRENT DECISION SIGNAL"))}</p>
-        <h2>${esc(decision)}</h2>
-        <strong>${esc(t(locale, "scoreLabel", "Score"))}: ${esc(score)} / 100</strong>
-        <span>${esc(verdict)}</span>
-      </div>
-
-      <div class="free-paid-dark-card">
-        <p>${esc(t(locale, "premium.brandPreviewLabel", "RECOMMENDED BRAND PREVIEW"))}</p>
-        <h2>${esc(recommendedName)}</h2>
-        <strong>${esc(t(locale, "premium.brandPreviewSub", "Brand direction unlocked"))}</strong>
-        <span>${esc(nameReason)}</span>
-      </div>
-    </div>
-
-    <div class="free-paid-locked-layer">
-      <div class="free-paid-locked-pill">
-        ${esc(t(locale, "premium.lockedLayer", "Locked strategy layer"))}
-      </div>
-    </div>
-
-    <div class="free-paid-lock-grid">
-      <div class="free-paid-lock-item">
-        <strong>${esc(t(locale, "premium.lockCustomer", "Customer Truth"))}</strong>
-        <span>${esc(t(locale, "premium.lockCustomerDesc", "Why customers buy and hesitate"))}</span>
-      </div>
-
-      <div class="free-paid-lock-item">
-        <strong>${esc(t(locale, "premium.lockRevenue", "Revenue Structure"))}</strong>
-        <span>${esc(t(locale, "premium.lockRevenueDesc", "Profit logic and break-even condition"))}</span>
-      </div>
-
-      <div class="free-paid-lock-item">
-        <strong>${esc(t(locale, "premium.lockExecution", "Execution Plan"))}</strong>
-        <span>${esc(t(locale, "premium.lockExecutionDesc", "What to test, stop, and scale"))}</span>
-      </div>
-    </div>
-
+    <!-- 2. 불완전성 -->
     <div class="free-paid-warning">
-      <strong>${esc(t(locale, "premium.warningTitle", "This analysis is not complete yet."))}</strong>
-      <p>${esc(t(locale, "premium.warningDesc", "The preview gives you the direction. The full report shows the failure points, revenue logic, customer resistance, and execution path."))}</p>
+      <strong>
+        ${esc(t(locale, "premium.warningTitle", "This decision is incomplete."))}
+      </strong>
+      <p>
+        ${esc(t(locale, "premium.warningDesc", "You are only seeing direction. Critical validation layers are hidden."))}
+      </p>
     </div>
 
+    <!-- 3. 실패 리스크 -->
     <div class="free-paid-danger">
-      ${esc(t(locale, "premium.danger", "Without the full strategy, you may spend time and money testing the wrong direction."))}
+      ${esc(t(locale, "premium.danger", "Proceeding without full strategy significantly increases failure probability."))}
     </div>
 
+    <!-- 4. 잠긴 실제 데이터 (핵심) -->
+    <div class="free-paid-locked-doc">
+      <div class="blur-content">
+        CAC vs LTV mismatch detected
+        Break-even delayed beyond 6 months
+        Customer rejection risk increasing
+      </div>
+      <div class="lock-overlay">
+        ${esc(t(locale, "premium.lockedLayer", "Full decision layer locked"))}
+      </div>
+    </div>
+
+    <!-- 5. 핵심 잠금 항목 -->
+    <div class="free-paid-lock-grid">
+      <div class="lock-item">
+        <strong>${esc(t(locale, "premium.lockCustomer", "Customer Rejection"))}</strong>
+        <span>${esc(t(locale, "premium.lockCustomerDesc", "Why customers will not buy"))}</span>
+      </div>
+      <div class="lock-item">
+        <strong>${esc(t(locale, "premium.lockRevenue", "Profit Failure Point"))}</strong>
+        <span>${esc(t(locale, "premium.lockRevenueDesc", "Where revenue collapses"))}</span>
+      </div>
+      <div class="lock-item">
+        <strong>${esc(t(locale, "premium.lockExecution", "Execution Risk"))}</strong>
+        <span>${esc(t(locale, "premium.lockExecutionDesc", "What will fail first"))}</span>
+      </div>
+    </div>
+
+    <!-- 6. CTA -->
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
-      ${esc(t(locale, "premium.ctaButton", "Unlock full report"))} — $49
+      ${esc(t(locale, "premium.ctaButton", "Remove decision risk — Unlock full report"))} — $49
     </a>
 
-    <div class="free-paid-bottom-note">
-      ${esc(t(locale, "premium.ctaSub", "Unlock customer, revenue, risk, and execution strategy before you spend more."))}
+    <div class="free-paid-sub">
+      ${esc(t(locale, "premium.ctaSub", "Check the full strategy before you spend more time or money."))}
     </div>
+
   </div>
 
   <div class="footer">
