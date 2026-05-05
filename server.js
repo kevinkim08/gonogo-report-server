@@ -98,72 +98,268 @@ app.get("/api/report-loading", (req, res) => {
 
     const targetUrl = `/api/debug-html?${params.toString()}`
 
+    const loadingCopy = {
+        ko: {
+            title: "보고서를 만들고 있어",
+            desc: "시장 위험, 고객 구매 이유, 수익 구조, 실행 가능성을 분석하는 중이야.",
+            steps: [
+                "사업 아이디어 구조 분석 중",
+                "고객 구매 가능성 계산 중",
+                "시장·경쟁 리스크 확인 중",
+                "수익 구조와 실행 조건 정리 중",
+                "최종 Go / No-Go 판단 생성 중",
+            ],
+        },
+        en: {
+            title: "Building your decision report",
+            desc: "Analyzing market risk, customer logic, profit structure, and execution signals.",
+            steps: [
+                "Reading your business idea",
+                "Checking customer buying logic",
+                "Mapping market and competition risk",
+                "Calculating profit structure",
+                "Generating your Go / No-Go decision",
+            ],
+        },
+        ja: {
+            title: "レポートを生成しています",
+            desc: "市場リスク、顧客心理、収益構造、実行可能性を分析しています。",
+            steps: [
+                "事業アイデアを分析中",
+                "顧客の購入理由を確認中",
+                "市場と競合リスクを確認中",
+                "収益構造を整理中",
+                "Go / No-Go 判断を生成中",
+            ],
+        },
+        zh: {
+            title: "正在生成决策报告",
+            desc: "正在分析市场风险、客户购买逻辑、盈利结构和执行条件。",
+            steps: [
+                "分析商业想法结构",
+                "判断客户购买动机",
+                "检查市场与竞争风险",
+                "整理盈利结构",
+                "生成 Go / No-Go 判断",
+            ],
+        },
+        mn: {
+            title: "Тайлан боловсруулж байна",
+            desc: "Зах зээлийн эрсдэл, хэрэглэгчийн логик, ашигт ажиллагаа, хэрэгжүүлэх боломжийг шинжилж байна.",
+            steps: [
+                "Бизнес санааг шинжилж байна",
+                "Хэрэглэгчийн худалдан авах шалтгааныг шалгаж байна",
+                "Зах зээл ба өрсөлдөөний эрсдэлийг тооцож байна",
+                "Ашгийн бүтцийг боловсруулж байна",
+                "Go / No-Go шийдвэр гаргаж байна",
+            ],
+        },
+    }
+
+    const copy = loadingCopy[lang] || loadingCopy.en
+    const stepsJson = JSON.stringify(copy.steps)
+
     res.setHeader("Content-Type", "text/html; charset=utf-8")
     return res.send(`
 <!doctype html>
-<html>
+<html lang="${lang}">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generating Report...</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>GoNoGo™ Report Loading</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#ffffff;
-      color:#0D2418;
-      font-family:Inter, system-ui, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(182,255,90,0.18), transparent 28%),
+        radial-gradient(circle at 80% 82%, rgba(13,36,24,0.08), transparent 32%),
+        #ffffff;
+      color: #0D2418;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      overflow: hidden;
     }
-    .box {
-      width:90%;
-      max-width:420px;
-      text-align:center;
+
+    .wrap {
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
     }
-    .logo {
-      font-size:14px;
-      font-weight:950;
-      margin-bottom:34px;
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid rgba(13,36,24,0.12);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.74);
+      backdrop-filter: blur(12px);
+      font-size: 12px;
+      font-weight: 950;
+      margin-bottom: 30px;
+      box-shadow: 0 12px 32px rgba(13,36,24,0.05);
     }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #B6FF5A;
+      box-shadow: 0 0 18px rgba(182,255,90,0.9);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.84);
+      border: 1px solid rgba(13,36,24,0.12);
+      border-radius: 30px;
+      padding: 34px 24px 28px;
+      box-shadow:
+        0 30px 90px rgba(13,36,24,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      backdrop-filter: blur(18px);
+    }
+
     .spinner {
-      width:46px;
-      height:46px;
-      border:4px solid rgba(13,36,24,0.12);
-      border-top-color:#0D2418;
-      border-radius:50%;
-      margin:0 auto 24px;
-      animation:spin 0.8s linear infinite;
+      width: 52px;
+      height: 52px;
+      border: 4px solid rgba(13,36,24,0.12);
+      border-top-color: #0D2418;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      animation: spin 0.85s linear infinite;
     }
+
     h1 {
-      font-size:28px;
-      line-height:1.05;
-      letter-spacing:-0.06em;
-      margin:0 0 12px;
+      margin: 0 0 12px;
+      font-size: 31px;
+      line-height: 1.04;
+      letter-spacing: -0.065em;
+      font-weight: 950;
     }
-    p {
-      font-size:14px;
-      line-height:1.6;
-      color:#53645A;
-      margin:0;
+
+    .desc {
+      margin: 0 auto 26px;
+      max-width: 340px;
+      color: #53645A;
+      font-size: 14px;
+      line-height: 1.65;
+      font-weight: 650;
     }
+
+    .progress {
+      height: 10px;
+      width: 100%;
+      background: #E5EDE8;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .bar {
+      height: 100%;
+      width: 8%;
+      background: #0D2418;
+      border-radius: 999px;
+      transition: width 0.45s ease;
+    }
+
+    .step {
+      min-height: 22px;
+      color: #0D2418;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+
+    .note {
+      margin-top: 22px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #7B8B82;
+      font-weight: 700;
+    }
+
     @keyframes spin {
-      to { transform:rotate(360deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 18px;
+        align-items: flex-start;
+        padding-top: 78px;
+      }
+
+      .card {
+        border-radius: 26px;
+        padding: 32px 20px 26px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .desc {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <div class="logo">GONOGO™</div>
-    <div class="spinner"></div>
-    <h1>Generating your decision report</h1>
-    <p>Analyzing market risk, customer logic, profit structure, and execution signals.</p>
-  </div>
+  <main class="wrap">
+    <div class="badge">
+      <span class="dot"></span>
+      GONOGO™ DECISION ENGINE
+    </div>
+
+    <section class="card">
+      <div class="spinner"></div>
+      <h1>${esc(copy.title)}</h1>
+      <p class="desc">${esc(copy.desc)}</p>
+
+      <div class="progress">
+        <div class="bar" id="bar"></div>
+      </div>
+
+      <div class="step" id="step">${esc(copy.steps[0])}</div>
+
+      <div class="note">
+        Do not close this page. Your report will open automatically.
+      </div>
+    </section>
+  </main>
 
   <script>
+    const steps = ${stepsJson};
+    const stepEl = document.getElementById("step");
+    const barEl = document.getElementById("bar");
+
+    let index = 0;
+
+    const widths = [18, 34, 52, 74, 92];
+
+    const timer = setInterval(function () {
+      index = Math.min(index + 1, steps.length - 1);
+      stepEl.textContent = steps[index];
+      barEl.style.width = widths[index] + "%";
+
+      if (index >= steps.length - 1) {
+        clearInterval(timer);
+      }
+    }, 1100);
+
     setTimeout(function () {
       window.location.replace(${JSON.stringify(targetUrl)});
-    }, 300);
+    }, 5200);
   </script>
 </body>
 </html>
