@@ -427,31 +427,24 @@ app.get("/api/debug-html", async (req, res) => {
 
         const locale = loadLocale(language)
 
-        let finalReport
-
         const paidReport = await generateDeepReportJson({
-    brandName,
-    productService,
-    targetCustomer,
-    language,
-})
+            brandName,
+            productService,
+            targetCustomer,
+            language,
+        })
 
-if (reportType === "free") {
-    finalReport = {
-        ...paidReport,
-        reportMode: "free"
-    }
-} else {
-    finalReport = {
-        ...paidReport,
-        reportMode: "paid"
-    }
-}
+        const finalReport = {
+            ...paidReport,
+            isPaid: reportType === "paid",
+            reportMode: reportType === "free" ? "free" : "paid",
+        }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
         console.log("🌍 LANG:", language)
         console.log("[DEBUG_HTML_TYPE]", reportType)
+        console.log("[DEBUG_HTML_MODE]", finalReport.reportMode)
         console.log("[DEBUG_HTML_LENGTH]", html.length)
 
         res.setHeader("Content-Type", "text/html; charset=utf-8")
@@ -494,43 +487,17 @@ app.post("/api/generate-report", async (req, res) => {
         const normalizedReportType =
             reportType === "paid" || reportType === "deep" ? "paid" : "free"
 
-        let finalReport
+        const paidReport = await generateDeepReportJson({
+            brandName,
+            productService,
+            targetCustomer,
+            language: normalizedLanguage,
+        })
 
-        if (normalizedReportType === "free") {
-            const paidReport = await generateDeepReportJson({
-    brandName,
-    productService,
-    targetCustomer,
-    language,
-})
-
-if (reportType === "free") {
-    finalReport = {
-        ...paidReport,
-        isPaid: false,
-        reportMode: "free",
-    }
-} else {
-    finalReport = {
-        ...paidReport,
-        isPaid: true,
-        reportMode: "paid",
-    }
-}
-        } else {
-           const paidReport = await generateDeepReportJson(...)
-
-if (normalizedReportType === "free") {
-    finalReport = {
-        ...paidReport,
-        reportMode: "free"
-    }
-} else {
-    finalReport = {
-        ...paidReport,
-        reportMode: "paid"
-    }
-}
+        const finalReport = {
+            ...paidReport,
+            isPaid: normalizedReportType === "paid",
+            reportMode: normalizedReportType === "free" ? "free" : "paid",
         }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
