@@ -4169,7 +4169,7 @@ function competitionPositionChart(rowsData = [], locale = {}) {
     ${rowsData
         .slice(0, 4)
         .map((row, index) => {
-            const name = row?.[0] || \`Competitor \${index + 1}\`
+            const name = row?.[0] || `Competitor ${index + 1}`
 
             const x = 18 + index * 20
             const y = 70 - index * 12
