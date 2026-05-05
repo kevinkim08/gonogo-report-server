@@ -1610,9 +1610,19 @@ function buildFreeReportFromPaidReport(fullReport) {
 
         businessDiagnosis: fullReport.businessDiagnosis,
 
+        visualScores: fullReport.visualScores,
+
+        decisionMatrix: fullReport.decisionMatrix,
+
         executiveDecision: fullReport.executiveDecision,
 
         marketCards: fullReport.marketCards,
+
+        marketFunnel: fullReport.marketFunnel,
+
+        unitEconomicsCards: fullReport.unitEconomicsCards,
+
+        unitEconomicsScore: fullReport.unitEconomicsScore,
 
         customerSummary: fullReport.customerSummary,
 
