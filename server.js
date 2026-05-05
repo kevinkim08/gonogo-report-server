@@ -429,27 +429,24 @@ app.get("/api/debug-html", async (req, res) => {
 
         let finalReport
 
-        if (reportType === "free") {
-            finalReport = await generateFreePreviewReportJson({
-                brandName,
-                productService,
-                targetCustomer,
-                language,
-            })
-        } else {
-            const paidReport = await generateDeepReportJson({
-                brandName,
-                productService,
-                targetCustomer,
-                language,
-            })
+        const paidReport = await generateDeepReportJson({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+})
 
-            finalReport = {
-                ...paidReport,
-                isPaid: true,
-                reportMode: "paid",
-            }
-        }
+if (reportType === "free") {
+    finalReport = {
+        ...paidReport,
+        reportMode: "free"
+    }
+} else {
+    finalReport = {
+        ...paidReport,
+        reportMode: "paid"
+    }
+}
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
@@ -500,25 +497,40 @@ app.post("/api/generate-report", async (req, res) => {
         let finalReport
 
         if (normalizedReportType === "free") {
-            finalReport = await generateFreePreviewReportJson({
-                brandName,
-                productService,
-                targetCustomer,
-                language: normalizedLanguage,
-            })
-        } else {
             const paidReport = await generateDeepReportJson({
-                brandName,
-                productService,
-                targetCustomer,
-                language: normalizedLanguage,
-            })
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+})
 
-            finalReport = {
-                ...paidReport,
-                isPaid: true,
-                reportMode: "paid",
-            }
+if (reportType === "free") {
+    finalReport = {
+        ...paidReport,
+        isPaid: false,
+        reportMode: "free",
+    }
+} else {
+    finalReport = {
+        ...paidReport,
+        isPaid: true,
+        reportMode: "paid",
+    }
+}
+        } else {
+           const paidReport = await generateDeepReportJson(...)
+
+if (normalizedReportType === "free") {
+    finalReport = {
+        ...paidReport,
+        reportMode: "free"
+    }
+} else {
+    finalReport = {
+        ...paidReport,
+        reportMode: "paid"
+    }
+}
         }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
@@ -3116,10 +3128,9 @@ body {
 // =========================================================
 
 function buildHtmlFromTemplate(report, locale) {
-    if (report?.reportMode === "free-preview") {
-        return buildFreePreviewHtml(report, locale)
-    }
-
+        
+    const isFree = report?.reportMode === "free"
+    
     const templatePath = path.join(__dirname, "templates", "deep-report.html")
     let html = fs.readFileSync(templatePath, "utf8")
 
