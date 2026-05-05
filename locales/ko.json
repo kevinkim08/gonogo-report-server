@@ -327,4 +327,30 @@
   "th_name": "이름",
   "th_domain": "도메인",
   "th_availability": "예상 가능성"
+  ,
+"premium": {
+  "kicker": "유료 잠금",
+  "title": "전체 사업 판단 보고서를 열어보세요",
+  "desc": "무료 미리보기는 판단 신호와 브랜드 방향까지만 보여줍니다. 전체 보고서에서는 고객 분석, 수익 구조, 리스크 판단, 실행 계획을 확인할 수 있습니다.",
+  "progressLabel": "보고서 완성도",
+  "progressNote": "미리보기 공개 · 전략 영역 잠금",
+  "signalLabel": "현재 판단 신호",
+  "brandPreviewLabel": "추천 브랜드 미리보기",
+  "brandPreviewSub": "브랜드 방향 공개",
+  "defaultBrandName": "추천 브랜드 방향",
+  "defaultBrandReason": "이 방향은 제안, 목표 고객, 시장 포지션을 연결합니다.",
+  "lockedLayer": "잠긴 전략 영역",
+  "lockCustomer": "고객 분석",
+  "lockCustomerDesc": "고객이 사는 이유와 망설이는 이유",
+  "lockRevenue": "수익 구조",
+  "lockRevenueDesc": "수익 논리와 손익분기 조건",
+  "lockExecution": "실행 계획",
+  "lockExecutionDesc": "무엇을 테스트하고, 중단하고, 확장할지",
+  "warningTitle": "이 분석은 아직 완전하지 않습니다.",
+  "warningDesc": "무료 미리보기는 방향만 보여줍니다. 전체 보고서에서 실패 지점, 수익 구조, 고객 저항, 실행 경로를 확인해야 합니다.",
+  "danger": "전체 전략 없이 진행하면 잘못된 방향에 시간과 비용을 낭비할 수 있습니다.",
+  "ctaButton": "전체 유료 보고서 열기",
+  "ctaSub": "고객, 수익, 리스크, 실행 전략을 더 쓰기 전에 확인하세요.",
+  "footer": "유료 잠금"
+}
 }
