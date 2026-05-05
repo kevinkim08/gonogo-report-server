@@ -649,7 +649,7 @@ html[lang="mn"] .chart-value {
   line-height: 1.65;
   color: #33443b;
   font-weight: 700;
-  max-width: 650px;
+  max-width: 600px;
 }
 
 .free-paid-progress-card {
@@ -678,7 +678,7 @@ html[lang="mn"] .chart-value {
 .free-paid-progress-fill {
   height: 100%;
   width: 65%;
-  background: #2f7d57;
+  background: linear-gradient(90deg, #2f7d57, #4caf7a);
   border-radius: 999px;
 }
 
@@ -758,29 +758,44 @@ html[lang="mn"] .chart-value {
 
 .free-paid-locked-layer {
   position: relative;
-  margin-top: 14px;
-  height: 130px;
+  margin-top: 18px;
+  height: 170px; /* 🔥 키움 */
   border: 1px solid #d8e7dc;
   overflow: hidden;
-  background:
-    linear-gradient(90deg, rgba(47,125,87,0.14), rgba(47,125,87,0.03)),
-    repeating-linear-gradient(
-      45deg,
-      rgba(47,125,87,0.08),
-      rgba(47,125,87,0.08) 10px,
-      rgba(255,255,255,0.4) 10px,
-      rgba(255,255,255,0.4) 20px
-    );
+  background: #ffffff;
 }
 
+/* 실제 문서 느낌 (핵심) */
 .free-paid-locked-layer::before {
+  content:
+    "Customer acquisition cost increasing\n"
+    "LTV / CAC ratio below safe threshold\n"
+    "Conversion bottleneck in onboarding\n"
+    "Revenue scaling risk detected";
+  white-space: pre-line;
+  position: absolute;
+  inset: 0;
+  padding: 22px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #2c3a33;
+  opacity: 0.65;
+}
+
+/* 블러 + 페이드 */
+.free-paid-locked-layer::after {
   content: "";
   position: absolute;
   inset: 0;
   backdrop-filter: blur(6px);
-  background: rgba(255,255,255,0.45);
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.3),
+    rgba(255,255,255,0.7)
+  );
 }
 
+/* 중앙 라벨 */
 .free-paid-locked-pill {
   position: absolute;
   z-index: 2;
@@ -789,11 +804,11 @@ html[lang="mn"] .chart-value {
   transform: translate(-50%, -50%);
   background: #ffffff;
   border: 1px solid #d8e7dc;
-  padding: 11px 16px;
+  padding: 12px 18px;
   font-size: 12px;
   font-weight: 900;
   color: #102018;
-  box-shadow: 0 16px 35px rgba(16,32,24,0.12);
+  box-shadow: 0 12px 30px rgba(16,32,24,0.15);
 }
 
 .free-paid-lock-grid {
@@ -850,7 +865,7 @@ html[lang="mn"] .chart-value {
 
 .free-paid-button {
   display: block;
-  margin-top: 14px;
+  margin-top: 12px;
   width: 100%;
   text-align: center;
   padding: 17px 20px;
@@ -863,12 +878,15 @@ html[lang="mn"] .chart-value {
 }
 
 .free-paid-bottom-note {
-  margin-top: 12px;
+  margin-top: 10px;
   text-align: center;
   font-size: 11px;
   color: #6f7e75;
   font-weight: 800;
 } 
+    .free-paid-cta-page {
+  padding-bottom: 40px !important;
+}
   </style>
 </head>
 
