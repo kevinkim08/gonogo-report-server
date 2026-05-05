@@ -3592,6 +3592,7 @@ html = html
 
     .replaceAll("{{assumptionItems}}", listItems(report.appendix.assumptions))
     .replaceAll("{{ assumptionItems }}", listItems(report.appendix.assumptions))
+    
     // =========================================================
     // [22] TEMPLATE VALIDATION
     // =========================================================
@@ -3607,25 +3608,6 @@ html = html
     if (report?.reportMode === "free") {
         html = keepFreeReportOnly(html, locale, report)
     }
-
-
-    // 🔥 FREE CUT + CTA INSERT
-if (isFree) {
-    const cutMarker = "<!-- FREE_REPORT_CUT_HERE -->"
-
-    if (html.includes(cutMarker)) {
-        html = html.split(cutMarker)[0]
-
-        html += renderPaidBasedFreeCTA(report, locale)
-
-        html += `
-</body>
-</html>
-`
-    } else {
-        console.warn("[FREE_CUT_MARKER_NOT_FOUND]")
-    }
-}
     
     // =========================================================
     // [24] BACK BUTTON
@@ -3652,325 +3634,152 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
 
     const freePart = html.slice(0, index)
 
-    const footerLeft = t(
-        locale,
-        "footer.left",
-        "GoNoGo™ Business Decision Report"
-    )
-
-    const premiumFooter = t(locale, "premium.footer", "Premium Locked")
-
-    const recommendedName =
-        report?.brandNaming?.recommendedName?.name ||
-        report?.brandNaming?.nameCandidates?.[0]?.name ||
-        report?.cover?.brandName ||
-        "Your Brand Name"
-
-    const nameReason =
-        report?.brandNaming?.recommendedName?.reason ||
-        "This name direction is connected to the business idea, target customer, and market positioning."
+    const decision = report?.cover?.decision || "HOLD"
 
     const score = Number.isFinite(report?.cover?.score)
         ? report.cover.score
         : 0
 
-    const decision = report?.cover?.decision || "HOLD"
+    const verdict = report?.cover?.oneLineVerdict || ""
+
+    const recommendedName =
+        report?.brandNaming?.recommendedName?.name ||
+        report?.brandNaming?.nameCandidates?.[0]?.name ||
+        report?.cover?.brandName ||
+        t(locale, "premium.defaultBrandName", "Recommended brand direction")
+
+    const nameReason =
+        report?.brandNaming?.recommendedName?.reason ||
+        t(
+            locale,
+            "premium.defaultBrandReason",
+            "This direction connects the offer, target customer, and market position."
+        )
 
     const checkoutUrl =
-        process.env.PAYWALL_CHECKOUT_URL || "/api/dev-create-paid-token"
+        process.env.PAYMENT_LINK ||
+        process.env.PAYWALL_CHECKOUT_URL ||
+        "/api/dev-create-paid-token"
 
     return `
 ${freePart}
 
-<section style="
-  page-break-before: always;
-  padding: 42px;
-  font-family: ${esc(locale.fontFamily || "Arial, sans-serif")};
-  color: #102018;
-">
-  <div style="
-    font-size:12px;
-    font-weight:900;
-    color:#2f7d57;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    margin-bottom:10px;
-  ">
-    ${esc(premiumFooter)}
-  </div>
+<section class="page free-paid-cta-page">
+  <div class="free-paid-wrap">
 
-  <h1 style="
-    margin:0 0 14px;
-    font-size:38px;
-    line-height:1.05;
-    letter-spacing:-0.06em;
-    color:#102018;
-  ">
-    ${esc(t(locale, "premium.title", "Unlock the full GoNoGo™ Report"))}
-  </h1>
+    <div class="free-paid-kicker">
+      ${esc(t(locale, "premium.kicker", "FULL REPORT LOCKED"))}
+    </div>
 
-  <p style="
-    margin:0 0 26px;
-    font-size:15px;
-    line-height:1.7;
-    color:#4b5d53;
-    font-weight:700;
-  ">
-    ${esc(
-        t(
-            locale,
-            "premium.desc",
-            "The free report shows the first decision signal. The paid report unlocks the full business structure, customer truth, market map, profit logic, execution plan, risk system, and naming strategy."
-        )
-    )}
-  </p>
+    <h1 class="free-paid-title">
+      ${esc(t(locale, "premium.title", "Unlock the full business decision report"))}
+    </h1>
 
-  <div style="
-    height:12px;
-    background:#e1ebe5;
-    border-radius:999px;
-    overflow:hidden;
-    margin-bottom:10px;
-  ">
-    <div style="
-      height:100%;
-      width:65%;
-      background:#2f7d57;
-      border-radius:999px;
-    "></div>
-  </div>
+    <p class="free-paid-desc">
+      ${esc(
+          t(
+              locale,
+              "premium.desc",
+              "This preview shows the decision signal and brand direction only. The full report unlocks customer truth, revenue structure, risk logic, and execution planning."
+          )
+      )}
+    </p>
 
-  <div style="
-    display:flex;
-    justify-content:space-between;
-    gap:12px;
-    font-size:12px;
-    font-weight:800;
-    color:#4b5d53;
-    margin-bottom:22px;
-  ">
-    <span>${esc(t(locale, "premium.freeUnlocked", "Free judgment unlocked"))}</span>
-    <span>65%</span>
-  </div>
-
-  <div style="
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    margin-bottom:18px;
-  ">
-    <div style="
-      border:1px solid #d8e7dc;
-      background:#f6faf7;
-      padding:16px;
-    ">
-      <div style="
-        font-size:10px;
-        font-weight:900;
-        color:#5b7065;
-        text-transform:uppercase;
-        letter-spacing:0.04em;
-        margin-bottom:8px;
-      ">
-        ${esc(t(locale, "premium.currentDecision", "Current Decision Signal"))}
+    <div class="free-paid-progress-card">
+      <div class="free-paid-progress-head">
+        <strong>${esc(t(locale, "premium.progressLabel", "REPORT COMPLETION"))}</strong>
+        <span>35%</span>
       </div>
 
-      <div style="
-        font-size:34px;
-        line-height:1;
-        font-weight:900;
-        color:#163c2b;
-        letter-spacing:-0.06em;
-      ">
-        ${esc(decision)}
+      <div class="free-paid-progress-track">
+        <div class="free-paid-progress-fill"></div>
       </div>
 
-      <div style="
-        margin-top:8px;
-        font-size:13px;
-        font-weight:800;
-        color:#4b5d53;
-      ">
-        ${esc(t(locale, "premium.scoreText", "Score"))}: ${esc(String(score))} / 100
+      <div class="free-paid-progress-note">
+        ${esc(t(locale, "premium.progressNote", "Preview unlocked · Strategy locked"))}
       </div>
     </div>
 
-    <div style="
-      border:1px solid #163c2b;
-      background:#163c2b;
-      color:#fff;
-      padding:16px;
-    ">
-      <div style="
-        font-size:10px;
-        font-weight:900;
-        opacity:0.82;
-        text-transform:uppercase;
-        letter-spacing:0.04em;
-        margin-bottom:8px;
-      ">
-        ${esc(t(locale, "premium.brandHookLabel", "Recommended Brand Preview"))}
+    <div class="free-paid-grid">
+      <div class="free-paid-signal-card">
+        <p>${esc(t(locale, "premium.signalLabel", "CURRENT DECISION SIGNAL"))}</p>
+        <h2>${esc(decision)}</h2>
+        <strong>${esc(t(locale, "scoreLabel", "Score"))}: ${esc(score)} / 100</strong>
+        <span>${esc(verdict)}</span>
       </div>
 
-      <div style="
-        font-size:30px;
-        line-height:1.05;
-        font-weight:900;
-        letter-spacing:-0.05em;
-      ">
-        ${esc(recommendedName)}
+      <div class="free-paid-dark-card">
+        <p>${esc(t(locale, "premium.brandPreviewLabel", "RECOMMENDED BRAND PREVIEW"))}</p>
+        <h2>${esc(recommendedName)}</h2>
+        <strong>${esc(t(locale, "premium.brandPreviewSub", "Brand direction unlocked"))}</strong>
+        <span>${esc(nameReason)}</span>
+      </div>
+    </div>
+
+    <div class="free-paid-locked-layer">
+      <div class="free-paid-locked-pill">
+        ${esc(t(locale, "premium.lockedLayer", "Locked strategy layer"))}
+      </div>
+    </div>
+
+    <div class="free-paid-lock-grid">
+      <div class="free-paid-lock-item">
+        <strong>${esc(t(locale, "premium.lockCustomer", "Customer Truth"))}</strong>
+        <span>${esc(t(locale, "premium.lockCustomerDesc", "Why customers buy and hesitate"))}</span>
       </div>
 
-      <div style="
-        margin-top:10px;
-        font-size:12px;
-        line-height:1.5;
-        opacity:0.86;
-      ">
-        ${esc(nameReason)}
+      <div class="free-paid-lock-item">
+        <strong>${esc(t(locale, "premium.lockRevenue", "Revenue Structure"))}</strong>
+        <span>${esc(t(locale, "premium.lockRevenueDesc", "Profit logic and break-even condition"))}</span>
       </div>
+
+      <div class="free-paid-lock-item">
+        <strong>${esc(t(locale, "premium.lockExecution", "Execution Plan"))}</strong>
+        <span>${esc(t(locale, "premium.lockExecutionDesc", "What to test, stop, and scale"))}</span>
+      </div>
+    </div>
+
+    <div class="free-paid-warning">
+      <strong>${esc(t(locale, "premium.warningTitle", "This analysis is not complete yet."))}</strong>
+      <p>
+        ${esc(
+            t(
+                locale,
+                "premium.warningDesc",
+                "The preview gives you the direction. The full report shows the failure points, revenue logic, customer resistance, and execution path."
+            )
+        )}
+      </p>
+    </div>
+
+    <div class="free-paid-danger">
+      ${esc(
+          t(
+              locale,
+              "premium.danger",
+              "Without the full strategy, you may spend time and money testing the wrong direction."
+          )
+      )}
+    </div>
+
+    <a class="free-paid-button" href="${esc(checkoutUrl)}">
+      ${esc(t(locale, "premium.ctaButton", "Unlock full report"))} — $49
+    </a>
+
+    <div class="free-paid-bottom-note">
+      ${esc(
+          t(
+              locale,
+              "premium.ctaSub",
+              "Unlock customer, revenue, risk, and execution strategy before you spend more."
+          )
+      )}
     </div>
   </div>
 
-  <div style="
-    position:relative;
-    border:1px solid #d8e7dc;
-    background:#fbfdfb;
-    padding:16px;
-    margin-bottom:18px;
-    overflow:hidden;
-  ">
-    <div style="
-      filter:blur(4px);
-      opacity:0.55;
-      font-size:13px;
-      line-height:1.8;
-      font-weight:700;
-    ">
-      <div>✓ Why this name works for the target customer</div>
-      <div>✓ Domain suggestions and availability logic</div>
-      <div>✓ Customer buying trigger and hesitation signals</div>
-      <div>✓ Market size, competition map, revenue structure</div>
-      <div>✓ 12-week execution plan, risk system, kill criteria</div>
-    </div>
-
-    <div style="
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(90deg, rgba(251,253,251,0.72), rgba(251,253,251,0.92));
-    ">
-      <div style="
-        background:#fff;
-        border:1px solid #d8e7dc;
-        padding:10px 14px;
-        font-size:12px;
-        font-weight:900;
-        color:#163c2b;
-        box-shadow:0 8px 22px rgba(16,32,24,0.10);
-      ">
-        ${esc(t(locale, "premium.lockedLabel", "Locked decision layer"))}
-      </div>
-    </div>
-  </div>
-
-  <div style="
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:10px;
-    margin-bottom:18px;
-  ">
-    <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
-      <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
-        ${esc(t(locale, "premium.unlock01Title", "Brand + Domain"))}
-      </div>
-      <div style="font-size:12px;line-height:1.45;">
-        ${esc(t(locale, "premium.unlock01Desc", "Get the name, strategy, and domain direction."))}
-      </div>
-    </div>
-
-    <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
-      <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
-        ${esc(t(locale, "premium.unlock02Title", "Customer Truth"))}
-      </div>
-      <div style="font-size:12px;line-height:1.45;">
-        ${esc(t(locale, "premium.unlock02Desc", "See why customers buy and why they hesitate."))}
-      </div>
-    </div>
-
-    <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
-      <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
-        ${esc(t(locale, "premium.unlock03Title", "Execution Plan"))}
-      </div>
-      <div style="font-size:12px;line-height:1.45;">
-        ${esc(t(locale, "premium.unlock03Desc", "Know what to test, when to stop, and when to scale."))}
-      </div>
-    </div>
-  </div>
-
-  <div style="
-    background:#f3f8f5;
-    border-left:5px solid #2f7d57;
-    padding:16px;
-    margin-bottom:18px;
-  ">
-    <div style="
-      font-size:16px;
-      line-height:1.45;
-      font-weight:900;
-      color:#102018;
-      margin-bottom:6px;
-    ">
-      ${esc(t(locale, "premium.ctaTitle", "Do not spend months building the wrong business."))}
-    </div>
-
-    <div style="
-      font-size:13px;
-      line-height:1.65;
-      color:#33443b;
-    ">
-      ${esc(t(locale, "premium.ctaDesc", "Unlock the full decision report before you spend money on branding, product development, ads, inventory, or a website."))}
-    </div>
-  </div>
-
-  <a href="${esc(checkoutUrl)}" style="
-    display:block;
-    text-align:center;
-    background:#102018;
-    color:#fff;
-    text-decoration:none;
-    font-weight:900;
-    font-size:16px;
-    padding:16px 18px;
-    border-radius:10px;
-    letter-spacing:-0.02em;
-  ">
-    ${esc(t(locale, "premium.ctaButton", "Check if this business is worth continuing"))} — $49
-  </a>
-
-  <div style="
-    margin-top:12px;
-    font-size:11px;
-    line-height:1.5;
-    color:#6a7a71;
-    text-align:center;
-  ">
-    ${esc(t(locale, "premium.ctaSub", "Brand name, customer reaction, and revenue structure — validate them now."))}
-  </div>
-
-  <div style="
-    margin-top:34px;
-    padding-top:14px;
-    border-top:1px solid #d8e7dc;
-    font-size:10px;
-    color:#789087;
-    display:flex;
-    justify-content:space-between;
-  ">
-    <span>${esc(footerLeft)}</span>
-    <span>${esc(premiumFooter)}</span>
+  <div class="footer">
+    <span>${esc(t(locale, "footer.left", "GoNoGo™ Business Decision Report"))}</span>
+    <span>${esc(t(locale, "premium.footer", "Paid Locked"))}</span>
   </div>
 </section>
 
@@ -3978,7 +3787,6 @@ ${freePart}
 </html>
 `
 }
-
 // =========================================================
 // [26] REPORT BACK BUTTON
 // =========================================================
