@@ -3608,6 +3608,25 @@ html = html
         html = keepFreeReportOnly(html, locale, report)
     }
 
+
+    // 🔥 FREE CUT + CTA INSERT
+if (isFree) {
+    const cutMarker = "<!-- FREE_REPORT_CUT_HERE -->"
+
+    if (html.includes(cutMarker)) {
+        html = html.split(cutMarker)[0]
+
+        html += renderPaidBasedFreeCTA(report, locale)
+
+        html += `
+</body>
+</html>
+`
+    } else {
+        console.warn("[FREE_CUT_MARKER_NOT_FOUND]")
+    }
+}
+    
     // =========================================================
     // [24] BACK BUTTON
     // =========================================================
@@ -3623,7 +3642,7 @@ html = html
 // =========================================================
 
 function keepFreeReportOnly(html, locale = {}, report = {}) {
-    const splitPoint = "<!-- PREMIUM_START -->"
+    const splitPoint = "<!-- FREE_REPORT_CUT_HERE -->"
     const index = html.indexOf(splitPoint)
 
     if (index === -1) {
