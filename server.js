@@ -3054,6 +3054,9 @@ html = html
     .replaceAll("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
     .replaceAll("{{ decisionSummaryBox }}", decisionSummaryBox(report, locale))
 
+    .replaceAll("{{finalDecisionSummaryBox}}", decisionSummaryBox(report, locale))
+    .replaceAll("{{ finalDecisionSummaryBox }}", decisionSummaryBox(report, locale))
+
     // Special text / generated rows
     .replaceAll("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
     .replaceAll("{{ modelDeepDive }}", report?.businessModel?.modelDeepDive || "")
