@@ -610,6 +610,258 @@ html[lang="mn"] .chart-value {
   text-align: right;
   white-space: nowrap;
 }
+
+    .free-paid-cta-page {
+    background:
+        radial-gradient(circle at 20% 16%, rgba(182,255,90,0.18), transparent 28%),
+        linear-gradient(180deg, #eef7f1 0%, #ffffff 100%);
+}
+
+.free-paid-cta-inner {
+    position: relative;
+    z-index: 2;
+}
+
+.free-paid-kicker {
+    display: inline-flex;
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: #0D2418;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+}
+
+.free-paid-title {
+    margin: 34px 0 0;
+    font-size: 48px;
+    line-height: 1.04;
+    letter-spacing: -0.075em;
+    font-weight: 950;
+    color: #0D2418;
+}
+
+.free-paid-desc {
+    margin-top: 18px;
+    max-width: 610px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: #53645A;
+    font-weight: 700;
+}
+
+.free-paid-progress-card {
+    margin-top: 28px;
+    padding: 22px;
+    border-radius: 26px;
+    background: #ffffff;
+    border: 1px solid #dfe7e2;
+}
+
+.free-paid-progress-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 950;
+}
+
+.free-paid-progress-track {
+    margin-top: 13px;
+    height: 12px;
+    border-radius: 999px;
+    background: #e4ece7;
+    overflow: hidden;
+}
+
+.free-paid-progress-fill {
+    height: 100%;
+    width: 35%;
+    border-radius: 999px;
+    background: #0D2418;
+}
+
+.free-paid-progress-card p {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: #6f7e75;
+    font-weight: 800;
+}
+
+.free-paid-signal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.free-paid-signal-card,
+.free-paid-dark-card {
+    min-height: 170px;
+    border-radius: 28px;
+    padding: 22px;
+    border: 1px solid #dfe7e2;
+}
+
+.free-paid-signal-card {
+    background: #ffffff;
+}
+
+.free-paid-dark-card {
+    background: #0D2418;
+    color: #ffffff;
+}
+
+.free-paid-signal-card p,
+.free-paid-dark-card p {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    color: #6f7e75;
+}
+
+.free-paid-dark-card p {
+    color: rgba(255,255,255,0.58);
+}
+
+.free-paid-signal-card h2,
+.free-paid-dark-card h2 {
+    margin: 0 0 8px;
+    font-size: 42px;
+    line-height: 0.95;
+    letter-spacing: -0.08em;
+    font-weight: 950;
+}
+
+.free-paid-signal-card strong,
+.free-paid-dark-card strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 950;
+}
+
+.free-paid-signal-card span,
+.free-paid-dark-card span {
+    display: block;
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #53645A;
+    font-weight: 700;
+}
+
+.free-paid-dark-card span {
+    color: rgba(255,255,255,0.76);
+}
+
+.free-paid-locked-layer {
+    position: relative;
+    margin-top: 18px;
+    height: 145px;
+    border-radius: 30px;
+    border: 1px solid #dfe7e2;
+    overflow: hidden;
+    background:
+        linear-gradient(90deg, rgba(13,36,24,0.08), rgba(13,36,24,0.02)),
+        repeating-linear-gradient(
+            45deg,
+            rgba(13,36,24,0.05),
+            rgba(13,36,24,0.05) 10px,
+            rgba(255,255,255,0.4) 10px,
+            rgba(255,255,255,0.4) 20px
+        );
+}
+
+.free-paid-locked-layer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(7px);
+    background: rgba(255,255,255,0.46);
+}
+
+.free-paid-locked-pill {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 14px 18px;
+    border-radius: 999px;
+    background: #ffffff;
+    border: 1px solid #dfe7e2;
+    font-size: 13px;
+    font-weight: 950;
+    color: #0D2418;
+}
+
+.free-paid-lock-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.free-paid-lock-item {
+    min-height: 78px;
+    padding: 14px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid #dfe7e2;
+}
+
+.free-paid-lock-item strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.35;
+    color: #0D2418;
+    font-weight: 950;
+}
+
+.free-paid-lock-item span {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #6f7e75;
+    font-weight: 750;
+}
+
+.free-paid-warning {
+    margin-top: 18px;
+    padding: 18px 20px;
+    border-radius: 22px;
+    background: #fff4ed;
+    border: 1px solid #ffd9c7;
+    color: #8a3b14;
+}
+
+.free-paid-warning strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 950;
+}
+
+.free-paid-warning p {
+    margin: 7px 0 0;
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 750;
+}
+
+.free-paid-button {
+    display: block;
+    margin-top: 18px;
+    width: 100%;
+    text-align: center;
+    padding: 19px 22px;
+    border-radius: 999px;
+    background: #B6FF5A;
+    color: #0D2418;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 950;
+}
   </style>
 </head>
 
@@ -831,7 +1083,6 @@ html[lang="mn"] .chart-value {
     </div>
   </section>  
   
-  <!-- FREE_REPORT_END -->
 
 <!-- Section 02 Branding -->
 <section class="page section-cover">
@@ -872,6 +1123,8 @@ html[lang="mn"] .chart-value {
   </div>
 </section>
 
+<!-- FREE_REPORT_END -->
+  
 <section class="page">
   <div class="section-title">{{section02_02_title}}</div>
 
