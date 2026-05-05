@@ -3002,149 +3002,258 @@ function buildHtmlFromTemplate(report, locale) {
 
     referenceLinkRows: rows(referenceLinks),
 }
-          // =========================================================
-    // [21] TEMPLATE REPLACE
-    // =========================================================
+    
+// =========================================================
+// [21] TEMPLATE REPLACE
+// =========================================================
 
-    html = html
+html = html
+    // Core charts
+    .replaceAll("{{decisionChart}}", buildDecisionChart(report, locale))
+    .replaceAll("{{ decisionChart }}", buildDecisionChart(report, locale))
 
-        .replaceAll("{{decisionChart}}", buildDecisionChart(report, locale))
-.replaceAll("{{ decisionChart }}", buildDecisionChart(report, locale))
+    .replaceAll(
+        "{{competitionPositionChart}}",
+        report?.lockedSections?.competition
+            ? ""
+            : competitionPositionChart(report.competitionMap, locale)
+    )
+    .replaceAll(
+        "{{ competitionPositionChart }}",
+        report?.lockedSections?.competition
+            ? ""
+            : competitionPositionChart(report.competitionMap, locale)
+    )
 
-.replaceAll(
-    "{{competitionPositionChart}}",
-    competitionPositionChart(report.competitionMap, locale)
-)
-.replaceAll(
-    "{{ competitionPositionChart }}",
-    competitionPositionChart(report.competitionMap, locale)
-)
+    .replaceAll(
+        "{{executionTimeline}}",
+        report?.lockedSections?.execution
+            ? ""
+            : executionTimeline(report.executionPlan, locale)
+    )
+    .replaceAll(
+        "{{ executionTimeline }}",
+        report?.lockedSections?.execution
+            ? ""
+            : executionTimeline(report.executionPlan, locale)
+    )
 
-.replaceAll("{{executionTimeline}}", executionTimeline(report.executionPlan, locale))
-.replaceAll("{{ executionTimeline }}", executionTimeline(report.executionPlan, locale))
+    .replaceAll(
+        "{{riskHeatmap}}",
+        report?.lockedSections?.risk
+            ? ""
+            : riskHeatmap(report.riskSystem, locale)
+    )
+    .replaceAll(
+        "{{ riskHeatmap }}",
+        report?.lockedSections?.risk
+            ? ""
+            : riskHeatmap(report.riskSystem, locale)
+    )
 
-.replaceAll("{{riskHeatmap}}", riskHeatmap(report.riskSystem, locale))
-.replaceAll("{{ riskHeatmap }}", riskHeatmap(report.riskSystem, locale))
+    .replaceAll("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
+    .replaceAll("{{ decisionSummaryBox }}", decisionSummaryBox(report, locale))
 
-.replaceAll("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
-.replaceAll("{{ decisionSummaryBox }}", decisionSummaryBox(report, locale))
+    // Special text / generated rows
+    .replaceAll("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
+    .replaceAll("{{ modelDeepDive }}", report?.businessModel?.modelDeepDive || "")
 
-.replaceAll("{{referenceLinkRows}}", rows(referenceLinks))
-.replaceAll("{{ referenceLinkRows }}", rows(referenceLinks))
-        
-        .replace("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
-        .replaceAll("{{referenceLinkRows}}", rows(referenceLinks))
-        .replaceAll("{{ referenceLinkRows }}", rows(referenceLinks))
-        
-        .replace("{{glossaryRows}}", glossaryRows(report.glossary))
-        .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
-        .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
-        .replaceAll(
-            "{{profitSimulationChart}}",
-            profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
-        )
-        .replace("{{cacLtvRiskChart}}", cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale))
+    .replaceAll("{{referenceLinkRows}}", rows(referenceLinks))
+    .replaceAll("{{ referenceLinkRows }}", rows(referenceLinks))
 
-        .replace(
-            "{{tamSamSomRows}}",
-            report?.lockedSections?.tamSamSom
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.tamSamSom)
-        )
+    .replaceAll("{{glossaryRows}}", glossaryRows(report.glossary))
+    .replaceAll("{{ glossaryRows }}", glossaryRows(report.glossary))
 
-        .replace("{{customerTruthRows}}", rows(report.customerTruth))
-        .replace("{{customerOpportunityRows}}", rows(customerOpportunityRows))
+    .replaceAll("{{scoreGuideRows}}", rows(scoreGuideRows))
+    .replaceAll("{{ scoreGuideRows }}", rows(scoreGuideRows))
 
-        .replace(
-            "{{competitionRows}}",
-            report?.lockedSections?.competition
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.competitionMap)
-        )
+    .replaceAll("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
+    .replaceAll("{{ marketFunnelChart }}", marketFunnelChart(report.marketFunnel))
 
-        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap, locale))
-        .replace(
-            "{{competitionConclusion}}",
-            report?.lockedSections?.competition
-                ? esc(lockedMessage)
-                : esc(report.competitionConclusion)
-        )
+    .replaceAll(
+        "{{profitSimulationChart}}",
+        profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
+    )
+    .replaceAll(
+        "{{ profitSimulationChart }}",
+        profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
+    )
 
-        .replace("{{benchmarkRows}}", rows(benchmarkRows))
+    .replaceAll(
+        "{{cacLtvRiskChart}}",
+        cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale)
+    )
+    .replaceAll(
+        "{{ cacLtvRiskChart }}",
+        cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale)
+    )
 
-        .replace(
-            "{{unitEconomicsRows}}",
-            report?.lockedSections?.unitEconomics
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.unitEconomicsTable)
-        )
+    // Tables
+    .replaceAll(
+        "{{tamSamSomRows}}",
+        report?.lockedSections?.tamSamSom
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.tamSamSom)
+    )
+    .replaceAll(
+        "{{ tamSamSomRows }}",
+        report?.lockedSections?.tamSamSom
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.tamSamSom)
+    )
 
-        .replace(
-            "{{marketingChannelRows}}",
-            report?.lockedSections?.marketing
-                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.marketingStrategy.channelFit)
-        )
+    .replaceAll("{{customerTruthRows}}", rows(report.customerTruth))
+    .replaceAll("{{ customerTruthRows }}", rows(report.customerTruth))
 
-        .replace(
-            "{{contentPlaybookItems}}",
-            report?.lockedSections?.marketing
-                ? `<li>${esc(lockedMessage)}</li>`
-                : listItems(report.marketingStrategy.contentPlaybook)
-        )
+    .replaceAll("{{customerOpportunityRows}}", rows(customerOpportunityRows))
+    .replaceAll("{{ customerOpportunityRows }}", rows(customerOpportunityRows))
 
-        .replace(
-            "{{marketingTestRows}}",
-            report?.lockedSections?.marketing
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.marketingStrategy.thirtyDayMarketingTest)
-        )
+    .replaceAll(
+        "{{competitionRows}}",
+        report?.lockedSections?.competition
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.competitionMap)
+    )
+    .replaceAll(
+        "{{ competitionRows }}",
+        report?.lockedSections?.competition
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.competitionMap)
+    )
 
-        .replace("{{businessModelRows}}", rows(report.businessModel.revenueLayers))
+    .replaceAll(
+        "{{competitionConclusion}}",
+        report?.lockedSections?.competition
+            ? esc(lockedMessage)
+            : esc(report.competitionConclusion)
+    )
+    .replaceAll(
+        "{{ competitionConclusion }}",
+        report?.lockedSections?.competition
+            ? esc(lockedMessage)
+            : esc(report.competitionConclusion)
+    )
 
-        .replace(
-            "{{riskRows}}",
-            report?.lockedSections?.risk
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.riskSystem)
-        )
+    .replaceAll("{{benchmarkRows}}", rows(benchmarkRows))
+    .replaceAll("{{ benchmarkRows }}", rows(benchmarkRows))
 
-        .replace(
-            "{{riskHeatmap}}",
-            report?.lockedSections?.risk ? "" : riskHeatmap(report.riskSystem, locale)
-        )
+    .replaceAll(
+        "{{unitEconomicsRows}}",
+        report?.lockedSections?.unitEconomics
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.unitEconomicsTable)
+    )
+    .replaceAll(
+        "{{ unitEconomicsRows }}",
+        report?.lockedSections?.unitEconomics
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.unitEconomicsTable)
+    )
 
-        .replace(
-            "{{executionRows}}",
-            report?.lockedSections?.execution
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.executionPlan)
-        )
+    .replaceAll(
+        "{{marketingChannelRows}}",
+        report?.lockedSections?.marketing
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.marketingStrategy.channelFit)
+    )
+    .replaceAll(
+        "{{ marketingChannelRows }}",
+        report?.lockedSections?.marketing
+            ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.marketingStrategy.channelFit)
+    )
 
-        .replace(
-            "{{executionTimeline}}",
-            report?.lockedSections?.execution ? "" : executionTimeline(report.executionPlan, locale)
-        )
+    .replaceAll(
+        "{{contentPlaybookItems}}",
+        report?.lockedSections?.marketing
+            ? `<li>${esc(lockedMessage)}</li>`
+            : listItems(report.marketingStrategy.contentPlaybook)
+    )
+    .replaceAll(
+        "{{ contentPlaybookItems }}",
+        report?.lockedSections?.marketing
+            ? `<li>${esc(lockedMessage)}</li>`
+            : listItems(report.marketingStrategy.contentPlaybook)
+    )
 
-        .replace("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
+    .replaceAll(
+        "{{marketingTestRows}}",
+        report?.lockedSections?.marketing
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.marketingStrategy.thirtyDayMarketingTest)
+    )
+    .replaceAll(
+        "{{ marketingTestRows }}",
+        report?.lockedSections?.marketing
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.marketingStrategy.thirtyDayMarketingTest)
+    )
 
-        .replace(
-            "{{goThresholdRows}}",
-            report?.lockedSections?.goThreshold
-                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
-                : rows(report.goThreshold)
-        )
+    .replaceAll("{{businessModelRows}}", rows(report.businessModel.revenueLayers))
+    .replaceAll("{{ businessModelRows }}", rows(report.businessModel.revenueLayers))
 
-        .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
+    .replaceAll(
+        "{{riskRows}}",
+        report?.lockedSections?.risk
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.riskSystem)
+    )
+    .replaceAll(
+        "{{ riskRows }}",
+        report?.lockedSections?.risk
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.riskSystem)
+    )
 
-        .replace("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
-        .replace("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
-        .replace("{{cacLtvRows}}", rows(report.sensitivityAnalysis?.cacLtvTable))
-        .replace("{{profitSimulationRows}}", rows(report.profitSimulation?.monthlyScenarioTable))
-        .replace("{{killCriteriaRows}}", rows(report.killCriteria?.rules))
-        .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
-        .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
+    .replaceAll(
+        "{{executionRows}}",
+        report?.lockedSections?.execution
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.executionPlan)
+    )
+    .replaceAll(
+        "{{ executionRows }}",
+        report?.lockedSections?.execution
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.executionPlan)
+    )
 
+    .replaceAll(
+        "{{goThresholdRows}}",
+        report?.lockedSections?.goThreshold
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.goThreshold)
+    )
+    .replaceAll(
+        "{{ goThresholdRows }}",
+        report?.lockedSections?.goThreshold
+            ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
+            : rows(report.goThreshold)
+    )
+
+    .replaceAll("{{goChecklistItems}}", checklistItems(report.goChecklist))
+    .replaceAll("{{ goChecklistItems }}", checklistItems(report.goChecklist))
+
+    .replaceAll("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
+    .replaceAll("{{ sourceQualityRows }}", rows(report.dataConfidence?.sourceQuality))
+
+    .replaceAll("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
+    .replaceAll("{{ dataLimitItems }}", listItems(report.dataConfidence?.limits))
+
+    .replaceAll("{{cacLtvRows}}", rows(report.sensitivityAnalysis?.cacLtvTable))
+    .replaceAll("{{ cacLtvRows }}", rows(report.sensitivityAnalysis?.cacLtvTable))
+
+    .replaceAll("{{profitSimulationRows}}", rows(report.profitSimulation?.monthlyScenarioTable))
+    .replaceAll("{{ profitSimulationRows }}", rows(report.profitSimulation?.monthlyScenarioTable))
+
+    .replaceAll("{{killCriteriaRows}}", rows(report.killCriteria?.rules))
+    .replaceAll("{{ killCriteriaRows }}", rows(report.killCriteria?.rules))
+
+    .replaceAll("{{dataSourceRows}}", rows(report.appendix.dataSources))
+    .replaceAll("{{ dataSourceRows }}", rows(report.appendix.dataSources))
+
+    .replaceAll("{{assumptionItems}}", listItems(report.appendix.assumptions))
+    .replaceAll("{{ assumptionItems }}", listItems(report.appendix.assumptions))
     // =========================================================
     // [22] TEMPLATE VALIDATION
     // =========================================================
