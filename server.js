@@ -3676,13 +3676,7 @@ ${freePart}
     </h1>
 
     <p class="free-paid-desc">
-      ${esc(
-          t(
-              locale,
-              "premium.desc",
-              "This preview shows the decision signal and brand direction only. The full report unlocks customer truth, revenue structure, risk logic, and execution planning."
-          )
-      )}
+      ${esc(t(locale, "premium.desc", "This preview shows the decision signal and brand direction only. The full report unlocks customer truth, revenue structure, risk logic, and execution planning."))}
     </p>
 
     <div class="free-paid-progress-card">
@@ -3741,25 +3735,11 @@ ${freePart}
 
     <div class="free-paid-warning">
       <strong>${esc(t(locale, "premium.warningTitle", "This analysis is not complete yet."))}</strong>
-      <p>
-        ${esc(
-            t(
-                locale,
-                "premium.warningDesc",
-                "The preview gives you the direction. The full report shows the failure points, revenue logic, customer resistance, and execution path."
-            )
-        )}
-      </p>
+      <p>${esc(t(locale, "premium.warningDesc", "The preview gives you the direction. The full report shows the failure points, revenue logic, customer resistance, and execution path."))}</p>
     </div>
 
     <div class="free-paid-danger">
-      ${esc(
-          t(
-              locale,
-              "premium.danger",
-              "Without the full strategy, you may spend time and money testing the wrong direction."
-          )
-      )}
+      ${esc(t(locale, "premium.danger", "Without the full strategy, you may spend time and money testing the wrong direction."))}
     </div>
 
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
@@ -3767,13 +3747,7 @@ ${freePart}
     </a>
 
     <div class="free-paid-bottom-note">
-      ${esc(
-          t(
-              locale,
-              "premium.ctaSub",
-              "Unlock customer, revenue, risk, and execution strategy before you spend more."
-          )
-      )}
+      ${esc(t(locale, "premium.ctaSub", "Unlock customer, revenue, risk, and execution strategy before you spend more."))}
     </div>
   </div>
 
