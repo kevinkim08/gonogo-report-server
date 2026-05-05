@@ -382,12 +382,13 @@ app.get("/api/debug-html", async (req, res) => {
 
         const locale = loadLocale(language)
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language,
-        })
+        const report = await generateDeepReportJson({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+    reportType
+})
 
         const finalReport =
             reportType === "free"
@@ -440,6 +441,7 @@ app.post("/api/generate-report", async (req, res) => {
     productService,
     targetCustomer,
     language,
+    reportType
 })
 
      app.get("/api/dev-create-paid-token", (req, res) => {
@@ -503,12 +505,13 @@ app.post("/api/generate-report", async (req, res) => {
 
         const locale = loadLocale(language)
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language,
-        })
+       const paidReport = await generateDeepReportJson({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+    reportType
+})
 
         const finalReport = {
             ...paidReport,
@@ -615,6 +618,11 @@ Critical rules:
 25. Keep all table cells short and layout-safe.
 26. This rule applies ONLY to table cells.
 27. Narrative fields must be deeper and more informative.
+28. Escape all double quotes inside string values.
+29. Do not use unescaped quotation marks inside any JSON string.
+30. Do not use line breaks inside JSON string values.
+31. Do not use trailing commas.
+32. Every string value must be valid JSON-safe text.
 
 Layout safety rules:
 - Table cells must be short.
@@ -750,7 +758,6 @@ Array stability rules:
 - brandNaming.keywords must contain exactly 8 items.
 - brandNaming.nameCandidates must contain exactly 5 items.
 - brandNaming.domainSuggestions must contain exactly 5 items.
-
 
 Language output rules:
 - All user-facing values must be written in the final report language.
@@ -956,7 +963,6 @@ Return this exact JSON shape:
   ["", "", ""],
   ["", "", ""]
 ],
-
 
   "buyingTrigger": "",
 "customerSummary": "",
@@ -1199,29 +1205,74 @@ Now generate the JSON report.
 `
 }
 
-function buildFreeReportFromPaidReport(fullReport) {
-    return {
-        ...fullReport,
-        isPaid: false,
-        reportMode: "free",
+function buildFreeReportPrompt({ brandName, productService, targetCustomer, language }) {
+    const languageName = getLanguageName(language)
 
-        lockedSections: {
-            afterSection01: true,
-            message:
-                "This free report shows only the business direction and basic structure. Customer analysis, market sizing, profit structure, risk judgment, and execution strategy are available in the paid report.",
-        },
-    }
+    return `
+You are GoNoGo, a business decision engine.
+
+Generate a SHORT decision report.
+
+Final language: ${languageName}
+
+Business Input:
+- Brand Name: ${brandName}
+- Product: ${productService}
+- Target: ${targetCustomer}
+
+Rules:
+- Output VALID JSON only
+- No markdown
+- No explanation outside JSON
+- Keep everything SHORT
+- No deep analysis
+- No long paragraphs
+- Max 2 sentences per text field
+
+Return ONLY this structure:
+
+{
+  "cover": {
+    "brandName": "${brandName}",
+    "decision": "GO | HOLD | NO GO",
+    "score": 0,
+    "subtitle": "",
+    "oneLineVerdict": ""
+  },
+
+  "businessDiagnosis": {
+    "industryType": "",
+    "businessModelType": "",
+    "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
+    "mainBottleneck": "",
+    "structureSummary": ""
+  },
+
+  "executiveDecision": [
+    ["Why this works", ""],
+    ["Why this fails", ""],
+    ["What to do now", ""]
+  ],
+
+  "marketCards": [
+    ["TAM", ""],
+    ["SAM", ""],
+    ["SOM", ""],
+    ["GROWTH", ""]
+  ],
+
+  "customerSummary": ""
+}
+`
 }
 
 async function generateDeepReportJson(input) {
-    const { brandName, productService, targetCustomer, language } = input
+    const { brandName, productService, targetCustomer, language, reportType } = input
 
-    const systemPrompt = buildPaidReportPrompt({
-        brandName,
-        productService,
-        targetCustomer,
-        language,
-    })
+    const systemPrompt =
+    input.reportType === "free"
+        ? buildFreeReportPrompt(input)
+        : buildPaidReportPrompt(input)
 
     const userPrompt = JSON.stringify({
         brandName,
@@ -1232,7 +1283,7 @@ async function generateDeepReportJson(input) {
     })
 
     const completion = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+    model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
         messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt },
@@ -1241,9 +1292,24 @@ async function generateDeepReportJson(input) {
     })
 
     const raw = completion.choices?.[0]?.message?.content
-    if (!raw) throw new Error("Empty OpenAI response.")
+if (!raw) throw new Error("Empty OpenAI response.")
 
-    return normalizeDeepReport(JSON.parse(raw), input)
+let parsed
+
+try {
+    parsed = JSON.parse(raw)
+} catch (parseError) {
+    console.error("[OPENAI_JSON_PARSE_ERROR]", parseError)
+    console.error("[OPENAI_JSON_RAW_START]", raw.slice(0, 1200))
+    console.error("[OPENAI_JSON_RAW_ERROR_AREA]", raw.slice(8800, 9800))
+    console.error("[OPENAI_JSON_RAW_END]", raw.slice(-1200))
+
+    throw new Error(
+        `OpenAI returned invalid JSON. ${String(parseError?.message || parseError)}`
+    )
+}
+
+return normalizeDeepReport(parsed, input)
 }
 
 
