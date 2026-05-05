@@ -354,6 +354,8 @@
   "blurLine1": "Customer acquisition cost risk detected",
 "blurLine2": "Break-even point depends on repeat purchase",
 "blurLine3": "Customer resistance and pricing friction require validation",
-"blurLine4": "Execution priority must be decided before spending budget"
+"blurLine4": "Execution priority must be decided before spending budget",
+  "lockBrand": "Brand + Domain",
+"lockBrandDesc": "Get the name, strategy, and domain direction."
 }
 }
