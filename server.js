@@ -4,6 +4,7 @@
 
 import express from "express"
 import cors from "cors"
+import crypto from "crypto"
 import OpenAI from "openai"
 import fs from "fs"
 import path from "path"
@@ -17,8 +18,45 @@ import chromium from "@sparticuz/chromium"
 // ======================================================
 
 const app = express()
-const PORT = process.env.PORT || 3000
 
+const PORT = process.env.PORT || 3000
+const paidDownloadTokens = new Map()
+
+function createPaidDownloadToken() {
+  const token = crypto.randomBytes(24).toString("hex")
+
+  paidDownloadTokens.set(token, {
+    paid: true,
+    downloadLimit: 3,
+    downloadCount: 0,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  })
+
+  return token
+}
+
+function validatePaidDownloadToken(token) {
+  if (!token) {
+    return { ok: false, status: 401, message: "Missing download token." }
+  }
+
+  const record = paidDownloadTokens.get(token)
+
+  if (!record || !record.paid) {
+    return { ok: false, status: 403, message: "Invalid payment token." }
+  }
+
+  if (Date.now() > record.expiresAt) {
+    return { ok: false, status: 403, message: "This download link has expired." }
+  }
+
+  if (record.downloadCount >= record.downloadLimit) {
+    return { ok: false, status: 403, message: "Download limit exceeded." }
+  }
+
+  return { ok: true, record }
+}
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -60,6 +98,91 @@ app.get("/api/health", (req, res) => {
 // ======================================================
 // 04. API ROUTES
 // ======================================================
+app.get("/api/report-loading", (req, res) => {
+    const lang = normalizeLanguage(req.query.lang || "ko")
+    const reportType = req.query.reportType === "paid" ? "paid" : "free"
+
+    const params = new URLSearchParams({
+        lang,
+        reportType,
+        brandName: req.query.brandName || "",
+        productService: req.query.productService || "",
+        targetCustomer: req.query.targetCustomer || "",
+    })
+
+    const targetUrl = `/api/debug-html?${params.toString()}`
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8")
+    return res.send(`
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generating Report...</title>
+  <style>
+    body {
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#ffffff;
+      color:#0D2418;
+      font-family:Inter, system-ui, sans-serif;
+    }
+    .box {
+      width:90%;
+      max-width:420px;
+      text-align:center;
+    }
+    .logo {
+      font-size:14px;
+      font-weight:950;
+      margin-bottom:34px;
+    }
+    .spinner {
+      width:46px;
+      height:46px;
+      border:4px solid rgba(13,36,24,0.12);
+      border-top-color:#0D2418;
+      border-radius:50%;
+      margin:0 auto 24px;
+      animation:spin 0.8s linear infinite;
+    }
+    h1 {
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-0.06em;
+      margin:0 0 12px;
+    }
+    p {
+      font-size:14px;
+      line-height:1.6;
+      color:#53645A;
+      margin:0;
+    }
+    @keyframes spin {
+      to { transform:rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">GONOGO™</div>
+    <div class="spinner"></div>
+    <h1>Generating your decision report</h1>
+    <p>Analyzing market risk, customer logic, profit structure, and execution signals.</p>
+  </div>
+
+  <script>
+    setTimeout(function () {
+      window.location.replace(${JSON.stringify(targetUrl)});
+    }, 300);
+  </script>
+</body>
+</html>
+    `)
+})
 
 app.get("/api/debug-html", async (req, res) => {
     try {
@@ -178,6 +301,97 @@ app.post("/api/generate-report", async (req, res) => {
             error: "Failed to generate report.",
             detail: String(error?.message || error),
         })
+    }
+})
+app.get("/api/dev-create-paid-token", (req, res) => {
+    const token = createPaidDownloadToken()
+
+    const lang = normalizeLanguage(req.query.lang || "ko")
+
+    const downloadUrl = `${req.protocol}://${req.get(
+        "host"
+    )}/api/download-paid-pdf?token=${token}&lang=${lang}`
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8")
+    return res.send(`
+        <html>
+            <body style="font-family:Arial;padding:40px;">
+                <h1>Paid token created</h1>
+                <p>PayPal 연결 전 테스트용 다운로드 링크야.</p>
+                <p>다운로드 가능 횟수: 3회</p>
+
+                <a href="${downloadUrl}" style="
+                    display:inline-block;
+                    padding:16px 24px;
+                    background:#082818;
+                    color:white;
+                    border-radius:12px;
+                    text-decoration:none;
+                    font-weight:700;
+                ">
+                    Download Paid PDF
+                </a>
+            </body>
+        </html>
+    `)
+})
+app.get("/api/download-paid-pdf", async (req, res) => {
+    try {
+        const { token } = req.query
+        const language = normalizeLanguage(req.query.lang || "ko")
+
+        const validation = validatePaidDownloadToken(token)
+
+        if (!validation.ok) {
+            return res.status(validation.status).send(`
+                <html>
+                    <body style="font-family:Arial;padding:40px;">
+                        <h1>Download unavailable</h1>
+                        <p>${validation.message}</p>
+                    </body>
+                </html>
+            `)
+        }
+
+        validation.record.downloadCount += 1
+
+        const brandName = req.query.brandName || "PaidReport"
+        const productService =
+            req.query.productService || "A paid business report"
+        const targetCustomer =
+            req.query.targetCustomer || "Target customers"
+
+        const locale = loadLocale(language)
+
+        const paidReport = await generateDeepReportJson({
+            brandName,
+            productService,
+            targetCustomer,
+            language,
+        })
+
+        const finalReport = {
+            ...paidReport,
+            isPaid: true,
+            reportMode: "paid",
+        }
+
+        const html = buildHtmlFromTemplate(finalReport, locale)
+        const pdfBuffer = await htmlToPdf(html)
+
+        const safeBrand = sanitizeFileName(brandName)
+
+        res.setHeader("Content-Type", "application/pdf")
+        res.setHeader("Content-Length", pdfBuffer.length)
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="GoNoGo_Paid_Report_${safeBrand}_${language}.pdf"`
+        )
+
+        return res.end(pdfBuffer)
+    } catch (error) {
+        console.error("[DOWNLOAD_PAID_PDF_ERROR]", error)
+        return res.status(500).send("Failed to download paid PDF.")
     }
 })
 // ======================================================
@@ -1033,13 +1247,15 @@ function buildHtmlFromTemplate(report, locale) {
 
     html = applyTemplateVars(html, templateData)
 
-    if (report?.reportMode === "free") {
-        html = keepFreeReportOnly(html, locale, report)
-    }
+if (report?.reportMode === "free") {
+    html = keepFreeReportOnly(html, locale, report)
+}
 
-    html = html.replace(/{{[^}]+}}/g, "")
+html = injectReportBackButton(html, locale)
 
-    return html
+html = html.replace(/{{[^}]+}}/g, "")
+
+return html
 }
 // ======================================================
 // 10. FREE REPORT / PAYWALL
@@ -1073,8 +1289,8 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
     const decision = report?.cover?.decision || "HOLD"
 
     const checkoutUrl =
-        process.env.PAYWALL_CHECKOUT_URL ||
-        "https://your-checkout-link.com"
+    process.env.PAYWALL_CHECKOUT_URL ||
+    "/api/dev-create-paid-token"
 
     return `
 ${freePart}
@@ -1374,7 +1590,37 @@ ${freePart}
 </section>
 `
 }
+function injectReportBackButton(html, locale = {}) {
+    const backText = t(locale, "report.backToSite", "Back to site")
 
+    const buttonHtml = `
+<a href="https://gonogo.so/report" style="
+  position:fixed;
+  left:14px;
+  bottom:14px;
+  z-index:99999;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 16px;
+  border-radius:999px;
+  background:#0D2418;
+  color:#ffffff;
+  font-size:13px;
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:0 12px 32px rgba(13,36,24,0.22);
+">
+  ← ${esc(backText)}
+</a>
+`
+
+    if (html.includes("</body>")) {
+        return html.replace("</body>", `${buttonHtml}</body>`)
+    }
+
+    return `${html}${buttonHtml}`
+}
 function lockedBox(
     message,
     title = "Premium Insights",
