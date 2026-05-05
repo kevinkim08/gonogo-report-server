@@ -4635,16 +4635,17 @@ function checklistItems(items = []) {
     if (!Array.isArray(items)) return ""
 
     return items
+        .slice(0, 4)
         .map((item) => {
             const label = item?.label || ""
             const status = item?.status || "WATCH"
             const cls = getStatusClass(status)
 
             return `
-<li class="${cls}">
+<div class="check-item">
     <span>${esc(label)}</span>
-    <b>${esc(status)}</b>
-</li>
+    <strong class="${esc(cls)}">${esc(status)}</strong>
+</div>
 `
         })
         .join("")
