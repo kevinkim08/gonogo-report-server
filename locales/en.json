@@ -326,4 +326,30 @@
   "th_name": "Name",
   "th_domain": "Domain",
   "th_availability": "Estimated Availability"
+  ,
+"premium": {
+  "kicker": "FULL REPORT LOCKED",
+  "title": "Unlock the full business decision report",
+  "desc": "This preview shows the decision signal and brand direction only. The full report unlocks customer truth, revenue structure, risk logic, and execution planning.",
+  "progressLabel": "REPORT COMPLETION",
+  "progressNote": "Preview unlocked · Strategy locked",
+  "signalLabel": "CURRENT DECISION SIGNAL",
+  "brandPreviewLabel": "RECOMMENDED BRAND PREVIEW",
+  "brandPreviewSub": "Brand direction unlocked",
+  "defaultBrandName": "Recommended brand direction",
+  "defaultBrandReason": "This direction connects the offer, target customer, and market position.",
+  "lockedLayer": "Locked strategy layer",
+  "lockCustomer": "Customer Truth",
+  "lockCustomerDesc": "Why customers buy and hesitate",
+  "lockRevenue": "Revenue Structure",
+  "lockRevenueDesc": "Profit logic and break-even condition",
+  "lockExecution": "Execution Plan",
+  "lockExecutionDesc": "What to test, stop, and scale",
+  "warningTitle": "This analysis is not complete yet.",
+  "warningDesc": "The preview gives you the direction. The full report shows the failure points, revenue logic, customer resistance, and execution path.",
+  "danger": "Without the full strategy, you may spend time and money testing the wrong direction.",
+  "ctaButton": "Unlock full report",
+  "ctaSub": "Unlock customer, revenue, risk, and execution strategy before you spend more.",
+  "footer": "Paid Locked"
+}
 }
