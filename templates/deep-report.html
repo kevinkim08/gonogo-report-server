@@ -1321,27 +1321,31 @@ html[lang="mn"] .chart-value {
   <section class="page">
     <div class="section-title">{{section05_06_title}}</div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>{{th_metric}}</th>
-          <th>{{th_pass_condition}}</th>
-          <th>{{th_decision_meaning}}</th>
-        </tr>
-      </thead>
-      <tbody>{{goThresholdRows}}</tbody>
-    </table>
+<table>
+  <thead>
+    <tr>
+      <th>{{th_metric}}</th>
+      <th>{{th_pass_condition}}</th>
+      <th>{{th_decision_meaning}}</th>
+    </tr>
+  </thead>
+  <tbody>{{goThresholdRows}}</tbody>
+</table>
 
-    <div class="label" style="margin-top:26px;">{{go_checklist_label}}</div>
-    <div class="checklist">{{goChecklistItems}}</div>
+<div class="label" style="margin-top:26px;">{{go_checklist_label}}</div>
+<div class="checklist">{{goChecklistItems}}</div>
 
-    <div class="label" style="margin-top:26px;">{{final_rule_label}}</div>
-    <div class="verdict">{{finalRule}}</div>
+<!-- 🔥 핵심 추가 -->
+<div class="label" style="margin-top:26px;">{{final_decision_label}}</div>
+{{decisionSummaryBox}}
 
-    <div class="footer">
-      <span>{{footerLeft}}</span>
-      <span>{{footer_go_threshold}}</span>
-    </div>
+<div class="label" style="margin-top:26px;">{{final_rule_label}}</div>
+<div class="verdict">{{finalRule}}</div>
+
+<div class="footer">
+  <span>{{footerLeft}}</span>
+  <span>{{footer_go_threshold}}</span>
+</div>
   </section>
 
   <section class="page section-cover">
