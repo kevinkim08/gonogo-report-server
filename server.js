@@ -2997,18 +2997,45 @@ function buildHtmlFromTemplate(report, locale) {
     }
 
     const templateData = {
-        ...locale,
-        ...data,
-    }
+    ...locale,
+    ...data,
+
+    referenceLinkRows: rows(referenceLinks),
+}
           // =========================================================
     // [21] TEMPLATE REPLACE
     // =========================================================
 
     html = html
 
-        .replace("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
-        .replace("{{referenceLinkRows}}", rows(referenceLinks))
+        .replaceAll("{{decisionChart}}", buildDecisionChart(report, locale))
+.replaceAll("{{ decisionChart }}", buildDecisionChart(report, locale))
 
+.replaceAll(
+    "{{competitionPositionChart}}",
+    competitionPositionChart(report.competitionMap, locale)
+)
+.replaceAll(
+    "{{ competitionPositionChart }}",
+    competitionPositionChart(report.competitionMap, locale)
+)
+
+.replaceAll("{{executionTimeline}}", executionTimeline(report.executionPlan, locale))
+.replaceAll("{{ executionTimeline }}", executionTimeline(report.executionPlan, locale))
+
+.replaceAll("{{riskHeatmap}}", riskHeatmap(report.riskSystem, locale))
+.replaceAll("{{ riskHeatmap }}", riskHeatmap(report.riskSystem, locale))
+
+.replaceAll("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
+.replaceAll("{{ decisionSummaryBox }}", decisionSummaryBox(report, locale))
+
+.replaceAll("{{referenceLinkRows}}", rows(referenceLinks))
+.replaceAll("{{ referenceLinkRows }}", rows(referenceLinks))
+        
+        .replace("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
+        .replaceAll("{{referenceLinkRows}}", rows(referenceLinks))
+        .replaceAll("{{ referenceLinkRows }}", rows(referenceLinks))
+        
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
@@ -4096,11 +4123,54 @@ function competitionPositionChart(rowsData = [], locale = {}) {
     if (!Array.isArray(rowsData)) return ""
 
     return `
+<style>
+.position-chart {
+    position: relative; /* 🔥 필수 */
+    height: 360px;
+    border: 1px solid #d9e5dd;
+    border-radius: 16px;
+    background: #f8fbf9;
+}
+
+/* 🔥 + 점선 (핵심) */
+.position-chart::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    border-left: 1px dashed rgba(13,36,24,0.35);
+}
+
+.position-chart::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    border-top: 1px dashed rgba(13,36,24,0.35);
+}
+
+/* 점 스타일 */
+.position-dot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background: #2f7a4f;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+</style>
+
 <div class="position-chart">
     ${rowsData
         .slice(0, 4)
         .map((row, index) => {
-            const name = row?.[0] || `Competitor ${index + 1}`
+            const name = row?.[0] || \`Competitor \${index + 1}\`
+
             const x = 18 + index * 20
             const y = 70 - index * 12
 
