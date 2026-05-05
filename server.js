@@ -4199,29 +4199,109 @@ function cacLtvRiskChart(rowsData = [], locale = {}) {
 
 function buildDecisionChart(report, locale = {}) {
     const scores = report?.visualScores || {}
+    const decision = report?.cover?.decision || "HOLD"
+    const totalScore = toScore(report?.cover?.score, 50)
+    const verdict = report?.cover?.oneLineVerdict || ""
 
     const items = [
         ["Market", scores.market],
         ["Profitability", scores.profitability],
         ["Execution", scores.execution],
-        ["Risk", scores.risk],
+        ["Risk Pressure", scores.risk],
     ]
 
     return `
+<style>
+.decision-chart {
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid #d8e7dc;
+    background: #f6faf7;
+}
+.decision-chart-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.decision-chart-title {
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.45;
+}
+.decision-chart-score {
+    font-size: 28px;
+    font-weight: 900;
+    color: #2f7d57;
+    white-space: nowrap;
+}
+.decision-chart-verdict {
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #4b5d53;
+    font-weight: 700;
+}
+.decision-chart-row {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr) 74px;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 11px;
+}
+.decision-chart-row:last-child {
+    margin-bottom: 0;
+}
+.decision-chart-label {
+    font-size: 11px;
+    font-weight: 900;
+}
+.decision-chart-track {
+    height: 12px;
+    background: #e1ebe5;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.decision-chart-fill {
+    height: 100%;
+    background: #2f7d57;
+    border-radius: 999px;
+}
+.decision-chart-fill.warn {
+    background: #d8b85a;
+}
+.decision-chart-fill.danger {
+    background: #b94a48;
+}
+.decision-chart-value {
+    text-align: right;
+    font-size: 10.5px;
+    font-weight: 900;
+}
+</style>
+
 <div class="decision-chart">
+    <div class="decision-chart-head">
+        <div>
+            <div class="decision-chart-title">Founder decision signal</div>
+            <div class="decision-chart-verdict">${esc(verdict)}</div>
+        </div>
+        <div class="decision-chart-score">${totalScore}/100<br><span style="font-size:12px;">${esc(decision)}</span></div>
+    </div>
+
     ${items
         .map(([label, value]) => {
             const score = toScore(value, 50)
+            const cls = score < 40 ? "danger" : score < 70 ? "warn" : ""
 
             return `
-<div class="score-row">
-    <div class="score-row-label">${esc(label)}</div>
-    <div class="score-row-track">
-        <div class="score-row-fill" style="width:${score}%"></div>
-    </div>
-    <div class="score-row-value">${score}</div>
-</div>
-`
+    <div class="decision-chart-row">
+        <div class="decision-chart-label">${esc(label)}</div>
+        <div class="decision-chart-track">
+            <div class="decision-chart-fill ${cls}" style="width:${score}%"></div>
+        </div>
+        <div class="decision-chart-value">${score} / 100</div>
+    </div>`
         })
         .join("")}
 </div>
@@ -4234,14 +4314,14 @@ function competitionPositionChart(rowsData = [], locale = {}) {
     return `
 <style>
 .position-chart {
-    position: relative; /* 🔥 필수 */
+    position: relative;
     height: 360px;
     border: 1px solid #d9e5dd;
     border-radius: 16px;
     background: #f8fbf9;
+    overflow: hidden;
+    margin-top: 18px;
 }
-
-/* 🔥 + 점선 (핵심) */
 .position-chart::before {
     content: "";
     position: absolute;
@@ -4250,7 +4330,6 @@ function competitionPositionChart(rowsData = [], locale = {}) {
     bottom: 0;
     border-left: 1px dashed rgba(13,36,24,0.35);
 }
-
 .position-chart::after {
     content: "";
     position: absolute;
@@ -4259,35 +4338,60 @@ function competitionPositionChart(rowsData = [], locale = {}) {
     right: 0;
     border-top: 1px dashed rgba(13,36,24,0.35);
 }
-
-/* 점 스타일 */
+.axis-label {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 900;
+    color: #4d6b5c;
+    z-index: 2;
+}
+.axis-top {
+    top: 12px;
+    left: 14px;
+}
+.axis-bottom {
+    bottom: 14px;
+    left: 14px;
+}
+.axis-left {
+    bottom: 34px;
+    left: 14px;
+}
+.axis-right {
+    bottom: 34px;
+    right: 14px;
+}
 .position-dot {
     position: absolute;
     transform: translate(-50%, -50%);
     background: #2f7a4f;
     color: #fff;
-    padding: 6px 10px;
+    padding: 7px 11px;
     border-radius: 999px;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     white-space: nowrap;
+    z-index: 3;
 }
 </style>
 
 <div class="position-chart">
+    <div class="axis-label axis-top">High Value</div>
+    <div class="axis-label axis-bottom">Low Value</div>
+    <div class="axis-label axis-left">Low Price</div>
+    <div class="axis-label axis-right">High Price</div>
+
     ${rowsData
         .slice(0, 4)
         .map((row, index) => {
             const name = row?.[0] || `Competitor ${index + 1}`
-
-            const x = 18 + index * 20
-            const y = 70 - index * 12
+            const x = [18, 38, 58, 78][index] || 50
+            const y = [70, 58, 48, 34][index] || 50
 
             return `
-<div class="position-dot" style="left:${x}%; top:${y}%;">
-    <span>${esc(name)}</span>
-</div>
-`
+    <div class="position-dot" style="left:${x}%; top:${y}%;">
+        <span>${esc(name)}</span>
+    </div>`
         })
         .join("")}
 </div>
@@ -4298,18 +4402,80 @@ function riskHeatmap(rowsData = [], locale = {}) {
     if (!Array.isArray(rowsData)) return ""
 
     return `
+<style>
+.risk-heatmap {
+    margin-top: 18px;
+    display: grid;
+    gap: 10px;
+}
+.risk-cell {
+    border: 1px solid #d8e7dc;
+    background: #ffffff;
+    padding: 13px 14px;
+    border-left: 7px solid #2f7d57;
+}
+.risk-cell.high {
+    border-left-color: #b94a48;
+}
+.risk-cell.medium {
+    border-left-color: #d8b85a;
+}
+.risk-cell.low {
+    border-left-color: #2f7d57;
+}
+.risk-cell-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 900;
+}
+.risk-level {
+    text-transform: uppercase;
+    font-size: 10px;
+}
+.risk-cell.high .risk-level {
+    color: #b94a48;
+}
+.risk-cell.medium .risk-level {
+    color: #b58b16;
+}
+.risk-cell.low .risk-level {
+    color: #2f7d57;
+}
+.risk-impact {
+    margin-top: 8px;
+    font-size: 11.5px;
+    line-height: 1.55;
+    color: #4b5d53;
+    font-weight: 700;
+}
+.risk-action {
+    margin-top: 6px;
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+</style>
+
 <div class="risk-heatmap">
     ${rowsData
+        .slice(0, 3)
         .map((row, index) => {
             const risk = row?.[0] || ""
+            const impact = row?.[1] || ""
+            const action = row?.[2] || ""
             const level = index === 0 ? "high" : index === 1 ? "medium" : "low"
+            const label = index === 0 ? "High" : index === 1 ? "Watch" : "Low"
 
             return `
-<div class="risk-cell ${level}">
-    <b>${esc(risk)}</b>
-    <span>${esc(row?.[1] || "")}</span>
-</div>
-`
+    <div class="risk-cell ${level}">
+        <div class="risk-cell-head">
+            <span>${esc(risk)}</span>
+            <span class="risk-level">${esc(label)}</span>
+        </div>
+        <div class="risk-impact">${esc(impact)}</div>
+        <div class="risk-action">${esc(action)}</div>
+    </div>`
         })
         .join("")}
 </div>
@@ -4320,16 +4486,67 @@ function executionTimeline(rowsData = [], locale = {}) {
     if (!Array.isArray(rowsData)) return ""
 
     return `
-<div class="timeline">
+<style>
+.execution-timeline {
+    margin-top: 18px;
+    padding: 18px;
+    border: 1px solid #d8e7dc;
+    background: #f6faf7;
+}
+.execution-step {
+    display: grid;
+    grid-template-columns: 86px 1fr;
+    gap: 14px;
+    position: relative;
+    padding-bottom: 18px;
+}
+.execution-step:last-child {
+    padding-bottom: 0;
+}
+.execution-phase {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: #163c2b;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+}
+.execution-body {
+    border-left: 4px solid #2f7d57;
+    background: #ffffff;
+    padding: 14px 16px;
+    min-height: 66px;
+}
+.execution-title {
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1.45;
+}
+.execution-desc {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: #4b5d53;
+    font-weight: 700;
+}
+</style>
+
+<div class="execution-timeline">
     ${rowsData
-        .map((row) => {
+        .slice(0, 3)
+        .map((row, index) => {
             return `
-<div class="timeline-item">
-    <div class="timeline-phase">${esc(row?.[0] || "")}</div>
-    <div class="timeline-title">${esc(row?.[1] || "")}</div>
-    <div class="timeline-desc">${esc(row?.[2] || "")}</div>
-</div>
-`
+    <div class="execution-step">
+        <div class="execution-phase">${esc(row?.[0] || `P${index + 1}`)}</div>
+        <div class="execution-body">
+            <div class="execution-title">${esc(row?.[1] || "")}</div>
+            <div class="execution-desc">${esc(row?.[2] || "")}</div>
+        </div>
+    </div>`
         })
         .join("")}
 </div>
@@ -4338,17 +4555,78 @@ function executionTimeline(rowsData = [], locale = {}) {
 
 function decisionSummaryBox(report, locale = {}) {
     const decision = report?.cover?.decision || "HOLD"
-    const score = report?.cover?.score || 0
+    const score = toScore(report?.cover?.score, 0)
     const verdict = report?.cover?.oneLineVerdict || ""
 
+    const cls =
+        String(decision).toUpperCase().includes("NO")
+            ? "danger"
+            : String(decision).toUpperCase().includes("GO")
+              ? "pass"
+              : "watch"
+
     return `
-<div class="decision-summary-box ${getStatusClass(decision)}">
-    <div class="decision-summary-score">${esc(score)} / 100</div>
-    <div class="decision-summary-decision">${esc(decision)}</div>
+<style>
+.decision-summary-box {
+    margin-top: 18px;
+    padding: 20px;
+    border: 2px solid #d8b85a;
+    background: #fffdf3;
+}
+.decision-summary-box.pass {
+    border-color: #2f7d57;
+    background: #f4fbf6;
+}
+.decision-summary-box.danger {
+    border-color: #b94a48;
+    background: #fff7f6;
+}
+.decision-summary-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+}
+.decision-summary-decision {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+.decision-summary-score {
+    font-size: 28px;
+    font-weight: 900;
+}
+.decision-summary-verdict {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.65;
+    font-weight: 750;
+    color: #33443b;
+}
+.decision-summary-box.pass .decision-summary-score,
+.decision-summary-box.pass .decision-summary-decision {
+    color: #2f7d57;
+}
+.decision-summary-box.watch .decision-summary-score,
+.decision-summary-box.watch .decision-summary-decision {
+    color: #b58b16;
+}
+.decision-summary-box.danger .decision-summary-score,
+.decision-summary-box.danger .decision-summary-decision {
+    color: #b94a48;
+}
+</style>
+
+<div class="decision-summary-box ${cls}">
+    <div class="decision-summary-top">
+        <div class="decision-summary-decision">${esc(decision)}</div>
+        <div class="decision-summary-score">${score}/100</div>
+    </div>
     <div class="decision-summary-verdict">${esc(verdict)}</div>
 </div>
 `
 }
+
 
 function checklistItems(items = []) {
     if (!Array.isArray(items)) return ""
