@@ -1,6 +1,6 @@
-// ======================================================
-// 01. IMPORTS
-// ======================================================
+// =========================================================
+// [01] IMPORTS
+// =========================================================
 
 import express from "express"
 import cors from "cors"
@@ -12,53 +12,19 @@ import { fileURLToPath } from "url"
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
 
-
-// ======================================================
-// 02. APP SETUP
-// ======================================================
+// =========================================================
+// [02] APP INITIALIZATION
+// =========================================================
 
 const app = express()
-
 const PORT = process.env.PORT || 3000
-const paidDownloadTokens = new Map()
 
-function createPaidDownloadToken() {
-  const token = crypto.randomBytes(24).toString("hex")
-
-  paidDownloadTokens.set(token, {
-    paid: true,
-    downloadLimit: 3,
-    downloadCount: 0,
-    createdAt: Date.now(),
-    expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
-  })
-
-  return token
-}
-
-function validatePaidDownloadToken(token) {
-  if (!token) {
-    return { ok: false, status: 401, message: "Missing download token." }
-  }
-
-  const record = paidDownloadTokens.get(token)
-
-  if (!record || !record.paid) {
-    return { ok: false, status: 403, message: "Invalid payment token." }
-  }
-
-  if (Date.now() > record.expiresAt) {
-    return { ok: false, status: 403, message: "This download link has expired." }
-  }
-
-  if (record.downloadCount >= record.downloadLimit) {
-    return { ok: false, status: 403, message: "Download limit exceeded." }
-  }
-
-  return { ok: true, record }
-}
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// =========================================================
+// [03] MIDDLEWARE
+// =========================================================
 
 app.use(express.json({ limit: "5mb" }))
 
@@ -70,22 +36,84 @@ app.use(
     })
 )
 
+// preflight 요청 처리
 app.options("*", cors())
+
+// =========================================================
+// [04] OPENAI CLIENT
+// =========================================================
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
 
+// =========================================================
+// [05] PAID DOWNLOAD TOKEN SYSTEM
+// =========================================================
 
-// ======================================================
-// 03. BASIC ROUTES
-// ======================================================
+const paidDownloadTokens = new Map()
+
+function createPaidDownloadToken() {
+    const token = crypto.randomBytes(24).toString("hex")
+
+    paidDownloadTokens.set(token, {
+        paid: true,
+        downloadLimit: 3,
+        downloadCount: 0,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    })
+
+    return token
+}
+
+function validatePaidDownloadToken(token) {
+    if (!token) {
+        return {
+            ok: false,
+            status: 401,
+            message: "Missing download token.",
+        }
+    }
+
+    const record = paidDownloadTokens.get(token)
+
+    if (!record || !record.paid) {
+        return {
+            ok: false,
+            status: 403,
+            message: "Invalid payment token.",
+        }
+    }
+
+    if (Date.now() > record.expiresAt) {
+        return {
+            ok: false,
+            status: 403,
+            message: "This download link has expired.",
+        }
+    }
+
+    if (record.downloadCount >= record.downloadLimit) {
+        return {
+            ok: false,
+            status: 403,
+            message: "Download limit exceeded.",
+        }
+    }
+
+    return { ok: true, record }
+}
+
+// =========================================================
+// [06] BASIC ROUTES
+// =========================================================
 
 app.get("/", (req, res) => {
     res.json({
         ok: true,
         service: "GoNoGo Report Server",
-        version: "3.0.0-sectioned",
+        version: "2.2.0-multilingual-pdf",
     })
 })
 
@@ -95,9 +123,11 @@ app.get("/api/health", (req, res) => {
         status: "healthy",
     })
 })
-// ======================================================
-// 04. API ROUTES
-// ======================================================
+
+// =========================================================
+// [07] REPORT LOADING PAGE
+// =========================================================
+
 app.get("/api/report-loading", (req, res) => {
     const lang = normalizeLanguage(req.query.lang || "ko")
     const reportType = req.query.reportType === "paid" ? "paid" : "free"
@@ -112,84 +142,280 @@ app.get("/api/report-loading", (req, res) => {
 
     const targetUrl = `/api/debug-html?${params.toString()}`
 
+    const loadingCopy = {
+        ko: {
+            title: "보고서를 만들고 있어",
+            desc: "시장 위험, 고객 구매 이유, 수익 구조, 실행 가능성을 분석하는 중이야.",
+            steps: [
+                "사업 아이디어 구조 분석 중",
+                "고객 구매 가능성 계산 중",
+                "시장·경쟁 리스크 확인 중",
+                "수익 구조와 실행 조건 정리 중",
+                "최종 Go / No-Go 판단 생성 중",
+            ],
+        },
+        en: {
+            title: "Building your decision report",
+            desc: "Analyzing market risk, customer logic, profit structure, and execution signals.",
+            steps: [
+                "Reading your business idea",
+                "Checking customer buying logic",
+                "Mapping market and competition risk",
+                "Calculating profit structure",
+                "Generating your Go / No-Go decision",
+            ],
+        },
+        ja: {
+            title: "レポートを生成しています",
+            desc: "市場リスク、顧客心理、収益構造、実行可能性を分析しています。",
+            steps: [
+                "事業アイデアを分析中",
+                "顧客の購入理由を確認中",
+                "市場と競合リスクを確認中",
+                "収益構造を整理中",
+                "Go / No-Go 判断を生成中",
+            ],
+        },
+        zh: {
+            title: "正在生成决策报告",
+            desc: "正在分析市场风险、客户购买逻辑、盈利结构和执行条件。",
+            steps: [
+                "分析商业想法结构",
+                "判断客户购买动机",
+                "检查市场与竞争风险",
+                "整理盈利结构",
+                "生成 Go / No-Go 判断",
+            ],
+        },
+        mn: {
+            title: "Тайлан боловсруулж байна",
+            desc: "Зах зээлийн эрсдэл, хэрэглэгчийн логик, ашигт ажиллагаа, хэрэгжүүлэх боломжийг шинжилж байна.",
+            steps: [
+                "Бизнес санааг шинжилж байна",
+                "Хэрэглэгчийн худалдан авах шалтгааныг шалгаж байна",
+                "Зах зээл ба өрсөлдөөний эрсдэлийг тооцож байна",
+                "Ашгийн бүтцийг боловсруулж байна",
+                "Go / No-Go шийдвэр гаргаж байна",
+            ],
+        },
+    }
+
+    const copy = loadingCopy[lang] || loadingCopy.en
+    const stepsJson = JSON.stringify(copy.steps)
+
     res.setHeader("Content-Type", "text/html; charset=utf-8")
+
     return res.send(`
 <!doctype html>
-<html>
+<html lang="${esc(lang)}">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generating Report...</title>
-  <style>
-    body {
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#ffffff;
-      color:#0D2418;
-      font-family:Inter, system-ui, sans-serif;
-    }
-    .box {
-      width:90%;
-      max-width:420px;
-      text-align:center;
-    }
-    .logo {
-      font-size:14px;
-      font-weight:950;
-      margin-bottom:34px;
-    }
-    .spinner {
-      width:46px;
-      height:46px;
-      border:4px solid rgba(13,36,24,0.12);
-      border-top-color:#0D2418;
-      border-radius:50%;
-      margin:0 auto 24px;
-      animation:spin 0.8s linear infinite;
-    }
-    h1 {
-      font-size:28px;
-      line-height:1.05;
-      letter-spacing:-0.06em;
-      margin:0 0 12px;
-    }
-    p {
-      font-size:14px;
-      line-height:1.6;
-      color:#53645A;
-      margin:0;
-    }
-    @keyframes spin {
-      to { transform:rotate(360deg); }
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GoNoGo Report Loading</title>
+
+<style>
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 18%, rgba(182,255,90,0.18), transparent 28%),
+    radial-gradient(circle at 80% 82%, rgba(13,36,24,0.08), transparent 32%),
+    #ffffff;
+  color: #0D2418;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 430px;
+  text-align: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid rgba(13,36,24,0.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.74);
+  backdrop-filter: blur(12px);
+  font-size: 12px;
+  font-weight: 950;
+  margin-bottom: 30px;
+  box-shadow: 0 12px 32px rgba(13,36,24,0.05);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #B6FF5A;
+  box-shadow: 0 0 18px rgba(182,255,90,0.9);
+}
+
+.card {
+  background: rgba(255,255,255,0.84);
+  border: 1px solid rgba(13,36,24,0.12);
+  border-radius: 30px;
+  padding: 34px 24px 28px;
+  box-shadow:
+    0 30px 90px rgba(13,36,24,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+  backdrop-filter: blur(18px);
+}
+
+.spinner {
+  width: 52px;
+  height: 52px;
+  border: 4px solid rgba(13,36,24,0.12);
+  border-top-color: #0D2418;
+  border-radius: 50%;
+  margin: 0 auto 24px;
+  animation: spin 0.85s linear infinite;
+}
+
+h1 {
+  margin: 0 0 12px;
+  font-size: 31px;
+  line-height: 1.04;
+  letter-spacing: -0.065em;
+  font-weight: 950;
+}
+
+.desc {
+  margin: 0 auto 26px;
+  max-width: 340px;
+  color: #53645A;
+  font-size: 14px;
+  line-height: 1.65;
+  font-weight: 650;
+}
+
+.progress {
+  height: 10px;
+  width: 100%;
+  background: #E5EDE8;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.bar {
+  height: 100%;
+  width: 8%;
+  background: #0D2418;
+  border-radius: 999px;
+  transition: width 0.45s ease;
+}
+
+.step {
+  min-height: 22px;
+  color: #0D2418;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.note {
+  margin-top: 22px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #7B8B82;
+  font-weight: 700;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 18px;
+    align-items: flex-start;
+    padding-top: 78px;
+  }
+
+  .card {
+    border-radius: 26px;
+    padding: 32px 20px 26px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .desc {
+    font-size: 13px;
+  }
+}
+</style>
 </head>
+
 <body>
-  <div class="box">
-    <div class="logo">GONOGO™</div>
-    <div class="spinner"></div>
-    <h1>Generating your decision report</h1>
-    <p>Analyzing market risk, customer logic, profit structure, and execution signals.</p>
+<div class="wrap">
+  <div class="badge">
+    <span class="dot"></span>
+    GoNoGo™ Report Engine
   </div>
 
-  <script>
-    setTimeout(function () {
-      window.location.replace(${JSON.stringify(targetUrl)});
-    }, 300);
-  </script>
+  <section class="card">
+    <div class="spinner"></div>
+    <h1>${esc(copy.title)}</h1>
+    <p class="desc">${esc(copy.desc)}</p>
+
+    <div class="progress">
+      <div class="bar" id="bar"></div>
+    </div>
+
+    <div class="step" id="step">${esc(copy.steps[0])}</div>
+
+    <div class="note">
+      Do not close this page. Your report will open automatically.
+    </div>
+  </section>
+</div>
+
+<script>
+const steps = ${stepsJson};
+const bar = document.getElementById("bar");
+const step = document.getElementById("step");
+
+let index = 0;
+let progress = 8;
+
+const timer = setInterval(() => {
+  index = Math.min(index + 1, steps.length - 1);
+  progress = Math.min(progress + 18, 94);
+
+  if (bar) bar.style.width = progress + "%";
+  if (step) step.textContent = steps[index];
+
+  if (index >= steps.length - 1) {
+    clearInterval(timer);
+
+    setTimeout(() => {
+      window.location.href = "${targetUrl}";
+    }, 900);
+  }
+}, 850);
+</script>
 </body>
 </html>
-    `)
+`)
 })
+// =========================================================
+// [08] DEBUG HTML ROUTE
+// =========================================================
 
 app.get("/api/debug-html", async (req, res) => {
     try {
-        const language = normalizeLanguage(
-            req.query.lang || req.query.language || "ko"
-        )
-
+        const language = normalizeLanguage(req.query.lang || req.query.language || "ko")
         const reportType = req.query.reportType === "free" ? "free" : "paid"
 
         const brandName = req.query.brandName || "SampleBrand"
@@ -210,11 +436,7 @@ app.get("/api/debug-html", async (req, res) => {
         const finalReport =
             reportType === "free"
                 ? buildFreeReportFromPaidReport(paidReport)
-                : {
-                      ...paidReport,
-                      isPaid: true,
-                      reportMode: "paid",
-                  }
+                : { ...paidReport, isPaid: true, reportMode: "paid" }
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
@@ -233,6 +455,10 @@ app.get("/api/debug-html", async (req, res) => {
         })
     }
 })
+
+// =========================================================
+// [09] GENERATE REPORT PDF ROUTE
+// =========================================================
 
 app.post("/api/generate-report", async (req, res) => {
     try {
@@ -255,9 +481,7 @@ app.post("/api/generate-report", async (req, res) => {
         const locale = loadLocale(normalizedLanguage)
 
         const normalizedReportType =
-            reportType === "paid" || reportType === "deep"
-                ? "paid"
-                : "free"
+            reportType === "paid" || reportType === "deep" ? "paid" : "free"
 
         const paidReport = await generateDeepReportJson({
             brandName,
@@ -268,11 +492,7 @@ app.post("/api/generate-report", async (req, res) => {
 
         const finalReport =
             normalizedReportType === "paid"
-                ? {
-                      ...paidReport,
-                      isPaid: true,
-                      reportMode: "paid",
-                  }
+                ? { ...paidReport, isPaid: true, reportMode: "paid" }
                 : buildFreeReportFromPaidReport(paidReport)
 
         const html = buildHtmlFromTemplate(finalReport, locale)
@@ -287,10 +507,7 @@ app.post("/api/generate-report", async (req, res) => {
 
         res.setHeader("Content-Type", "application/pdf")
         res.setHeader("Content-Length", pdfBuffer.length)
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${fileName}"`
-        )
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`)
 
         return res.end(pdfBuffer)
     } catch (error) {
@@ -303,38 +520,66 @@ app.post("/api/generate-report", async (req, res) => {
         })
     }
 })
+
+// =========================================================
+// [10] DEV PAID TOKEN ROUTE
+// =========================================================
+
 app.get("/api/dev-create-paid-token", (req, res) => {
     const token = createPaidDownloadToken()
-
     const lang = normalizeLanguage(req.query.lang || "ko")
+
+    const brandName = req.query.brandName || ""
+    const productService = req.query.productService || ""
+    const targetCustomer = req.query.targetCustomer || ""
+
+    const params = new URLSearchParams({
+        token,
+        lang,
+        brandName,
+        productService,
+        targetCustomer,
+    })
 
     const downloadUrl = `${req.protocol}://${req.get(
         "host"
-    )}/api/download-paid-pdf?token=${token}&lang=${lang}`
+    )}/api/download-paid-pdf?${params.toString()}`
 
     res.setHeader("Content-Type", "text/html; charset=utf-8")
-    return res.send(`
-        <html>
-            <body style="font-family:Arial;padding:40px;">
-                <h1>Paid token created</h1>
-                <p>PayPal 연결 전 테스트용 다운로드 링크야.</p>
-                <p>다운로드 가능 횟수: 3회</p>
 
-                <a href="${downloadUrl}" style="
-                    display:inline-block;
-                    padding:16px 24px;
-                    background:#082818;
-                    color:white;
-                    border-radius:12px;
-                    text-decoration:none;
-                    font-weight:700;
-                ">
-                    Download Paid PDF
-                </a>
-            </body>
-        </html>
-    `)
+    return res.send(`
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Paid token created</title>
+</head>
+<body style="font-family:Arial;padding:40px;">
+    <h1>Paid token created</h1>
+    <p>PayPal 연결 전 테스트용 다운로드 링크야.</p>
+    <p>다운로드 가능 횟수: 3회</p>
+
+    <a href="${esc(downloadUrl)}" style="
+        display:inline-block;
+        padding:16px 24px;
+        background:#082818;
+        color:white;
+        border-radius:12px;
+        text-decoration:none;
+        font-weight:700;
+    ">
+        Download Paid PDF
+    </a>
+</body>
+</html>
+`)
 })
+
+// =========================================================
+// [11] DOWNLOAD PAID PDF ROUTE
+// =========================================================
+
 app.get("/api/download-paid-pdf", async (req, res) => {
     try {
         const { token } = req.query
@@ -344,13 +589,18 @@ app.get("/api/download-paid-pdf", async (req, res) => {
 
         if (!validation.ok) {
             return res.status(validation.status).send(`
-                <html>
-                    <body style="font-family:Arial;padding:40px;">
-                        <h1>Download unavailable</h1>
-                        <p>${validation.message}</p>
-                    </body>
-                </html>
-            `)
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Download unavailable</title>
+</head>
+<body style="font-family:Arial;padding:40px;">
+    <h1>Download unavailable</h1>
+    <p>${esc(validation.message)}</p>
+</body>
+</html>
+`)
         }
 
         validation.record.downloadCount += 1
@@ -394,9 +644,1267 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         return res.status(500).send("Failed to download paid PDF.")
     }
 })
-// ======================================================
-// 05. REPORT GENERATION (OpenAI)
-// ======================================================
+// =========================================================
+// [12] PAID REPORT PROMPT BUILDER
+// =========================================================
+
+function buildPaidReportPrompt({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+}) {
+    const languageName = getLanguageName(language)
+
+    return `
+You are GoNoGo, a ruthless business decision engine.
+
+You are NOT a writer.
+You are NOT a generic consultant.
+You are a paid business decision report engine.
+
+Your job:
+Evaluate this business idea and generate a premium PDF-ready JSON report.
+
+Final report language: ${languageName}
+
+Business Input:
+
+Brand Name: ${brandName}
+
+Product / Service: ${productService}
+
+Target Customer: ${targetCustomer}
+
+Language / Market: ${language}
+
+Critical rules:
+
+Output VALID JSON only.
+
+No markdown.
+
+No explanation outside JSON.
+
+Use the exact JSON shape provided below.
+
+Do not use placeholders.
+
+Every table cell must contain real content.
+
+Use realistic assumptions when exact data is unavailable.
+
+Clearly state assumptions in appendix.
+
+Use country-specific market logic.
+
+Be conservative, not optimistic.
+
+If the business is weak, say it clearly.
+
+All scores must be numbers from 0 to 100.
+
+Keep table cells concise but meaningful.
+
+Make the report directly useful for founder decision-making.
+
+You must return every field in the exact JSON structure.
+
+Never omit required keys.
+
+Never rename keys.
+
+Never add new top-level keys.
+
+Every array must keep the required number of rows.
+
+Every table row must keep the required number of columns.
+
+If data is uncertain, write a conservative assumption instead of leaving it blank.
+
+Do not use null.
+
+Do not use undefined.
+
+Do not use empty strings unless the field is truly impossible.
+
+Keep all table cells short and layout-safe.
+
+This rule applies ONLY to table cells.
+
+Narrative fields must be deeper and more informative.
+
+Escape all double quotes inside string values.
+
+Do not use unescaped quotation marks inside any JSON string.
+
+Do not use line breaks inside JSON string values.
+
+Do not use trailing commas.
+
+Every string value must be valid JSON-safe text.
+
+Layout safety rules:
+
+Table cells must be short.
+
+Each table cell should be 8 to 18 words maximum in English.
+
+For Japanese, Chinese, and Mongolian, keep table cells shorter than English.
+
+Do not write full paragraphs inside table cells.
+
+Long explanations must go only into text fields such as marketInsight, buyingTrigger, economicsJudgment, modelJudgment, operatingRule, finalRule, founderWarning.
+
+Do not put line breaks inside table cells.
+
+Do not use very long compound phrases inside table cells.
+
+Avoid repeating the same sentence across multiple cells.
+
+Numbers, ranges, and decisions should be concise.
+
+Use clear, founder-friendly wording.
+
+Narrative depth rules (CRITICAL):
+
+customerSummary:
+
+3 to 4 sentences
+
+Summarize both positive buying signals and negative hesitation signals.
+
+Explain what actually makes the customer buy.
+
+Explain what blocks the customer from buying.
+
+End with the most important validation point.
+
+The report must not feel shallow.
+
+Narrative fields are the core of decision quality.
+
+structureSummary:
+
+3 to 4 sentences
+
+Rewrite the business diagnosis table into a connected business story.
+
+Explain how the business actually operates in reality.
+
+Include business type, revenue model, entry difficulty, bottleneck, and validation logic.
+
+For the following fields, write deeper, structured explanations:
+
+marketInsight:
+
+3 to 4 sentences
+
+Explain: market structure → limitation → real opportunity → strategic implication
+
+economicsJudgment:
+
+3 to 4 sentences
+
+Explain: cost structure → CAC pressure → margin reality → survival condition
+
+modelJudgment:
+
+3 to 4 sentences
+
+Explain: why this model works or fails → structural weakness → how to fix
+
+modelDeepDive:
+
+3 to 5 sentences
+
+Explain the deeper business model mechanics.
+
+Cover revenue logic, repeat purchase or retention logic, margin pressure, operational weakness, and the best structural improvement.
+
+This must not repeat modelJudgment.
+
+operatingRule:
+
+2 to 3 sentences
+
+Must define a clear decision rule (what to track and when to stop)
+
+profitJudgment:
+
+3 to 4 sentences
+
+Explain: scaling condition → risk → realistic expectation
+
+breakEvenPoint:
+
+2 to 3 sentences
+
+Explain: when business becomes viable → key threshold → constraint
+
+Additional rules:
+
+Each explanation must include:
+
+Cause
+
+Business meaning
+
+Action implication
+
+Avoid generic phrases such as "this is important" or "this is needed"
+
+Avoid repeating the same logic across sections
+
+Each section must provide a different angle of insight
+
+Brand naming rules:
+
+brandNaming must be generated as a paid report section.
+
+The brand name should be created from productService and targetCustomer, not only from the user's brandName input.
+
+If brandName is empty, generic, temporary, or unclear, recommend a stronger brand name.
+
+Generate names that are short, memorable, easy to pronounce, and commercially usable.
+
+Avoid generic names such as Best, Smart, Premium, Global, Shop, Store, Solution, Service.
+
+Avoid names that are too narrow unless the business requires a niche identity.
+
+Prefer names that can expand into future products, categories, or markets.
+
+Naming must reflect customer desire, category signal, trust, and differentiation.
+
+For ko, names may be Korean, English, or hybrid depending on market fit.
+
+For en, prefer globally pronounceable English-style names.
+
+For ja, prefer compact, trust-oriented, easy-to-read names.
+
+For zh, prefer names that can carry meaning and social commerce appeal.
+
+For mn, prefer simple, practical, easy-to-remember names.
+
+Domain suggestions are strategic recommendations only.
+
+Do not claim real-time domain availability.
+
+availability must mean estimated likelihood only: HIGH | MEDIUM | LOW.
+
+domainSuggestions must avoid trademark-sensitive famous brand terms.
+
+brandNaming:
+
+brandDirection must explain the strategic naming direction in 3 to 4 sentences.
+
+namingStrategy must explain the naming logic, positioning angle, and why it fits the customer.
+
+keywords must contain exactly 8 short keywords.
+
+nameCandidates must contain exactly 5 candidates.
+
+Each nameCandidate must include name, meaning, fit, risk, and score.
+
+score must be a number from 0 to 100.
+
+recommendedName must choose exactly one best candidate.
+
+domainSuggestions must contain exactly 5 domain ideas.
+
+Each domain suggestion must include domain, reason, and availability.
+
+domain availability is only an estimated likelihood, not a verified registration result.
+
+Array stability rules:
+
+glossary must contain exactly 5 items.
+
+decisionMatrix must contain exactly 4 rows.
+
+marketCards must contain exactly 4 rows.
+
+marketFunnel must contain exactly 3 items: TAM, SAM, SOM.
+
+tamSamSom must contain exactly 3 rows.
+
+customerTruth must contain exactly 3 rows.
+
+customerOpportunity must contain exactly 4 rows.
+
+competitionMap must contain exactly 4 rows.
+
+benchmarkRows must contain exactly 3 rows.
+
+unitEconomicsCards must contain exactly 4 rows.
+
+unitEconomicsTable must contain exactly 4 rows.
+
+marketingStrategy.channelFit must contain exactly 4 rows.
+
+marketingStrategy.contentPlaybook must contain exactly 5 items.
+
+marketingStrategy.thirtyDayMarketingTest must contain exactly 12 rows and represent a 12-week / 3-month test plan.
+
+businessModel.revenueLayers must contain exactly 3 rows.
+
+riskSystem must contain exactly 3 rows.
+
+executionPlan must contain exactly 3 rows.
+
+goThreshold must contain exactly 4 rows.
+
+goChecklist must contain exactly 4 items.
+
+dataConfidence.sourceQuality must contain exactly 3 rows.
+
+dataConfidence.limits must contain exactly 3 items.
+
+sensitivityAnalysis.cacLtvTable must contain exactly 3 rows.
+
+profitSimulation.monthlyScenarioTable must contain exactly 3 rows.
+
+killCriteria.rules must contain exactly 4 rows.
+
+appendix.dataSources must contain exactly 3 rows.
+
+appendix.assumptions must contain exactly 4 items.
+
+referenceLinks must contain exactly 5 rows.
+
+brandNaming.keywords must contain exactly 8 items.
+
+brandNaming.nameCandidates must contain exactly 5 items.
+
+brandNaming.domainSuggestions must contain exactly 5 items.
+
+Language output rules:
+
+All user-facing values must be written in the final report language.
+
+Do not mix Korean into English, Japanese, Chinese, or Mongolian reports.
+
+Keep business terms such as CAC, LTV, TAM, SAM, SOM, AOV in English.
+
+For Japanese, Chinese, and Mongolian, keep sentences compact to protect PDF layout.
+
+Narrative tone rules:
+
+Write like a strategy consultant, not a content writer
+
+Be direct, specific, and decision-oriented
+
+Avoid storytelling, focus on judgment
+
+Each paragraph should help a founder decide "go / pivot / stop"
+
+Country strategy rules:
+
+ko: Korea-first. Consider Naver, Kakao, Coupang, SmartStore, Instagram, YouTube Shorts, local payment behavior, Korean price sensitivity.
+
+en: Global / English market. Consider Google, Meta, Amazon, Shopify, TikTok, Reddit, creator ads, DTC funnel.
+
+ja: Japan-first. Consider LINE, Rakuten, Yahoo Japan, Amazon JP, trust-heavy purchase behavior, conservative adoption.
+
+zh: Chinese-speaking market. Consider WeChat, Xiaohongshu, Douyin, Tmall, group commerce, social proof, KOL/KOC.
+
+mn: Mongolia-first. Consider Facebook commerce, bank transfer, offline trust, messenger sales, low-friction purchase behavior.
+
+Important:
+Your JSON must match the current HTML template structure exactly.
+
+Return this exact JSON shape:
+`
+}
+// =========================================================
+// [13] PAID REPORT PROMPT JSON SHAPE
+// =========================================================
+
+const PAID_REPORT_JSON_SHAPE = `
+{
+  "cover": {
+    "brandName": "",
+    "decision": "GO | HOLD | NO GO",
+    "score": 0,
+    "subtitle": "",
+    "oneLineVerdict": ""
+  },
+
+  "brandNaming": {
+    "brandDirection": "",
+    "namingStrategy": "",
+    "keywords": ["", "", "", "", "", "", "", ""],
+    "nameCandidates": [
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      },
+      {
+        "name": "",
+        "meaning": "",
+        "fit": "",
+        "risk": "",
+        "score": 0
+      }
+    ],
+    "recommendedName": {
+      "name": "",
+      "reason": "",
+      "positioning": "",
+      "expansionPotential": ""
+    },
+    "domainSuggestions": [
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      },
+      {
+        "domain": "",
+        "reason": "",
+        "availability": "HIGH | MEDIUM | LOW"
+      }
+    ]
+  },
+
+  "glossary": [
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    },
+    {
+      "term": "",
+      "meaning": "",
+      "whyItMatters": ""
+    }
+  ],
+
+  "businessDiagnosis": {
+    "industryType": "",
+    "businessModelType": "",
+    "countryMarketBehavior": "",
+    "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
+    "mainBottleneck": "",
+    "bestFirstOffer": "",
+    "validationExperiment": "",
+    "goNoGoLogic": "",
+    "structureSummary": ""
+  },
+
+  "visualScores": {
+    "market": 0,
+    "profitability": 0,
+    "execution": 0,
+    "risk": 0
+  },
+
+  "decisionMatrix": [
+    ["MARKET", "LOW | MEDIUM | HIGH"],
+    ["PROFITABILITY", "LOW | MEDIUM | HIGH"],
+    ["EXECUTION", "LOW | MEDIUM | HIGH"],
+    ["RISK", "LOW | MEDIUM | HIGH"]
+  ],
+
+  "executiveDecision": [
+    ["Why this works", ""],
+    ["Why this fails", ""],
+    ["What to do now", ""]
+  ],
+
+  "founderDecision": "",
+
+  "marketCards": [
+    ["TAM", ""],
+    ["SAM", ""],
+    ["SOM", ""],
+    ["GROWTH", ""]
+  ],
+
+  "marketFunnel": [
+    {
+      "label": "TAM",
+      "value": "",
+      "score": 100
+    },
+    {
+      "label": "SAM",
+      "value": "",
+      "score": 60
+    },
+    {
+      "label": "SOM",
+      "value": "",
+      "score": 20
+    }
+  ],
+
+  "tamSamSom": [
+    ["TAM", "", "", ""],
+    ["SAM", "", "", ""],
+    ["SOM", "", "", ""]
+  ],
+
+  "marketInsight": "",
+
+  "customerTruth": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+
+  "customerOpportunity": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+
+  "buyingTrigger": "",
+  "customerSummary": "",
+
+  "competitionMap": [
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""],
+    ["", "", "", ""]
+  ],
+
+  "competitionConclusion": "",
+
+  "benchmarkRows": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+
+  "unitEconomicsCards": [
+    ["CAC", ""],
+    ["LTV", ""],
+    ["AOV", ""],
+    ["REPEAT", ""]
+  ],
+
+  "unitEconomicsScore": {
+    "ltvToCac": "",
+    "payback": "",
+    "margin": "",
+    "status": "PASS | WATCH | FAIL"
+  },
+
+  "unitEconomicsTable": [
+    ["CAC", "", "", ""],
+    ["LTV", "", "", ""],
+    ["AOV", "", "", ""],
+    ["Repeat", "", "", ""]
+  ],
+
+  "economicsJudgment": "",
+
+  "marketingStrategy": {
+    "channelFit": [
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""],
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""],
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""],
+      ["", "LOW | MEDIUM | HIGH | WATCH", "", ""]
+    ],
+    "contentPlaybook": ["", "", "", "", ""],
+    "thirtyDayMarketingTest": [
+      ["Week 1", "", ""],
+      ["Week 2", "", ""],
+      ["Week 3", "", ""],
+      ["Week 4", "", ""],
+      ["Week 5", "", ""],
+      ["Week 6", "", ""],
+      ["Week 7", "", ""],
+      ["Week 8", "", ""],
+      ["Week 9", "", ""],
+      ["Week 10", "", ""],
+      ["Week 11", "", ""],
+      ["Week 12", "", ""]
+    ]
+  },
+
+  "businessModel": {
+    "revenueLayers": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "modelJudgment": "",
+    "modelDeepDive": ""
+  },
+
+  "riskSystem": [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+  ],
+
+  "executionPlan": [
+    ["Phase 1", "", ""],
+    ["Phase 2", "", ""],
+    ["Phase 3", "", ""]
+  ],
+
+  "operatingRule": "",
+
+  "goThreshold": [
+    ["CAC", "", ""],
+    ["Conversion", "", ""],
+    ["Repeat", "", ""],
+    ["Margin", "", ""]
+  ],
+
+  "goChecklist": [
+    {
+      "label": "CAC",
+      "status": "PASS | WATCH | FAIL"
+    },
+    {
+      "label": "Conversion",
+      "status": "PASS | WATCH | FAIL"
+    },
+    {
+      "label": "Repeat Purchase",
+      "status": "PASS | WATCH | FAIL"
+    },
+    {
+      "label": "Margin",
+      "status": "PASS | WATCH | FAIL"
+    }
+  ],
+
+  "finalRule": "",
+
+  "dataConfidence": {
+    "overallLevel": "LOW | MEDIUM | HIGH",
+    "summary": "",
+    "sourceQuality": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "limits": ["", "", ""]
+  },
+
+  "sensitivityAnalysis": {
+    "cacLtvTable": [
+      ["Low CAC", "", "", ""],
+      ["Base CAC", "", "", ""],
+      ["High CAC", "", "", ""]
+    ],
+    "criticalBreakPoint": "",
+    "founderWarning": ""
+  },
+
+  "profitSimulation": {
+    "monthlyScenarioTable": [
+      ["Conservative", "", "", "", "", ""],
+      ["Base", "", "", "", "", ""],
+      ["Aggressive", "", "", "", "", ""]
+    ],
+    "breakEvenPoint": "",
+    "profitJudgment": "",
+    "cashRisk": ""
+  },
+
+  "killCriteria": {
+    "rules": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "stopDecision": "",
+    "pivotDecision": "",
+    "scaleDecision": ""
+  },
+
+  "appendix": {
+    "dataSources": [
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""]
+    ],
+    "assumptions": ["", "", "", ""]
+  },
+
+  "referenceLinks": [
+    ["", ""],
+    ["", ""],
+    ["", ""],
+    ["", ""],
+    ["", ""]
+  ]
+}
+`
+// =========================================================
+// [14] PAID REPORT PROMPT TAIL
+// =========================================================
+
+function buildPaidReportPromptTail() {
+    return `
+Glossary rules:
+
+Explain important business terms used in the report.
+
+Include terms such as TAM, SAM, SOM, CAC, LTV, AOV, Margin, Retention, Conversion when relevant.
+
+Meanings must be simple enough for a non-expert founder.
+
+whyItMatters must explain how the term affects the business decision.
+
+Business diagnosis rules:
+
+Classify the business industry type.
+
+Classify the business model type.
+
+Explain country-specific buying behavior.
+
+Identify the biggest bottleneck.
+
+Recommend the best first offer.
+
+Define the first validation experiment.
+
+Data confidence rules:
+
+Explain how reliable the market and unit economics assumptions are.
+
+Separate public data, platform observations, and assumptions.
+
+Clearly state what is uncertain.
+
+Do not pretend exact data exists when it does not.
+
+Reference links rules:
+
+referenceLinks must contain relevant sources for the selected country, industry, and business model.
+
+Each row must contain: Source name, URL.
+
+Use official statistics, market platforms, trend tools, or industry-specific sources when relevant.
+
+Do not use fixed pet, food, ecommerce, or Korea-only sources unless they match the user's business input.
+
+Sensitivity analysis rules:
+
+Show how the business changes when CAC rises or LTV falls.
+
+cacLtvTable columns must be: Scenario, CAC, LTV, Decision.
+
+criticalBreakPoint must explain the point where the business becomes unprofitable.
+
+founderWarning must be direct and practical.
+
+Profit simulation rules:
+
+monthlyScenarioTable columns must be: Scenario, Customers, Revenue, Marketing Cost, Estimated Profit, Judgment.
+
+Use realistic monthly customer acquisition assumptions.
+
+Include marketing cost, gross margin, fulfillment cost if relevant.
+
+breakEvenPoint must explain when the business starts making money.
+
+profitJudgment must clearly say whether this business can make money.
+
+cashRisk must explain the cashflow risk for the founder.
+
+Kill criteria rules:
+
+Define measurable stop conditions.
+
+Rules columns must be: Metric, Kill Line, Action.
+
+Include CAC, conversion rate, repeat purchase, margin, refund/churn when relevant.
+
+stopDecision must say when to stop.
+
+pivotDecision must say when to change offer/model.
+
+scaleDecision must say when to increase budget.
+
+Calculation rules:
+
+TAM must describe the total reachable category demand.
+
+SAM must narrow TAM to the country/channel/customer segment.
+
+SOM must be a realistic first 12-month obtainable market.
+
+Unit economics must include CAC, AOV, LTV, repeat purchase, margin, and payback.
+
+LTV/CAC must be calculated logically.
+
+Marketing channels must match the selected country.
+
+Execution plan must be actionable within 30 days.
+
+GO threshold must define measurable pass/fail criteria.
+
+Appendix must include assumed data sources and assumptions.
+
+Scoring logic:
+
+Market score: demand size + urgency + accessibility.
+
+Profitability score: margin + LTV/CAC + repeat purchase potential.
+
+Execution score: founder feasibility + launch cost + operational complexity.
+
+Risk score: higher number means higher risk pressure.
+
+Overall cover.score should reflect weighted judgment.
+
+Decision logic:
+
+GO: score 75+, strong demand, viable unit economics.
+
+HOLD: score 50-74, needs validation.
+
+NO GO: below 50, weak economics or market access.
+
+Now generate the JSON report.
+`
+}
+// =========================================================
+// [15] FINAL PROMPT BUILDER MERGE
+// =========================================================
+
+function buildPaidReportPrompt({
+    brandName,
+    productService,
+    targetCustomer,
+    language,
+}) {
+    const languageName = getLanguageName(language)
+
+    const promptHead = `
+You are GoNoGo, a ruthless business decision engine.
+
+You are NOT a writer.
+You are NOT a generic consultant.
+You are a paid business decision report engine.
+
+Your job:
+Evaluate this business idea and generate a premium PDF-ready JSON report.
+
+Final report language: ${languageName}
+
+Business Input:
+
+Brand Name: ${brandName}
+
+Product / Service: ${productService}
+
+Target Customer: ${targetCustomer}
+
+Language / Market: ${language}
+
+Critical rules:
+
+Output VALID JSON only.
+
+No markdown.
+
+No explanation outside JSON.
+
+Use the exact JSON shape provided below.
+
+Do not use placeholders.
+
+Every table cell must contain real content.
+
+Use realistic assumptions when exact data is unavailable.
+
+Clearly state assumptions in appendix.
+
+Use country-specific market logic.
+
+Be conservative, not optimistic.
+
+If the business is weak, say it clearly.
+
+All scores must be numbers from 0 to 100.
+
+Keep table cells concise but meaningful.
+
+Make the report directly useful for founder decision-making.
+
+You must return every field in the exact JSON structure.
+
+Never omit required keys.
+
+Never rename keys.
+
+Never add new top-level keys.
+
+Every array must keep the required number of rows.
+
+Every table row must keep the required number of columns.
+
+If data is uncertain, write a conservative assumption instead of leaving it blank.
+
+Do not use null.
+
+Do not use undefined.
+
+Do not use empty strings unless the field is truly impossible.
+
+Keep all table cells short and layout-safe.
+
+This rule applies ONLY to table cells.
+
+Narrative fields must be deeper and more informative.
+
+Escape all double quotes inside string values.
+
+Do not use unescaped quotation marks inside any JSON string.
+
+Do not use line breaks inside JSON string values.
+
+Do not use trailing commas.
+
+Every string value must be valid JSON-safe text.
+
+Layout safety rules:
+
+Table cells must be short.
+
+Each table cell should be 8 to 18 words maximum in English.
+
+For Japanese, Chinese, and Mongolian, keep table cells shorter than English.
+
+Do not write full paragraphs inside table cells.
+
+Long explanations must go only into text fields such as marketInsight, buyingTrigger, economicsJudgment, modelJudgment, operatingRule, finalRule, founderWarning.
+
+Do not put line breaks inside table cells.
+
+Do not use very long compound phrases inside table cells.
+
+Avoid repeating the same sentence across multiple cells.
+
+Numbers, ranges, and decisions should be concise.
+
+Use clear, founder-friendly wording.
+
+Narrative depth rules (CRITICAL):
+
+customerSummary:
+
+3 to 4 sentences
+
+Summarize both positive buying signals and negative hesitation signals.
+
+Explain what actually makes the customer buy.
+
+Explain what blocks the customer from buying.
+
+End with the most important validation point.
+
+The report must not feel shallow.
+
+Narrative fields are the core of decision quality.
+
+structureSummary:
+
+3 to 4 sentences
+
+Rewrite the business diagnosis table into a connected business story.
+
+Explain how the business actually operates in reality.
+
+Include business type, revenue model, entry difficulty, bottleneck, and validation logic.
+
+For the following fields, write deeper, structured explanations:
+
+marketInsight:
+
+3 to 4 sentences
+
+Explain: market structure → limitation → real opportunity → strategic implication
+
+economicsJudgment:
+
+3 to 4 sentences
+
+Explain: cost structure → CAC pressure → margin reality → survival condition
+
+modelJudgment:
+
+3 to 4 sentences
+
+Explain: why this model works or fails → structural weakness → how to fix
+
+modelDeepDive:
+
+3 to 5 sentences
+
+Explain the deeper business model mechanics.
+
+Cover revenue logic, repeat purchase or retention logic, margin pressure, operational weakness, and the best structural improvement.
+
+This must not repeat modelJudgment.
+
+operatingRule:
+
+2 to 3 sentences
+
+Must define a clear decision rule (what to track and when to stop)
+
+profitJudgment:
+
+3 to 4 sentences
+
+Explain: scaling condition → risk → realistic expectation
+
+breakEvenPoint:
+
+2 to 3 sentences
+
+Explain: when business becomes viable → key threshold → constraint
+
+Additional rules:
+
+Each explanation must include:
+
+Cause
+
+Business meaning
+
+Action implication
+
+Avoid generic phrases such as "this is important" or "this is needed"
+
+Avoid repeating the same logic across sections
+
+Each section must provide a different angle of insight
+
+Brand naming rules:
+
+brandNaming must be generated as a paid report section.
+
+The brand name should be created from productService and targetCustomer, not only from the user's brandName input.
+
+If brandName is empty, generic, temporary, or unclear, recommend a stronger brand name.
+
+Generate names that are short, memorable, easy to pronounce, and commercially usable.
+
+Avoid generic names such as Best, Smart, Premium, Global, Shop, Store, Solution, Service.
+
+Avoid names that are too narrow unless the business requires a niche identity.
+
+Prefer names that can expand into future products, categories, or markets.
+
+Naming must reflect customer desire, category signal, trust, and differentiation.
+
+For ko, names may be Korean, English, or hybrid depending on market fit.
+
+For en, prefer globally pronounceable English-style names.
+
+For ja, prefer compact, trust-oriented, easy-to-read names.
+
+For zh, prefer names that can carry meaning and social commerce appeal.
+
+For mn, prefer simple, practical, easy-to-remember names.
+
+Domain suggestions are strategic recommendations only.
+
+Do not claim real-time domain availability.
+
+availability must mean estimated likelihood only: HIGH | MEDIUM | LOW.
+
+domainSuggestions must avoid trademark-sensitive famous brand terms.
+
+brandNaming:
+
+brandDirection must explain the strategic naming direction in 3 to 4 sentences.
+
+namingStrategy must explain the naming logic, positioning angle, and why it fits the customer.
+
+keywords must contain exactly 8 short keywords.
+
+nameCandidates must contain exactly 5 candidates.
+
+Each nameCandidate must include name, meaning, fit, risk, and score.
+
+score must be a number from 0 to 100.
+
+recommendedName must choose exactly one best candidate.
+
+domainSuggestions must contain exactly 5 domain ideas.
+
+Each domain suggestion must include domain, reason, and availability.
+
+domain availability is only an estimated likelihood, not a verified registration result.
+
+Array stability rules:
+
+glossary must contain exactly 5 items.
+
+decisionMatrix must contain exactly 4 rows.
+
+marketCards must contain exactly 4 rows.
+
+marketFunnel must contain exactly 3 items: TAM, SAM, SOM.
+
+tamSamSom must contain exactly 3 rows.
+
+customerTruth must contain exactly 3 rows.
+
+customerOpportunity must contain exactly 4 rows.
+
+competitionMap must contain exactly 4 rows.
+
+benchmarkRows must contain exactly 3 rows.
+
+unitEconomicsCards must contain exactly 4 rows.
+
+unitEconomicsTable must contain exactly 4 rows.
+
+marketingStrategy.channelFit must contain exactly 4 rows.
+
+marketingStrategy.contentPlaybook must contain exactly 5 items.
+
+marketingStrategy.thirtyDayMarketingTest must contain exactly 12 rows and represent a 12-week / 3-month test plan.
+
+businessModel.revenueLayers must contain exactly 3 rows.
+
+riskSystem must contain exactly 3 rows.
+
+executionPlan must contain exactly 3 rows.
+
+goThreshold must contain exactly 4 rows.
+
+goChecklist must contain exactly 4 items.
+
+dataConfidence.sourceQuality must contain exactly 3 rows.
+
+dataConfidence.limits must contain exactly 3 items.
+
+sensitivityAnalysis.cacLtvTable must contain exactly 3 rows.
+
+profitSimulation.monthlyScenarioTable must contain exactly 3 rows.
+
+killCriteria.rules must contain exactly 4 rows.
+
+appendix.dataSources must contain exactly 3 rows.
+
+appendix.assumptions must contain exactly 4 items.
+
+referenceLinks must contain exactly 5 rows.
+
+brandNaming.keywords must contain exactly 8 items.
+
+brandNaming.nameCandidates must contain exactly 5 items.
+
+brandNaming.domainSuggestions must contain exactly 5 items.
+
+Language output rules:
+
+All user-facing values must be written in the final report language.
+
+Do not mix Korean into English, Japanese, Chinese, or Mongolian reports.
+
+Keep business terms such as CAC, LTV, TAM, SAM, SOM, AOV in English.
+
+For Japanese, Chinese, and Mongolian, keep sentences compact to protect PDF layout.
+
+Narrative tone rules:
+
+Write like a strategy consultant, not a content writer
+
+Be direct, specific, and decision-oriented
+
+Avoid storytelling, focus on judgment
+
+Each paragraph should help a founder decide "go / pivot / stop"
+
+Country strategy rules:
+
+ko: Korea-first. Consider Naver, Kakao, Coupang, SmartStore, Instagram, YouTube Shorts, local payment behavior, Korean price sensitivity.
+
+en: Global / English market. Consider Google, Meta, Amazon, Shopify, TikTok, Reddit, creator ads, DTC funnel.
+
+ja: Japan-first. Consider LINE, Rakuten, Yahoo Japan, Amazon JP, trust-heavy purchase behavior, conservative adoption.
+
+zh: Chinese-speaking market. Consider WeChat, Xiaohongshu, Douyin, Tmall, group commerce, social proof, KOL/KOC.
+
+mn: Mongolia-first. Consider Facebook commerce, bank transfer, offline trust, messenger sales, low-friction purchase behavior.
+
+Important:
+Your JSON must match the current HTML template structure exactly.
+
+Return this exact JSON shape:
+`
+
+    return `${promptHead}
+
+${PAID_REPORT_JSON_SHAPE}
+
+${buildPaidReportPromptTail()}`
+}
+// =========================================================
+// [16] GENERATE DEEP REPORT (OPENAI CALL)
+// =========================================================
 
 async function generateDeepReportJson(input) {
     const { brandName, productService, targetCustomer, language } = input
@@ -427,134 +1935,70 @@ async function generateDeepReportJson(input) {
 
     const raw = completion.choices?.[0]?.message?.content
 
-    if (!raw) {
-        throw new Error("Empty OpenAI response.")
+    if (!raw) throw new Error("Empty OpenAI response.")
+
+    let parsed
+
+    try {
+        parsed = JSON.parse(raw)
+    } catch (parseError) {
+        console.error("[OPENAI_JSON_PARSE_ERROR]", parseError)
+        console.error("[OPENAI_JSON_RAW_START]", raw.slice(0, 1200))
+        console.error("[OPENAI_JSON_RAW_ERROR_AREA]", raw.slice(8800, 9800))
+        console.error("[OPENAI_JSON_RAW_END]", raw.slice(-1200))
+
+        throw new Error(
+            `OpenAI returned invalid JSON. ${String(parseError?.message || parseError)}`
+        )
     }
 
-    return normalizeDeepReport(JSON.parse(raw), input)
+    return normalizeDeepReport(parsed, input)
 }
 
+// =========================================================
+// [17] FREE REPORT BUILDER
+// =========================================================
 
-// ======================================================
-// 06. PROMPT BUILDER
-// ======================================================
+async function generateFreeReportJson(input) {
+    const deep = await generateDeepReportJson(input)
 
-function buildPaidReportPrompt({
-    brandName,
-    productService,
-    targetCustomer,
-    language,
-}) {
-    const languageName = getLanguageName(language)
-
-    return `
-You are GoNoGo, a ruthless business decision engine.
-
-You are NOT a writer.
-You are NOT a generic consultant.
-You are a paid business decision report engine.
-
-Your job:
-Evaluate this business idea and generate a premium JSON report.
-
-Final report language: ${languageName}
-
-Business Input:
-Brand Name: ${brandName}
-Product / Service: ${productService}
-Target Customer: ${targetCustomer}
-Language / Market: ${language}
-
-CRITICAL RULES:
-
-- Output VALID JSON only
-- No markdown
-- No explanation
-- No text outside JSON
-- Every field must be filled
-- Never return null or undefined
-- If data is missing → use conservative assumption
-
-SCORING RULE:
-
-GO: score 75+
-HOLD: 50~74
-NO GO: below 50
-
-RETURN THIS STRUCTURE:
-
-{
-  "cover": {
-    "brandName": "${brandName}",
-    "decision": "GO | HOLD | NO GO",
-    "score": 0,
-    "subtitle": "",
-    "oneLineVerdict": ""
-  },
-
-  "visualScores": {
-    "market": 0,
-    "profitability": 0,
-    "execution": 0,
-    "risk": 0
-  },
-
-  "businessDiagnosis": {
-    "industryType": "",
-    "businessModelType": "",
-    "countryMarketBehavior": "",
-    "marketEntryDifficulty": "LOW | MEDIUM | HIGH",
-    "mainBottleneck": "",
-    "bestFirstOffer": "",
-    "validationExperiment": "",
-    "goNoGoLogic": "",
-    "structureSummary": ""
-  },
-
-  "marketInsight": "",
-  "customerSummary": "",
-  "economicsJudgment": "",
-
-  "unitEconomicsCards": [
-    ["CAC", ""],
-    ["LTV", ""],
-    ["AOV", ""],
-    ["REPEAT", ""]
-  ],
-
-  "decisionMatrix": [
-    ["MARKET", "LOW | MEDIUM | HIGH"],
-    ["PROFITABILITY", "LOW | MEDIUM | HIGH"],
-    ["EXECUTION", "LOW | MEDIUM | HIGH"],
-    ["RISK", "LOW | MEDIUM | HIGH"]
-  ],
-
-  "founderDecision": ""
-}
-`
-}
-// ======================================================
-// 07. FREE REPORT BUILDER
-// ======================================================
-
-function buildFreeReportFromPaidReport(fullReport) {
     return {
-        ...fullReport,
-        isPaid: false,
-        reportMode: "free",
-
-        lockedSections: {
-            afterSection01: true,
-            message:
-                "This free report shows only the business direction and basic structure. Customer analysis, market sizing, profit structure, risk judgment, and execution strategy are available in the paid report.",
+        ...deep,
+        cover: {
+            ...deep.cover,
+            subtitle: `${deep.cover.subtitle} — Free Decision Sample`,
         },
     }
 }
 
+// =========================================================
+// [18] FREE REPORT FILTER (PAID → FREE)
+// =========================================================
 
-// ======================================================
-// 08. REPORT NORMALIZER
-// ======================================================
+function buildFreeReportFromPaidReport(fullReport) {
+    return {
+        cover: fullReport.cover,
+
+        businessDiagnosis: fullReport.businessDiagnosis,
+
+        executiveDecision: fullReport.executiveDecision,
+
+        marketCards: fullReport.marketCards,
+
+        customerSummary: fullReport.customerSummary,
+
+        isPaid: false,
+        reportMode: "free",
+
+        lockedSections: {
+            message:
+                "Full analysis including market reality, customer behavior, profit structure, and execution strategy is available in the paid report.",
+        },
+    }
+}
+// =========================================================
+// [19] NORMALIZE REPORT (안정화 핵심)
+// =========================================================
 
 function normalizeDeepReport(report, input) {
     return {
@@ -625,8 +2069,7 @@ function normalizeDeepReport(report, input) {
             execution: toScore(report?.visualScores?.execution, 50),
             risk: toScore(report?.visualScores?.risk, 50),
         },
-
-        decisionMatrix: safeArray(report?.decisionMatrix, [
+              decisionMatrix: safeArray(report?.decisionMatrix, [
             ["MARKET", "MEDIUM"],
             ["PROFITABILITY", "MEDIUM"],
             ["EXECUTION", "MEDIUM"],
@@ -662,17 +2105,36 @@ function normalizeDeepReport(report, input) {
 
         marketInsight: report?.marketInsight || "",
 
-        customerTruth: safeArray(report?.customerTruth, []).slice(0, 3),
-        customerOpportunity: safeArray(
-            report?.customerOpportunity,
-            []
-        ).slice(0, 4),
+        customerTruth: safeArray(report?.customerTruth, [
+            ["", "", ""],
+            ["", "", ""],
+            ["", "", ""],
+        ]).slice(0, 3),
+
+        customerOpportunity: safeArray(report?.customerOpportunity, [
+            ["", "", ""],
+            ["", "", ""],
+            ["", "", ""],
+            ["", "", ""],
+        ]).slice(0, 4),
+
         buyingTrigger: report?.buyingTrigger || "",
         customerSummary: report?.customerSummary || "",
 
-        competitionMap: safeArray(report?.competitionMap, []).slice(0, 4),
+        competitionMap: safeArray(report?.competitionMap, [
+            ["", "", "", ""],
+            ["", "", "", ""],
+            ["", "", "", ""],
+            ["", "", "", ""],
+        ]).slice(0, 4),
+
         competitionConclusion: report?.competitionConclusion || "",
-        benchmarkRows: safeArray(report?.benchmarkRows, []).slice(0, 3),
+
+        benchmarkRows: safeArray(report?.benchmarkRows, [
+            ["", "", ""],
+            ["", "", ""],
+            ["", "", ""],
+        ]).slice(0, 3),
 
         unitEconomicsCards: safeArray(report?.unitEconomicsCards, [
             ["CAC", ""],
@@ -688,44 +2150,84 @@ function normalizeDeepReport(report, input) {
             status: report?.unitEconomicsScore?.status || "WATCH",
         },
 
-        unitEconomicsTable: safeArray(
-            report?.unitEconomicsTable,
-            []
-        ).slice(0, 4),
+        unitEconomicsTable: safeArray(report?.unitEconomicsTable, [
+            ["CAC", "", "", ""],
+            ["LTV", "", "", ""],
+            ["AOV", "", "", ""],
+            ["Repeat", "", "", ""],
+        ]).slice(0, 4),
 
         economicsJudgment: report?.economicsJudgment || "",
 
         marketingStrategy: {
             channelFit: safeArray(
                 report?.marketingStrategy?.channelFit,
-                []
+                [
+                    ["", "WATCH", "", ""],
+                    ["", "WATCH", "", ""],
+                    ["", "WATCH", "", ""],
+                    ["", "WATCH", "", ""],
+                ]
             ).slice(0, 4),
+
             contentPlaybook: safeArray(
                 report?.marketingStrategy?.contentPlaybook,
-                []
+                ["", "", "", "", ""]
             ).slice(0, 5),
+
             thirtyDayMarketingTest: safeArray(
                 report?.marketingStrategy?.thirtyDayMarketingTest,
-                []
+                [
+                    ["Week 1", "", ""],
+                    ["Week 2", "", ""],
+                    ["Week 3", "", ""],
+                    ["Week 4", "", ""],
+                    ["Week 5", "", ""],
+                    ["Week 6", "", ""],
+                    ["Week 7", "", ""],
+                    ["Week 8", "", ""],
+                    ["Week 9", "", ""],
+                    ["Week 10", "", ""],
+                    ["Week 11", "", ""],
+                    ["Week 12", "", ""],
+                ]
             ).slice(0, 12),
         },
 
         businessModel: {
             revenueLayers: safeArray(
                 report?.businessModel?.revenueLayers,
-                []
+                [
+                    ["", "", ""],
+                    ["", "", ""],
+                    ["", "", ""],
+                ]
             ).slice(0, 3),
-            modelJudgment:
-                report?.businessModel?.modelJudgment || "",
-            modelDeepDive:
-                report?.businessModel?.modelDeepDive || "",
+
+            modelJudgment: report?.businessModel?.modelJudgment || "",
+            modelDeepDive: report?.businessModel?.modelDeepDive || "",
         },
 
-        riskSystem: safeArray(report?.riskSystem, []).slice(0, 3),
-        executionPlan: safeArray(report?.executionPlan, []).slice(0, 3),
+        riskSystem: safeArray(report?.riskSystem, [
+            ["", "", ""],
+            ["", "", ""],
+            ["", "", ""],
+        ]).slice(0, 3),
+
+        executionPlan: safeArray(report?.executionPlan, [
+            ["Phase 1", "", ""],
+            ["Phase 2", "", ""],
+            ["Phase 3", "", ""],
+        ]).slice(0, 3),
+
         operatingRule: report?.operatingRule || "",
 
-        goThreshold: safeArray(report?.goThreshold, []).slice(0, 4),
+        goThreshold: safeArray(report?.goThreshold, [
+            ["CAC", "", ""],
+            ["Conversion", "", ""],
+            ["Repeat", "", ""],
+            ["Margin", "", ""],
+        ]).slice(0, 4),
 
         goChecklist: safeArray(report?.goChecklist, [
             { label: "CAC", status: "WATCH" },
@@ -737,26 +2239,36 @@ function normalizeDeepReport(report, input) {
         finalRule: report?.finalRule || "",
 
         dataConfidence: {
-            overallLevel:
-                report?.dataConfidence?.overallLevel || "MEDIUM",
+            overallLevel: report?.dataConfidence?.overallLevel || "MEDIUM",
             summary: report?.dataConfidence?.summary || "",
             sourceQuality: safeArray(
                 report?.dataConfidence?.sourceQuality,
-                []
+                [
+                    ["", "", ""],
+                    ["", "", ""],
+                    ["", "", ""],
+                ]
             ).slice(0, 3),
-            limits: safeArray(
-                report?.dataConfidence?.limits,
-                []
-            ).slice(0, 3),
+            limits: safeArray(report?.dataConfidence?.limits, [
+                "",
+                "",
+                "",
+            ]).slice(0, 3),
         },
 
         sensitivityAnalysis: {
             cacLtvTable: safeArray(
                 report?.sensitivityAnalysis?.cacLtvTable,
-                []
+                [
+                    ["Low CAC", "", "", ""],
+                    ["Base CAC", "", "", ""],
+                    ["High CAC", "", "", ""],
+                ]
             ).slice(0, 3),
+
             criticalBreakPoint:
                 report?.sensitivityAnalysis?.criticalBreakPoint || "",
+
             founderWarning:
                 report?.sensitivityAnalysis?.founderWarning || "",
         },
@@ -764,59 +2276,78 @@ function normalizeDeepReport(report, input) {
         profitSimulation: {
             monthlyScenarioTable: safeArray(
                 report?.profitSimulation?.monthlyScenarioTable,
-                []
+                [
+                    ["Conservative", "", "", "", "", ""],
+                    ["Base", "", "", "", "", ""],
+                    ["Aggressive", "", "", "", "", ""],
+                ]
             ).slice(0, 3),
+
             breakEvenPoint:
                 report?.profitSimulation?.breakEvenPoint || "",
+
             profitJudgment:
                 report?.profitSimulation?.profitJudgment || "",
-            cashRisk: report?.profitSimulation?.cashRisk || "",
+
+            cashRisk:
+                report?.profitSimulation?.cashRisk || "",
         },
 
         killCriteria: {
-            rules: safeArray(
-                report?.killCriteria?.rules,
-                []
-            ).slice(0, 4),
+            rules: safeArray(report?.killCriteria?.rules, [
+                ["", "", ""],
+                ["", "", ""],
+                ["", "", ""],
+                ["", "", ""],
+            ]).slice(0, 4),
+
             stopDecision:
                 report?.killCriteria?.stopDecision || "",
+
             pivotDecision:
                 report?.killCriteria?.pivotDecision || "",
+
             scaleDecision:
                 report?.killCriteria?.scaleDecision || "",
         },
 
         appendix: {
-            dataSources: safeArray(
-                report?.appendix?.dataSources,
-                []
-            ).slice(0, 3),
-            assumptions: safeArray(
-                report?.appendix?.assumptions,
-                []
-            ).slice(0, 4),
+            dataSources: safeArray(report?.appendix?.dataSources, [
+                ["", "", ""],
+                ["", "", ""],
+                ["", "", ""],
+            ]).slice(0, 3),
+
+            assumptions: safeArray(report?.appendix?.assumptions, [
+                "",
+                "",
+                "",
+                "",
+            ]).slice(0, 4),
         },
 
-        referenceLinks: safeArray(report?.referenceLinks, []).slice(0, 5),
+        referenceLinks: safeArray(report?.referenceLinks, [
+            ["", ""],
+            ["", ""],
+            ["", ""],
+            ["", ""],
+            ["", ""],
+        ]).slice(0, 5),
     }
 }
-// ======================================================
-// 09. HTML TEMPLATE BUILDER
-// ======================================================
+// =========================================================
+// [20] BUILD HTML FROM TEMPLATE
+// =========================================================
 
 function buildHtmlFromTemplate(report, locale) {
-    const templatePath = path.join(
-        __dirname,
-        "templates",
-        "deep-report.html"
-    )
-
+    const templatePath = path.join(__dirname, "templates", "deep-report.html")
     let html = fs.readFileSync(templatePath, "utf8")
 
     const matrix = objectFromPairs(report.decisionMatrix)
     const market = objectFromPairs(report.marketCards)
     const unit = objectFromPairs(report.unitEconomicsCards)
     const execMap = objectFromPairs(report.executiveDecision)
+
     const funnel = normalizeFunnel(report.marketFunnel)
 
     const lockedMessage = t(
@@ -911,10 +2442,12 @@ function buildHtmlFromTemplate(report, locale) {
         brandName: report.cover.brandName,
         decision: report.cover.decision,
         score: report.cover.score,
+
         decisionClass: getStatusClass(report.cover?.decision),
         subtitle: report.cover.subtitle,
         oneLineVerdict: report.cover.oneLineVerdict,
 
+        // Brand naming
         brandDirection: report?.brandNaming?.brandDirection || "",
         namingStrategy: report?.brandNaming?.namingStrategy || "",
 
@@ -1026,9 +2559,7 @@ function buildHtmlFromTemplate(report, locale) {
         repeatValue: unit.REPEAT || "",
 
         economicsJudgment: report.economicsJudgment,
-
         modelJudgment: report.businessModel.modelJudgment,
-
         operatingRule: report.operatingRule,
         finalRule: report.finalRule,
 
@@ -1046,223 +2577,156 @@ function buildHtmlFromTemplate(report, locale) {
         ...locale,
         ...data,
     }
-            html = html
+          // =========================================================
+    // [21] TEMPLATE REPLACE
+    // =========================================================
+
+    html = html
+
         .replace("{{modelDeepDive}}", report?.businessModel?.modelDeepDive || "")
         .replace("{{referenceLinkRows}}", rows(referenceLinks))
+
         .replace("{{glossaryRows}}", glossaryRows(report.glossary))
         .replace("{{scoreGuideRows}}", rows(scoreGuideRows))
         .replace("{{marketFunnelChart}}", marketFunnelChart(report.marketFunnel))
         .replaceAll(
             "{{profitSimulationChart}}",
-            profitSimulationChart(
-                report.profitSimulation?.monthlyScenarioTable,
-                locale
-            )
+            profitSimulationChart(report.profitSimulation?.monthlyScenarioTable, locale)
         )
-        .replace(
-            "{{cacLtvRiskChart}}",
-            cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale)
-        )
+        .replace("{{cacLtvRiskChart}}", cacLtvRiskChart(report.sensitivityAnalysis?.cacLtvTable, locale))
+
         .replace(
             "{{tamSamSomRows}}",
             report?.lockedSections?.tamSamSom
-                ? `<tr><td colspan="4">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.tamSamSom)
         )
+
         .replace("{{customerTruthRows}}", rows(report.customerTruth))
         .replace("{{customerOpportunityRows}}", rows(customerOpportunityRows))
+
         .replace(
             "{{competitionRows}}",
             report?.lockedSections?.competition
-                ? `<tr><td colspan="4">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.competitionMap)
         )
-        .replace(
-            "{{competitionPositionChart}}",
-            competitionPositionChart(report.competitionMap, locale)
-        )
+
+        .replace("{{competitionPositionChart}}", competitionPositionChart(report.competitionMap, locale))
         .replace(
             "{{competitionConclusion}}",
             report?.lockedSections?.competition
                 ? esc(lockedMessage)
                 : esc(report.competitionConclusion)
         )
+
         .replace("{{benchmarkRows}}", rows(benchmarkRows))
+
         .replace(
             "{{unitEconomicsRows}}",
             report?.lockedSections?.unitEconomics
-                ? `<tr><td colspan="4">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.unitEconomicsTable)
         )
+
         .replace(
             "{{marketingChannelRows}}",
             report?.lockedSections?.marketing
-                ? `<tr><td colspan="4">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="4">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.marketingStrategy.channelFit)
         )
+
         .replace(
             "{{contentPlaybookItems}}",
             report?.lockedSections?.marketing
                 ? `<li>${esc(lockedMessage)}</li>`
                 : listItems(report.marketingStrategy.contentPlaybook)
         )
+
         .replace(
             "{{marketingTestRows}}",
             report?.lockedSections?.marketing
-                ? `<tr><td colspan="3">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.marketingStrategy.thirtyDayMarketingTest)
         )
-        .replace(
-            "{{businessModelRows}}",
-            rows(report.businessModel.revenueLayers)
-        )
+
+        .replace("{{businessModelRows}}", rows(report.businessModel.revenueLayers))
+
         .replace(
             "{{riskRows}}",
             report?.lockedSections?.risk
-                ? `<tr><td colspan="3">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.riskSystem)
         )
+
         .replace(
             "{{riskHeatmap}}",
-            report?.lockedSections?.risk
-                ? ""
-                : riskHeatmap(report.riskSystem, locale)
+            report?.lockedSections?.risk ? "" : riskHeatmap(report.riskSystem, locale)
         )
+
         .replace(
             "{{executionRows}}",
             report?.lockedSections?.execution
-                ? `<tr><td colspan="3">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.executionPlan)
         )
+
         .replace(
             "{{executionTimeline}}",
-            report?.lockedSections?.execution
-                ? ""
-                : executionTimeline(report.executionPlan, locale)
+            report?.lockedSections?.execution ? "" : executionTimeline(report.executionPlan, locale)
         )
+
         .replace("{{decisionSummaryBox}}", decisionSummaryBox(report, locale))
+
         .replace(
             "{{goThresholdRows}}",
             report?.lockedSections?.goThreshold
-                ? `<tr><td colspan="3">${lockedBox(
-                      lockedMessage,
-                      lockedTitle,
-                      lockedButton
-                  )}</td></tr>`
+                ? `<tr><td colspan="3">${lockedBox(lockedMessage, lockedTitle, lockedButton)}</td></tr>`
                 : rows(report.goThreshold)
         )
-        .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
-        .replace(
-            "{{sourceQualityRows}}",
-            rows(report.dataConfidence?.sourceQuality)
-        )
-        .replace(
-            "{{dataLimitItems}}",
-            listItems(report.dataConfidence?.limits)
-        )
-        .replace("{{referenceLinkRows}}", rows(referenceLinks))
-        .replace(
-            "{{cacLtvRows}}",
-            rows(report.sensitivityAnalysis?.cacLtvTable)
-        )
-        .replace(
-            "{{profitSimulationRows}}",
-            rows(report.profitSimulation?.monthlyScenarioTable)
-        )
-        .replace(
-            "{{killCriteriaRows}}",
-            rows(report.killCriteria?.rules)
-        )
-        .replace(
-            "{{dataSourceRows}}",
-            rows(report.appendix.dataSources)
-        )
-        .replace(
-            "{{assumptionItems}}",
-            listItems(report.appendix.assumptions)
-        )
 
-    validateTemplateKeys(html, templateData, [
-        "modelDeepDive",
-        "profitSimulationChart",
-        "referenceLinkRows",
-        "glossaryRows",
-        "scoreGuideRows",
-        "marketFunnelChart",
-        "cacLtvRiskChart",
-        "tamSamSomRows",
-        "customerTruthRows",
-        "customerOpportunityRows",
-        "competitionRows",
-        "competitionConclusion",
-        "benchmarkRows",
-        "unitEconomicsRows",
-        "marketingChannelRows",
-        "contentPlaybookItems",
-        "marketingTestRows",
-        "businessModelRows",
-        "riskRows",
-        "riskHeatmap",
-        "executionRows",
-        "executionTimeline",
-        "decisionSummaryBox",
-        "goThresholdRows",
-        "goChecklistItems",
-        "sourceQualityRows",
-        "dataLimitItems",
-        "cacLtvRows",
-        "profitSimulationRows",
-        "killCriteriaRows",
-        "dataSourceRows",
-        "assumptionItems",
-    ])
+        .replace("{{goChecklistItems}}", checklistItems(report.goChecklist))
+
+        .replace("{{sourceQualityRows}}", rows(report.dataConfidence?.sourceQuality))
+        .replace("{{dataLimitItems}}", listItems(report.dataConfidence?.limits))
+        .replace("{{cacLtvRows}}", rows(report.sensitivityAnalysis?.cacLtvTable))
+        .replace("{{profitSimulationRows}}", rows(report.profitSimulation?.monthlyScenarioTable))
+        .replace("{{killCriteriaRows}}", rows(report.killCriteria?.rules))
+        .replace("{{dataSourceRows}}", rows(report.appendix.dataSources))
+        .replace("{{assumptionItems}}", listItems(report.appendix.assumptions))
+
+    // =========================================================
+    // [22] TEMPLATE VALIDATION
+    // =========================================================
+
+    validateTemplateKeys(html, templateData)
 
     html = applyTemplateVars(html, templateData)
 
-if (report?.reportMode === "free") {
-    html = keepFreeReportOnly(html, locale, report)
+    // =========================================================
+    // [23] FREE REPORT CUT
+    // =========================================================
+
+    if (report?.reportMode === "free") {
+        html = keepFreeReportOnly(html, locale, report)
+    }
+
+    // =========================================================
+    // [24] BACK BUTTON
+    // =========================================================
+
+    html = injectReportBackButton(html, locale)
+
+    html = html.replace(/{{[^}]+}}/g, "")
+
+    return html
 }
-
-html = injectReportBackButton(html, locale)
-
-html = html.replace(/{{[^}]+}}/g, "")
-
-return html
-}
-// ======================================================
-// 10. FREE REPORT / PAYWALL
-// ======================================================
+// =========================================================
+// [25] FREE REPORT ONLY / PREMIUM LOCK UI
+// =========================================================
 
 function keepFreeReportOnly(html, locale = {}, report = {}) {
-    const splitPoint = "<!-- FREE_REPORT_END -->"
+    const splitPoint = "<!-- PREMIUM_START -->"
     const index = html.indexOf(splitPoint)
 
     if (index === -1) {
@@ -1272,7 +2736,12 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
 
     const freePart = html.slice(0, index)
 
-    const footerLeft = t(locale, "footer.left", "GoNoGo™ Business Decision Report")
+    const footerLeft = t(
+        locale,
+        "footer.left",
+        "GoNoGo™ Business Decision Report"
+    )
+
     const premiumFooter = t(locale, "premium.footer", "Premium Locked")
 
     const recommendedName =
@@ -1285,331 +2754,336 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
         report?.brandNaming?.recommendedName?.reason ||
         "This name direction is connected to the business idea, target customer, and market positioning."
 
-    const score = Number.isFinite(report?.cover?.score) ? report.cover.score : 0
+    const score = Number.isFinite(report?.cover?.score)
+        ? report.cover.score
+        : 0
+
     const decision = report?.cover?.decision || "HOLD"
 
     const checkoutUrl =
-    process.env.PAYWALL_CHECKOUT_URL ||
-    "/api/dev-create-paid-token"
+        process.env.PAYWALL_CHECKOUT_URL || "/api/dev-create-paid-token"
 
     return `
 ${freePart}
 
-<section class="page section-cover">
-  <div class="section-kicker">
-    ${esc(t(locale, "premium.kicker", "PREMIUM REPORT"))}
+<section style="
+  page-break-before: always;
+  padding: 42px;
+  font-family: ${esc(locale.fontFamily || "Arial, sans-serif")};
+  color: #102018;
+">
+  <div style="
+    font-size:12px;
+    font-weight:900;
+    color:#2f7d57;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  ">
+    ${esc(premiumFooter)}
   </div>
 
-  <div class="section-cover-title">
-    ${esc(t(locale, "premium.title", "You are 65% done. The real decision is locked."))}
-  </div>
+  <h1 style="
+    margin:0 0 14px;
+    font-size:38px;
+    line-height:1.05;
+    letter-spacing:-0.06em;
+    color:#102018;
+  ">
+    ${esc(t(locale, "premium.title", "Unlock the full GoNoGo™ Report"))}
+  </h1>
 
-  <div class="section-cover-desc">
-    ${esc(t(locale, "premium.desc", "The free report shows the basic direction. The full report unlocks brand naming, domain strategy, customer buying logic, market reality, profit structure, risk judgment, and execution strategy."))}
+  <p style="
+    margin:0 0 26px;
+    font-size:15px;
+    line-height:1.7;
+    color:#4b5d53;
+    font-weight:700;
+  ">
+    ${esc(
+        t(
+            locale,
+            "premium.desc",
+            "The free report shows the first decision signal. The paid report unlocks the full business structure, customer truth, market map, profit logic, execution plan, risk system, and naming strategy."
+        )
+    )}
+  </p>
+
+  <div style="
+    height:12px;
+    background:#e1ebe5;
+    border-radius:999px;
+    overflow:hidden;
+    margin-bottom:10px;
+  ">
+    <div style="
+      height:100%;
+      width:65%;
+      background:#2f7d57;
+      border-radius:999px;
+    "></div>
   </div>
 
   <div style="
-    margin-top:28px;
-    border:1px solid #d8e7dc;
-    background:#ffffff;
-    padding:22px;
-    box-shadow:0 14px 36px rgba(16,32,24,0.10);
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    font-size:12px;
+    font-weight:800;
+    color:#4b5d53;
+    margin-bottom:22px;
+  ">
+    <span>${esc(t(locale, "premium.freeUnlocked", "Free judgment unlocked"))}</span>
+    <span>65%</span>
+  </div>
+
+  <div style="
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:18px;
   ">
     <div style="
-      font-size:11px;
-      font-weight:900;
-      color:#2f7d57;
-      text-transform:uppercase;
-      letter-spacing:0.06em;
-      margin-bottom:10px;
-    ">
-      ${esc(t(locale, "premium.progressLabel", "Report Completion"))}
-    </div>
-
-    <div style="
-      height:12px;
-      background:#e1ebe5;
-      border-radius:999px;
-      overflow:hidden;
-      margin-bottom:10px;
-    ">
-      <div style="
-        height:100%;
-        width:65%;
-        background:#2f7d57;
-        border-radius:999px;
-      "></div>
-    </div>
-
-    <div style="
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      font-size:12px;
-      font-weight:800;
-      color:#4b5d53;
-      margin-bottom:22px;
-    ">
-      <span>${esc(t(locale, "premium.freeUnlocked", "Free judgment unlocked"))}</span>
-      <span>65%</span>
-    </div>
-
-    <div style="
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-bottom:18px;
-    ">
-      <div style="
-        border:1px solid #d8e7dc;
-        background:#f6faf7;
-        padding:16px;
-      ">
-        <div style="
-          font-size:10px;
-          font-weight:900;
-          color:#5b7065;
-          text-transform:uppercase;
-          letter-spacing:0.04em;
-          margin-bottom:8px;
-        ">
-          ${esc(t(locale, "premium.currentDecision", "Current Decision Signal"))}
-        </div>
-        <div style="
-          font-size:34px;
-          line-height:1;
-          font-weight:900;
-          color:#163c2b;
-          letter-spacing:-0.06em;
-        ">
-          ${esc(decision)}
-        </div>
-        <div style="
-          margin-top:8px;
-          font-size:13px;
-          font-weight:800;
-          color:#4b5d53;
-        ">
-          ${esc(t(locale, "premium.scoreText", "Score"))}: ${esc(String(score))} / 100
-          <div style="
-  margin-top:6px;
-  font-size:12px;
-  font-weight:800;
-  color:#b42318;
-">
- ${esc(t(locale, "premium.riskLine", "Execution risk is high in the current state."))}
-</div>
-        </div>
-      </div>
-
-      <div style="
-        border:1px solid #163c2b;
-        background:#163c2b;
-        color:#fff;
-        padding:16px;
-      ">
-        <div style="
-          font-size:10px;
-          font-weight:900;
-          opacity:0.82;
-          text-transform:uppercase;
-          letter-spacing:0.04em;
-          margin-bottom:8px;
-        ">
-          ${esc(t(locale, "premium.brandHookLabel", "Recommended Brand Preview"))}
-        </div>
-        <div style="
-          font-size:30px;
-          line-height:1.05;
-          font-weight:900;
-          letter-spacing:-0.05em;
-        ">
-          ${esc(recommendedName)}
-        </div>
-        <div style="
-          margin-top:10px;
-          font-size:12px;
-          line-height:1.5;
-          opacity:0.86;
-        ">
-          ${esc(nameReason)}
-          <div style="
-  margin-top:8px;
-  font-size:12px;
-  font-weight:800;
-  color:#ffd8d8;
-">
-  ${esc(t(locale, "premium.nameCheckLine", "Check whether this name is safe to use now."))}
-</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="
-      position:relative;
       border:1px solid #d8e7dc;
-      background:#fbfdfb;
+      background:#f6faf7;
       padding:16px;
-      margin-bottom:18px;
-      overflow:hidden;
     ">
       <div style="
-        filter:blur(4px);
-        opacity:0.55;
-        font-size:13px;
-        line-height:1.8;
-        font-weight:700;
-      ">
-        <div>✓ Why this name works for the target customer</div>
-        <div>✓ Domain suggestions and availability logic</div>
-        <div>✓ Customer buying trigger and hesitation signals</div>
-        <div>✓ Market size, competition map, revenue structure</div>
-        <div>✓ 12-week execution plan, risk system, kill criteria</div>
-      </div>
-
-      <div style="
-        position:absolute;
-        inset:0;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        background:linear-gradient(90deg, rgba(251,253,251,0.72), rgba(251,253,251,0.92));
-      ">
-        <div style="
-          background:#fff;
-          border:1px solid #d8e7dc;
-          padding:10px 14px;
-          font-size:12px;
-          font-weight:900;
-          color:#163c2b;
-          box-shadow:0 8px 22px rgba(16,32,24,0.10);
-        ">
-          ${esc(t(locale, "premium.lockedLabel", "Locked decision layer"))}
-        </div>
-      </div>
-    </div>
-
-    <div style="
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-      margin-bottom:18px;
-    ">
-      <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
-        <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
-          ${esc(t(locale, "premium.unlock01Title", "Brand + Domain"))}
-        </div>
-        <div style="font-size:12px;line-height:1.45;">
-          ${esc(t(locale, "premium.unlock01Desc", "Get the name, strategy, and domain direction."))}
-        </div>
-      </div>
-
-      <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
-        <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
-          ${esc(t(locale, "premium.unlock02Title", "Customer Truth"))}
-        </div>
-        <div style="font-size:12px;line-height:1.45;">
-          ${esc(t(locale, "premium.unlock02Desc", "See why customers buy and why they hesitate."))}
-        </div>
-      </div>
-
-      <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
-        <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
-          ${esc(t(locale, "premium.unlock03Title", "Execution Plan"))}
-        </div>
-        <div style="font-size:12px;line-height:1.45;">
-          ${esc(t(locale, "premium.unlock03Desc", "Know what to test, when to stop, and when to scale."))}
-        </div>
-      </div>
-    </div>
-
-    <div style="
-      background:#f3f8f5;
-      border-left:5px solid #2f7d57;
-      padding:16px;
-      margin-bottom:18px;
-    ">
-      <div style="
-        font-size:16px;
-        line-height:1.45;
+        font-size:10px;
         font-weight:900;
-        color:#102018;
-        margin-bottom:6px;
+        color:#5b7065;
+        text-transform:uppercase;
+        letter-spacing:0.04em;
+        margin-bottom:8px;
       ">
-        ${esc(t(locale, "premium.ctaTitle", "Do not spend months building the wrong business."))}
+        ${esc(t(locale, "premium.currentDecision", "Current Decision Signal"))}
       </div>
+
       <div style="
-        font-size:13px;
-        line-height:1.65;
-        color:#33443b;
+        font-size:34px;
+        line-height:1;
+        font-weight:900;
+        color:#163c2b;
+        letter-spacing:-0.06em;
       ">
-        ${esc(t(locale, "premium.ctaDesc", "Unlock the full decision report before you spend money on branding, product development, ads, inventory, or a website."))}
+        ${esc(decision)}
+      </div>
+
+      <div style="
+        margin-top:8px;
+        font-size:13px;
+        font-weight:800;
+        color:#4b5d53;
+      ">
+        ${esc(t(locale, "premium.scoreText", "Score"))}: ${esc(String(score))} / 100
       </div>
     </div>
-<div style="
-  background:#fff3f3;
-  border-left:4px solid #b42318;
-  padding:14px;
-  margin-bottom:14px;
-  font-size:13px;
-  font-weight:800;
-  color:#7a1c1c;
-">
- ${esc(t(locale, "premium.urgencyLine", "If you do not validate this now, you may waste months moving in the wrong direction."))}
-</div>
-    <a href="${esc(checkoutUrl)}" style="
-      display:block;
-      text-align:center;
-      background:#102018;
-      color:#fff;
-      text-decoration:none;
-      font-weight:900;
-      font-size:16px;
-      padding:16px 18px;
-      border-radius:10px;
-      letter-spacing:-0.02em;
-    ">
-     ${esc(t(locale, "premium.ctaButton", "Check if this business is worth continuing"))} — $49
-    </a>
 
     <div style="
-      margin-top:12px;
-      font-size:11px;
-      line-height:1.5;
-      color:#6a7a71;
-      text-align:center;
+      border:1px solid #163c2b;
+      background:#163c2b;
+      color:#fff;
+      padding:16px;
     ">
-     ${esc(t(locale, "premium.ctaSub", "Brand name, customer reaction, and revenue structure — validate them now."))}
+      <div style="
+        font-size:10px;
+        font-weight:900;
+        opacity:0.82;
+        text-transform:uppercase;
+        letter-spacing:0.04em;
+        margin-bottom:8px;
+      ">
+        ${esc(t(locale, "premium.brandHookLabel", "Recommended Brand Preview"))}
+      </div>
+
+      <div style="
+        font-size:30px;
+        line-height:1.05;
+        font-weight:900;
+        letter-spacing:-0.05em;
+      ">
+        ${esc(recommendedName)}
+      </div>
+
+      <div style="
+        margin-top:10px;
+        font-size:12px;
+        line-height:1.5;
+        opacity:0.86;
+      ">
+        ${esc(nameReason)}
+      </div>
     </div>
   </div>
 
-  <div class="footer">
+  <div style="
+    position:relative;
+    border:1px solid #d8e7dc;
+    background:#fbfdfb;
+    padding:16px;
+    margin-bottom:18px;
+    overflow:hidden;
+  ">
+    <div style="
+      filter:blur(4px);
+      opacity:0.55;
+      font-size:13px;
+      line-height:1.8;
+      font-weight:700;
+    ">
+      <div>✓ Why this name works for the target customer</div>
+      <div>✓ Domain suggestions and availability logic</div>
+      <div>✓ Customer buying trigger and hesitation signals</div>
+      <div>✓ Market size, competition map, revenue structure</div>
+      <div>✓ 12-week execution plan, risk system, kill criteria</div>
+    </div>
+
+    <div style="
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:linear-gradient(90deg, rgba(251,253,251,0.72), rgba(251,253,251,0.92));
+    ">
+      <div style="
+        background:#fff;
+        border:1px solid #d8e7dc;
+        padding:10px 14px;
+        font-size:12px;
+        font-weight:900;
+        color:#163c2b;
+        box-shadow:0 8px 22px rgba(16,32,24,0.10);
+      ">
+        ${esc(t(locale, "premium.lockedLabel", "Locked decision layer"))}
+      </div>
+    </div>
+  </div>
+
+  <div style="
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    margin-bottom:18px;
+  ">
+    <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
+      <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
+        ${esc(t(locale, "premium.unlock01Title", "Brand + Domain"))}
+      </div>
+      <div style="font-size:12px;line-height:1.45;">
+        ${esc(t(locale, "premium.unlock01Desc", "Get the name, strategy, and domain direction."))}
+      </div>
+    </div>
+
+    <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
+      <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
+        ${esc(t(locale, "premium.unlock02Title", "Customer Truth"))}
+      </div>
+      <div style="font-size:12px;line-height:1.45;">
+        ${esc(t(locale, "premium.unlock02Desc", "See why customers buy and why they hesitate."))}
+      </div>
+    </div>
+
+    <div style="border:1px solid #d8e7dc; padding:12px; background:#f6faf7;">
+      <div style="font-size:11px;font-weight:900;color:#2f7d57;margin-bottom:6px;">
+        ${esc(t(locale, "premium.unlock03Title", "Execution Plan"))}
+      </div>
+      <div style="font-size:12px;line-height:1.45;">
+        ${esc(t(locale, "premium.unlock03Desc", "Know what to test, when to stop, and when to scale."))}
+      </div>
+    </div>
+  </div>
+
+  <div style="
+    background:#f3f8f5;
+    border-left:5px solid #2f7d57;
+    padding:16px;
+    margin-bottom:18px;
+  ">
+    <div style="
+      font-size:16px;
+      line-height:1.45;
+      font-weight:900;
+      color:#102018;
+      margin-bottom:6px;
+    ">
+      ${esc(t(locale, "premium.ctaTitle", "Do not spend months building the wrong business."))}
+    </div>
+
+    <div style="
+      font-size:13px;
+      line-height:1.65;
+      color:#33443b;
+    ">
+      ${esc(t(locale, "premium.ctaDesc", "Unlock the full decision report before you spend money on branding, product development, ads, inventory, or a website."))}
+    </div>
+  </div>
+
+  <a href="${esc(checkoutUrl)}" style="
+    display:block;
+    text-align:center;
+    background:#102018;
+    color:#fff;
+    text-decoration:none;
+    font-weight:900;
+    font-size:16px;
+    padding:16px 18px;
+    border-radius:10px;
+    letter-spacing:-0.02em;
+  ">
+    ${esc(t(locale, "premium.ctaButton", "Check if this business is worth continuing"))} — $49
+  </a>
+
+  <div style="
+    margin-top:12px;
+    font-size:11px;
+    line-height:1.5;
+    color:#6a7a71;
+    text-align:center;
+  ">
+    ${esc(t(locale, "premium.ctaSub", "Brand name, customer reaction, and revenue structure — validate them now."))}
+  </div>
+
+  <div style="
+    margin-top:34px;
+    padding-top:14px;
+    border-top:1px solid #d8e7dc;
+    font-size:10px;
+    color:#789087;
+    display:flex;
+    justify-content:space-between;
+  ">
     <span>${esc(footerLeft)}</span>
     <span>${esc(premiumFooter)}</span>
   </div>
 </section>
+
+</body>
+</html>
 `
 }
+
+// =========================================================
+// [26] REPORT BACK BUTTON
+// =========================================================
+
 function injectReportBackButton(html, locale = {}) {
     const backText = t(locale, "report.backToSite", "Back to site")
 
     const buttonHtml = `
-<a href="https://gonogo.so/report" style="
+<a href="/" style="
   position:fixed;
-  left:14px;
-  bottom:14px;
-  z-index:99999;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:12px 16px;
-  border-radius:999px;
-  background:#0D2418;
-  color:#ffffff;
-  font-size:13px;
-  font-weight:900;
+  right:18px;
+  bottom:18px;
+  z-index:9999;
+  background:#102018;
+  color:#fff;
   text-decoration:none;
-  box-shadow:0 12px 32px rgba(13,36,24,0.22);
+  padding:12px 15px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 10px 30px rgba(0,0,0,0.18);
 ">
   ← ${esc(backText)}
 </a>
@@ -1621,55 +3095,58 @@ function injectReportBackButton(html, locale = {}) {
 
     return `${html}${buttonHtml}`
 }
+
+// =========================================================
+// [27] LOCKED BOX
+// =========================================================
+
 function lockedBox(
     message,
     title = "Premium Insights",
     buttonLabel = "Premium Report"
 ) {
     return `
-        <div style="
-            border:1px solid #d8e7dc;
-            background:#f6faf7;
-            padding:14px;
-            border-radius:8px;
-        ">
-            <div style="
-                font-size:13px;
-                font-weight:900;
-                color:#163c2b;
-                margin-bottom:6px;
-            ">
-                ${esc(title)}
-            </div>
+<div style="
+    padding:18px;
+    border:1px solid #d8e7dc;
+    background:#f6faf7;
+    text-align:center;
+">
+    <div style="
+        font-size:14px;
+        font-weight:900;
+        color:#102018;
+        margin-bottom:6px;
+    ">
+        ${esc(title)}
+    </div>
 
-            <div style="
-                font-size:11px;
-                color:#555;
-                margin-bottom:10px;
-                line-height:1.5;
-            ">
-                ${esc(message)}
-            </div>
+    <div style="
+        font-size:11px;
+        color:#555;
+        margin-bottom:10px;
+        line-height:1.5;
+    ">
+        ${esc(message)}
+    </div>
 
-            <div style="
-                display:inline-block;
-                padding:10px 14px;
-                background:#2f7d57;
-                color:#fff;
-                border-radius:6px;
-                font-size:12px;
-                font-weight:bold;
-            ">
-                ${esc(buttonLabel)}
-            </div>
-        </div>
-    `
+    <div style="
+        display:inline-block;
+        padding:10px 14px;
+        background:#2f7d57;
+        color:#fff;
+        border-radius:6px;
+        font-size:12px;
+        font-weight:bold;
+    ">
+        ${esc(buttonLabel)}
+    </div>
+</div>
+`
 }
-
-
-// ======================================================
-// 11. PDF GENERATOR
-// ======================================================
+// =========================================================
+// [28] HTML TO PDF
+// =========================================================
 
 async function htmlToPdf(html) {
     const browser = await puppeteer.launch({
@@ -1699,625 +3176,39 @@ async function htmlToPdf(html) {
     }
 }
 
-
-// ======================================================
-// 12. CHART / VISUAL HTML HELPERS 1
-// ======================================================
-
-function marketFunnelChart(items = [], locale = {}) {
-    if (!Array.isArray(items) || items.length === 0) return ""
-
-    const normalized = items.map((item) => {
-        const label = item?.label || ""
-        const value = item?.value || ""
-        const score = Math.max(8, Math.min(100, Number(item?.score || 0)))
-
-        return {
-            label,
-            value,
-            score,
-        }
-    })
-
-    return `
-        <div class="market-funnel-box">
-            ${normalized
-                .map((item, index) => {
-                    const levelClass =
-                        index === 0
-                            ? "funnel-tam"
-                            : index === 1
-                              ? "funnel-sam"
-                              : "funnel-som"
-
-                    return `
-                        <div class="market-funnel-row ${levelClass}">
-                            <div class="market-funnel-label">${esc(
-                                item.label
-                            )}</div>
-
-                            <div class="market-funnel-track">
-                                <div 
-                                    class="market-funnel-fill" 
-                                    style="width:${item.score}%"
-                                ></div>
-                            </div>
-
-                            <div class="market-funnel-value">${esc(
-                                item.value
-                            )}</div>
-                        </div>
-                    `
-                })
-                .join("")}
-        </div>
-    `
-}
-
-function profitSimulationChart(rowsData = [], locale = {}) {
-    if (!Array.isArray(rowsData)) return ""
-
-    const chart = locale?.chart || {}
-
-    const revenueLabel =
-        chart.revenue || locale?.th_monthly_revenue || "Revenue"
-
-    const marketingCostLabel =
-        chart.marketingCost ||
-        locale?.th_marketing_cost ||
-        "Marketing Cost"
-
-    const profitLabel =
-        chart.profit || locale?.th_expected_profit || "Profit"
-
-    return `
-        <div class="chart-box">
-            ${rowsData
-                .map((row) => {
-                    const scenario = row?.[0] || ""
-                    const revenue = parseMoney(row?.[2])
-                    const marketing = parseMoney(row?.[3])
-                    const profit = parseMoney(row?.[4])
-
-                    const max = Math.max(
-                        revenue,
-                        marketing,
-                        Math.abs(profit),
-                        1
-                    )
-
-                    const revenueW = Math.max(
-                        5,
-                        Math.min(100, (revenue / max) * 100)
-                    )
-
-                    const marketingW = Math.max(
-                        5,
-                        Math.min(100, (marketing / max) * 100)
-                    )
-
-                    const profitW = Math.max(
-                        5,
-                        Math.min(100, (Math.abs(profit) / max) * 100)
-                    )
-
-                    return `
-                        <div class="scenario-chart">
-                            <div class="scenario-title">${esc(
-                                scenario
-                            )}</div>
-
-                            <div class="mini-bar-row">
-                                <span>${esc(revenueLabel)}</span>
-                                <div class="chart-track">
-                                    <div 
-                                        class="chart-fill" 
-                                        style="width:${revenueW}%"
-                                    ></div>
-                                </div>
-                                <b>${esc(row?.[2] || "")}</b>
-                            </div>
-
-                            <div class="mini-bar-row">
-                                <span>${esc(marketingCostLabel)}</span>
-                                <div class="chart-track">
-                                    <div 
-                                        class="chart-fill light" 
-                                        style="width:${marketingW}%"
-                                    ></div>
-                                </div>
-                                <b>${esc(row?.[3] || "")}</b>
-                            </div>
-
-                            <div class="mini-bar-row">
-                                <span>${esc(profitLabel)}</span>
-                                <div class="chart-track">
-                                    <div 
-                                        class="chart-fill ${
-                                            profit < 0 ? "danger" : ""
-                                        }" 
-                                        style="width:${profitW}%"
-                                    ></div>
-                                </div>
-                                <b>${esc(row?.[4] || "")}</b>
-                            </div>
-                        </div>
-                    `
-                })
-                .join("")}
-        </div>
-    `
-}
-
-function cacLtvRiskChart(rowsData = [], locale = {}) {
-    if (!Array.isArray(rowsData)) return ""
-
-    const chart = locale?.chart || {}
-    const ratioLabel = chart.ltvCac || "LTV/CAC"
-
-    return `
-        <div class="chart-box">
-            ${rowsData
-                .map((row) => {
-                    const scenario = row?.[0] || ""
-                    const cac = parseMoney(row?.[1])
-                    const ltv = parseMoney(row?.[2])
-                    const ratio = cac > 0 ? ltv / cac : 0
-                    const width = Math.max(5, Math.min(100, ratio * 25))
-
-                    const cls =
-                        ratio >= 3 ? "" : ratio >= 2 ? "light" : "danger"
-
-                    return `
-                        <div class="chart-row">
-                            <div class="chart-label">${esc(scenario)}</div>
-
-                            <div class="chart-track">
-                                <div 
-                                    class="chart-fill ${cls}" 
-                                    style="width:${width}%"
-                                ></div>
-                            </div>
-
-                            <div class="chart-value">
-                                ${esc(ratioLabel)} ${ratio.toFixed(1)}x
-                            </div>
-                        </div>
-                    `
-                })
-                .join("")}
-        </div>
-    `
-}
-function buildDecisionChart(report, locale = {}) {
-    const market = toScore(report?.visualScores?.market, 60)
-    const profitability = toScore(report?.visualScores?.profitability, 50)
-    const execution = toScore(report?.visualScores?.execution, 55)
-    const risk = toScore(report?.visualScores?.risk, 40)
-
-    const avg = Math.round(
-        (market + profitability + execution + (100 - risk)) / 4
-    )
-
-    const chart = locale?.chart || {}
-    const label = locale?.label || locale?.labels || {}
-
-    const message =
-        avg >= 70
-            ? chart.decisionStrong ||
-              "Decision signal is strong enough to continue validation."
-            : avg >= 50
-              ? chart.decisionMixed ||
-                "Decision signal is mixed. Validate before scaling."
-              : chart.decisionWeak ||
-                "Decision signal is weak. Redesign before spending more."
-
-    return `
-        <div class="decision-chart-box">
-            <div class="decision-chart-head">
-                <div>
-                    <div class="decision-chart-kicker">${esc(
-                        chart.decisionSignal || "Decision Signal"
-                    )}</div>
-                    <div class="decision-chart-title">${esc(message)}</div>
-                </div>
-                <div class="decision-chart-score">${avg}/100</div>
-            </div>
-
-            ${decisionBar({
-                label: chart.market || label.market || "Market",
-                value: market,
-                danger: false,
-                locale,
-            })}
-
-            ${decisionBar({
-                label:
-                    chart.profitability ||
-                    label.profitability ||
-                    "Profitability",
-                value: profitability,
-                danger: false,
-                locale,
-            })}
-
-            ${decisionBar({
-                label: chart.execution || label.execution || "Execution",
-                value: execution,
-                danger: false,
-                locale,
-            })}
-
-            ${decisionBar({
-                label:
-                    chart.riskPressure ||
-                    label.riskPressure ||
-                    "Risk Pressure",
-                value: risk,
-                danger: true,
-                locale,
-            })}
-        </div>
-    `
-}
-
-function decisionBar({ label = "", value = 0, danger = false, locale = {} }) {
-    const safeValue = Math.max(0, Math.min(100, Number(value) || 0))
-    const chart = locale?.chart || {}
-
-    const status = danger
-        ? safeValue >= 70
-            ? chart.high || "HIGH"
-            : safeValue >= 50
-              ? chart.watch || "WATCH"
-              : chart.low || "LOW"
-        : safeValue >= 70
-          ? chart.good || "GOOD"
-          : safeValue >= 50
-            ? chart.watch || "WATCH"
-            : chart.weak || "WEAK"
-
-    const cls = danger
-        ? safeValue >= 70
-            ? "danger"
-            : safeValue >= 50
-              ? "light"
-              : ""
-        : safeValue >= 70
-          ? ""
-          : safeValue >= 50
-            ? "light"
-            : "danger"
-
-    return `
-        <div class="decision-bar-row">
-            <div class="decision-bar-label">${esc(label)}</div>
-            <div class="decision-bar-track">
-                <div 
-                    class="decision-bar-fill ${cls}" 
-                    style="width:${safeValue}%"
-                ></div>
-            </div>
-            <div class="decision-bar-value">
-                ${safeValue} · ${esc(status)}
-            </div>
-        </div>
-    `
-}
-
-function competitionPositionChart(map = [], locale = {}) {
-    if (!Array.isArray(map)) return ""
-
-    const chart = locale?.chart || {}
-
-    const lowPrice = chart.lowPrice || "Low Price"
-    const highPrice = chart.highPrice || "High Price"
-    const highValue = chart.highValue || "High Value"
-    const lowValue = chart.lowValue || "Low Value"
-
-    return `
-        <div class="chart-box">
-            <div style="
-                position: relative;
-                height: 240px;
-                background: #f6faf7;
-                border:1px solid #d8e7dc;
-            ">
-                ${map
-                    .map((row, i) => {
-                        const name = esc(row?.[0] || "")
-                        const x = (i % 2) * 60 + 20
-                        const y = Math.floor(i / 2) * 60 + 20
-
-                        return `
-                            <div style="
-                                position:absolute;
-                                left:${x}%;
-                                top:${y}%;
-                                transform:translate(-50%, -50%);
-                                background:#2f7d57;
-                                color:#fff;
-                                padding:6px 10px;
-                                font-size:10px;
-                                border-radius:6px;
-                                white-space:nowrap;
-                            ">
-                                ${name}
-                            </div>
-                        `
-                    })
-                    .join("")}
-
-                <div style="
-                    position:absolute;
-                    left:10px;
-                    bottom:10px;
-                    font-size:10px;
-                ">
-                    ${esc(lowPrice)}
-                </div>
-
-                <div style="
-                    position:absolute;
-                    right:10px;
-                    bottom:10px;
-                    font-size:10px;
-                ">
-                    ${esc(highPrice)}
-                </div>
-
-                <div style="
-                    position:absolute;
-                    left:10px;
-                    top:10px;
-                    font-size:10px;
-                ">
-                    ${esc(highValue)}
-                </div>
-
-                <div style="
-                    position:absolute;
-                    left:10px;
-                    bottom:30px;
-                    font-size:10px;
-                ">
-                    ${esc(lowValue)}
-                </div>
-            </div>
-        </div>
-    `
-}
-
-function riskHeatmap(rows = [], locale = {}) {
-    if (!Array.isArray(rows) || rows.length === 0) return ""
-
-    const chart = locale?.chart || {}
-
-    const levelConfig = [
-        {
-            level: "HIGH",
-            label: chart.high || "HIGH",
-            color: "#b94a48",
-        },
-        {
-            level: "MEDIUM",
-            label: chart.watch || "WATCH",
-            color: "#d8b85a",
-        },
-        {
-            level: "LOW",
-            label: chart.low || "LOW",
-            color: "#2f7d57",
-        },
-    ]
-
-    return `
-        <div class="chart-box">
-            <div style="display:grid; grid-template-columns:1fr; gap:10px;">
-                ${rows
-                    .slice(0, 3)
-                    .map((row, index) => {
-                        const title = esc(row?.[0] || "")
-                        const impact = esc(row?.[1] || "")
-                        const action = esc(row?.[2] || "")
-                        const config = levelConfig[index] || levelConfig[1]
-
-                        return `
-                            <div style="
-                                border:1px solid #d8e7dc;
-                                background:#fbfdfb;
-                                padding:12px;
-                                border-left:6px solid ${config.color};
-                                font-size:11px;
-                                line-height:1.45;
-                            ">
-                                <div style="
-                                    display:flex;
-                                    justify-content:space-between;
-                                    gap:10px;
-                                    align-items:flex-start;
-                                    margin-bottom:6px;
-                                ">
-                                    <b style="font-size:12px;">${title}</b>
-                                    <span style="
-                                        color:${config.color};
-                                        font-weight:900;
-                                        white-space:nowrap;
-                                    ">
-                                        ${esc(config.label)}
-                                    </span>
-                                </div>
-
-                                <div style="margin-bottom:5px;">
-                                    ${impact}
-                                </div>
-
-                                <div style="
-                                    color:#4b5d53;
-                                    font-size:10.5px;
-                                ">
-                                    ${action}
-                                </div>
-                            </div>
-                        `
-                    })
-                    .join("")}
-            </div>
-        </div>
-    `
-}
-
-function executionTimeline(rows = [], locale = {}) {
-    if (!Array.isArray(rows) || rows.length === 0) return ""
-
-    const chart = locale?.chart || {}
-    const actionLabel =
-        chart.action || locale?.th_execution_content || "Action"
-    const goalLabel = chart.goal || locale?.th_core_kpi || "Goal"
-
-    return `
-        <div class="chart-box">
-            ${rows
-                .slice(0, 3)
-                .map((row, index) => {
-                    const phase = esc(row?.[0] || "")
-                    const action = esc(row?.[1] || "")
-                    const goal = esc(row?.[2] || "")
-
-                    return `
-                        <div class="scenario-chart">
-                            <div class="scenario-title">
-                                ${index + 1}. ${phase}
-                            </div>
-                            <div class="mini-note" style="margin-top:8px;">
-                                <b>${esc(actionLabel)}:</b> ${action}<br/>
-                                <b>${esc(goalLabel)}:</b> ${goal}
-                            </div>
-                        </div>
-                    `
-                })
-                .join("")}
-        </div>
-    `
-}
-
-function decisionSummaryBox(report, locale = {}) {
-    const decision = report?.cover?.decision || "HOLD"
-    const score = Number(report?.cover?.score || 50)
-    const chart = locale?.chart || {}
-
-    const confidence =
-        score >= 75
-            ? chart.highConfidence || "HIGH CONFIDENCE"
-            : score >= 55
-              ? chart.mediumConfidence || "MEDIUM CONFIDENCE"
-              : chart.lowConfidence || "LOW CONFIDENCE"
-
-    const color =
-        decision === "GO"
-            ? "#2ecc71"
-            : decision === "HOLD"
-              ? "#f39c12"
-              : "#e74c3c"
-
-    const action =
-        decision === "GO"
-            ? chart.goAction ||
-              "Start execution immediately with controlled budget."
-            : decision === "HOLD"
-              ? chart.holdAction || "Run validation tests before scaling."
-              : chart.noGoAction || "Stop or redesign the business model."
-
-    return `
-        <div class="chart-box">
-            <div style="
-                border:2px solid ${color};
-                border-radius:10px;
-                padding:16px;
-            ">
-                <div style="
-                    font-size:14px;
-                    font-weight:bold;
-                    color:${color};
-                    margin-bottom:6px;
-                ">
-                    ${esc(decision)}
-                </div>
-
-                <div style="font-size:12px; margin-bottom:6px;">
-                    ${esc(locale?.scoreLabel || "Score")}: 
-                    <b>${score}</b> / 100
-                </div>
-
-                <div style="font-size:11px; margin-bottom:10px;">
-                    ${esc(confidence)}
-                </div>
-
-                <div style="
-                    font-size:11px;
-                    background:#f6f6f6;
-                    padding:10px;
-                    border-radius:6px;
-                ">
-                    ${esc(action)}
-                </div>
-            </div>
-        </div>
-    `
-}
-
-function checklistItems(items) {
-    if (!Array.isArray(items)) return ""
-
-    return items
-        .map((item) => {
-            const status = item?.status || "WATCH"
-            const cls = getStatusClass(status)
-
-            return `
-                <div class="checklist-item ${cls}">
-                    <span>${esc(item?.label || "")}</span>
-                    <b>${esc(status)}</b>
-                </div>
-            `
-        })
-        .join("")
-}
-
-function glossaryRows(items) {
-    if (!Array.isArray(items) || items.length === 0) return ""
-
-    return items
-        .map(
-            (item) => `
-                <tr>
-                    <td>${esc(item?.term || "")}</td>
-                    <td>${esc(item?.meaning || "")}</td>
-                    <td>${esc(item?.whyItMatters || "")}</td>
-                </tr>
-            `
-        )
-        .join("")
-}
-
-
-// ======================================================
-// 13. TEMPLATE HELPERS
-// ======================================================
+// =========================================================
+// [29] LOCALE / TEMPLATE UTILS
+// =========================================================
 
 function loadLocale(lang) {
     const filePath = path.join(__dirname, "locales", `${lang}.json`)
     return JSON.parse(fs.readFileSync(filePath, "utf8"))
 }
 
+function normalizeLanguage(lang) {
+    const supported = ["ko", "en", "ja", "zh", "mn"]
+    return supported.includes(lang) ? lang : "en"
+}
+
+function getLanguageName(lang) {
+    const map = {
+        ko: "Korean",
+        en: "English",
+        ja: "Japanese",
+        zh: "Chinese",
+        mn: "Mongolian",
+    }
+
+    return map[lang] || "English"
+}
+
 function getByPath(obj, pathKey) {
-    return String(pathKey || "")
+    return String(pathKey)
         .split(".")
         .reduce((acc, key) => {
             if (acc && Object.prototype.hasOwnProperty.call(acc, key)) {
                 return acc[key]
             }
-
             return undefined
         }, obj)
 }
@@ -2339,41 +3230,35 @@ function applyTemplateVars(html, data = {}) {
     })
 }
 
-function extractTemplateKeys(html) {
-    const matches = html.match(/{{\s*[^}]+\s*}}/g) || []
+function validateTemplateKeys(html, data = {}) {
+    const matches = [...html.matchAll(/{{\s*([a-zA-Z0-9_.]+)\s*}}/g)]
+    const missing = []
 
-    return [
-        ...new Set(
-            matches.map((match) => {
-                return match.replace(/[{}]/g, "").trim()
-            })
-        ),
-    ]
+    for (const match of matches) {
+        const key = match[1]
+        const value = getByPath(data, key)
+
+        if (value === undefined || value === null) {
+            missing.push(key)
+        }
+    }
+
+    if (missing.length) {
+        console.warn("[TEMPLATE_MISSING_KEYS]", [...new Set(missing)])
+    }
 }
 
-function validateTemplateKeys(html, templateData, blockKeys = []) {
-    const htmlKeys = extractTemplateKeys(html)
-
-    const missingKeys = htmlKeys.filter((key) => {
-        if (blockKeys.includes(key)) return false
-        return !(key in templateData)
-    })
-
-    const extraKeys = Object.keys(templateData).filter((key) => {
-        return !htmlKeys.includes(key)
-    })
-
-    if (missingKeys.length > 0) {
-        console.log("[MISSING_TEMPLATE_KEYS]", missingKeys)
-    }
-
-    if (extraKeys.length > 0) {
-        console.log("[EXTRA_TEMPLATE_KEYS]", extraKeys)
-    }
-
+function flattenLabels(labels) {
     return {
-        missingKeys,
-        extraKeys,
+        label: labels || {},
+        labels: labels || {},
+    }
+}
+
+function flattenNotes(notes) {
+    return {
+        note: notes || {},
+        fixedNotes: notes || {},
     }
 }
 
@@ -2397,63 +3282,9 @@ function getLocaleList(locale, key, fallback = []) {
     return Array.isArray(value) ? value : fallback
 }
 
-function flattenLabels(labels) {
-    return {
-        label: labels || {},
-        labels: labels || {},
-    }
-}
-
-function flattenNotes(notes) {
-    return {
-        note: notes || {},
-        fixedNotes: notes || {},
-    }
-}
-
-function rows(items) {
-    if (!Array.isArray(items)) return ""
-
-    return items
-        .map((row) => {
-            const cells = Array.isArray(row) ? row : Object.values(row)
-
-            return `
-                <tr>
-                    ${cells.map((cell) => `<td>${esc(cell)}</td>`).join("")}
-                </tr>
-            `
-        })
-        .join("")
-}
-
-function listItems(items) {
-    if (!Array.isArray(items)) return ""
-
-    return items.map((item) => `<li>${esc(item)}</li>`).join("")
-}
-
-
-// ======================================================
-// 14. GENERAL UTILS
-// ======================================================
-
-function normalizeLanguage(lang) {
-    const supported = ["ko", "en", "ja", "zh", "mn"]
-    return supported.includes(lang) ? lang : "en"
-}
-
-function getLanguageName(code) {
-    return (
-        {
-            ko: "Korean",
-            en: "English",
-            ja: "Japanese",
-            zh: "Chinese",
-            mn: "Mongolian",
-        }[code] || "English"
-    )
-}
+// =========================================================
+// [30] DATA UTILS
+// =========================================================
 
 function esc(value) {
     return String(value ?? "")
@@ -2470,64 +3301,103 @@ function safeArray(value, fallback = []) {
 
 function toScore(value, fallback = 50) {
     const n = Number(value)
-
     if (!Number.isFinite(n)) return fallback
-
-    return Math.max(0, Math.min(100, Math.round(n)))
+    return Math.max(0, Math.min(100, n))
 }
 
 function sanitizeFileName(value) {
-    return String(value || "report").replace(
-        /[^\w가-힣ぁ-んァ-ン一-龥]/g,
-        "_"
-    )
+    return String(value || "Report")
+        .replace(/[^\w가-힣ぁ-んァ-ン一-龥-]+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 80) || "Report"
 }
 
-function objectFromPairs(items) {
-    const out = {}
+function objectFromPairs(rowsData = []) {
+    const obj = {}
 
-    if (!Array.isArray(items)) return out
+    if (!Array.isArray(rowsData)) return obj
 
-    items.forEach((item) => {
-        if (Array.isArray(item)) {
-            out[item[0]] = item[1]
+    for (const row of rowsData) {
+        if (Array.isArray(row) && row.length >= 2) {
+            obj[String(row[0])] = row[1]
         }
-    })
-
-    return out
-}
-
-function normalizeFunnel(items) {
-    const base = {
-        tam: {
-            label: "TAM",
-            value: "",
-            score: 100,
-        },
-        sam: {
-            label: "SAM",
-            value: "",
-            score: 60,
-        },
-        som: {
-            label: "SOM",
-            value: "",
-            score: 20,
-        },
     }
 
-    if (!Array.isArray(items)) return base
-
-    items.forEach((item) => {
-        const key = String(item?.label || "").toLowerCase()
-
-        if (key === "tam") base.tam = item
-        if (key === "sam") base.sam = item
-        if (key === "som") base.som = item
-    })
-
-    return base
+    return obj
 }
+
+function rows(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map((row) => {
+            const cells = Array.isArray(row) ? row : Object.values(row)
+
+            return `<tr>${cells
+                .map((cell) => `<td>${esc(cell)}</td>`)
+                .join("")}</tr>`
+        })
+        .join("")
+}
+
+function listItems(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map((item) => `<li>${esc(item)}</li>`)
+        .join("")
+}
+
+function glossaryRows(items) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map(
+            (item) => `
+<tr>
+    <td>${esc(item?.term || "")}</td>
+    <td>${esc(item?.meaning || "")}</td>
+    <td>${esc(item?.whyItMatters || "")}</td>
+</tr>
+`
+        )
+        .join("")
+}
+
+function getDefaultGlossary(language = "en") {
+    return [
+        {
+            term: "TAM",
+            meaning: "Total Addressable Market",
+            whyItMatters: "Shows the maximum demand boundary.",
+        },
+        {
+            term: "SAM",
+            meaning: "Serviceable Available Market",
+            whyItMatters: "Shows the realistic reachable market.",
+        },
+        {
+            term: "SOM",
+            meaning: "Serviceable Obtainable Market",
+            whyItMatters: "Shows the first achievable market slice.",
+        },
+        {
+            term: "CAC",
+            meaning: "Customer Acquisition Cost",
+            whyItMatters: "Shows how expensive growth becomes.",
+        },
+        {
+            term: "LTV",
+            meaning: "Lifetime Value",
+            whyItMatters: "Shows how much one customer can generate.",
+        },
+    ]
+}
+
+// =========================================================
+// [31] STATUS UTILS
+// =========================================================
 
 function getStatusClass(value) {
     const v = String(value || "").toLowerCase()
@@ -2550,7 +3420,11 @@ function getStatusClass(value) {
         return "status-yellow"
     }
 
-    if (v.includes("go") || v.includes("pass") || v.includes("가능")) {
+    if (
+        v.includes("go") ||
+        v.includes("pass") ||
+        v.includes("가능")
+    ) {
         return "status-green"
     }
 
@@ -2563,7 +3437,6 @@ function getScoreClass(score) {
     if (!Number.isFinite(n)) return "status-yellow"
     if (n >= 70) return "status-green"
     if (n >= 50) return "status-yellow"
-
     return "status-red"
 }
 
@@ -2571,87 +3444,333 @@ function getRiskScoreClass(score) {
     const n = Number(score)
 
     if (!Number.isFinite(n)) return "status-yellow"
+
+    // 리스크는 점수가 높을수록 위험
     if (n >= 70) return "status-red"
     if (n >= 50) return "status-yellow"
-
     return "status-green"
 }
 
-function parseMoney(value) {
-    const raw = String(value || "")
-    const cleaned = raw.replace(/[^\d.-]/g, "")
-    const n = Number(cleaned)
+// =========================================================
+// [32] MONEY PARSER
+// =========================================================
 
-    return Number.isFinite(n) ? Math.abs(n) : 0
+function parseMoney(value) {
+    if (typeof value === "number") return value
+
+    const raw = String(value || "")
+        .replace(/,/g, "")
+        .replace(/[^\d.-]/g, "")
+
+    const n = Number(raw)
+
+    return Number.isFinite(n) ? n : 0
 }
 
-function getDefaultGlossary(language = "en") {
-    const lang = normalizeLanguage(language)
+// =========================================================
+// [33] FUNNEL NORMALIZER
+// =========================================================
 
-    if (lang === "ko") {
-        return [
-            {
-                term: "TAM",
-                meaning: "전체 시장 규모",
-                whyItMatters: "사업이 접근할 수 있는 최대 기회를 판단합니다.",
-            },
-            {
-                term: "SAM",
-                meaning: "실제 공략 가능한 시장",
-                whyItMatters: "초기 채널과 고객 범위를 현실적으로 좁힙니다.",
-            },
-            {
-                term: "SOM",
-                meaning: "초기 확보 가능한 시장",
-                whyItMatters: "첫 12개월 목표를 보수적으로 계산합니다.",
-            },
-            {
-                term: "CAC",
-                meaning: "고객 한 명을 얻는 비용",
-                whyItMatters: "광고비와 수익성의 생존선을 결정합니다.",
-            },
-            {
-                term: "LTV",
-                meaning: "고객 한 명이 남기는 총 가치",
-                whyItMatters: "반복 구매와 장기 수익성을 판단합니다.",
-            },
-        ]
+function normalizeFunnel(items = []) {
+    const safe = Array.isArray(items) ? items : []
+
+    const findByLabel = (label, fallbackScore) => {
+        const found = safe.find(
+            (item) => String(item?.label || "").toUpperCase() === label
+        )
+
+        return {
+            value: found?.value || "",
+            score: toScore(found?.score, fallbackScore),
+        }
     }
 
-    return [
-        {
-            term: "TAM",
-            meaning: "Total addressable market.",
-            whyItMatters: "Shows the maximum market opportunity.",
-        },
-        {
-            term: "SAM",
-            meaning: "Serviceable available market.",
-            whyItMatters: "Narrows the market to reachable segments.",
-        },
-        {
-            term: "SOM",
-            meaning: "Serviceable obtainable market.",
-            whyItMatters: "Defines realistic first-year capture potential.",
-        },
-        {
-            term: "CAC",
-            meaning: "Cost to acquire one customer.",
-            whyItMatters: "Determines whether marketing can be profitable.",
-        },
-        {
-            term: "LTV",
-            meaning: "Lifetime value of one customer.",
-            whyItMatters: "Shows whether repeat value supports growth.",
-        },
-    ]
+    return {
+        tam: findByLabel("TAM", 100),
+        sam: findByLabel("SAM", 60),
+        som: findByLabel("SOM", 20),
+    }
 }
 
+// =========================================================
+// [34] CHARTS
+// =========================================================
 
-// ======================================================
-// 15. SERVER START
-// ======================================================
+function marketFunnelChart(items = [], locale = {}) {
+    if (!Array.isArray(items) || items.length === 0) return ""
+
+    const normalized = items.map((item) => {
+        const label = item?.label || ""
+        const value = item?.value || ""
+        const score = Math.max(8, Math.min(100, Number(item?.score || 0)))
+
+        return { label, value, score }
+    })
+
+    return `
+<div class="market-funnel-box">
+    ${normalized
+        .map((item, index) => {
+            const levelClass =
+                index === 0
+                    ? "funnel-tam"
+                    : index === 1
+                    ? "funnel-sam"
+                    : "funnel-som"
+
+            return `
+<div class="market-funnel-row ${levelClass}">
+    <div class="market-funnel-label">${esc(item.label)}</div>
+    <div class="market-funnel-track">
+        <div class="market-funnel-fill" style="width:${item.score}%"></div>
+    </div>
+    <div class="market-funnel-value">${esc(item.value)}</div>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function profitSimulationChart(rowsData = [], locale = {}) {
+    if (!Array.isArray(rowsData)) return ""
+
+    const chart = locale?.chart || {}
+
+    const revenueLabel =
+        chart.revenue || locale?.th_monthly_revenue || "Revenue"
+
+    const marketingCostLabel =
+        chart.marketingCost || locale?.th_marketing_cost || "Marketing Cost"
+
+    const profitLabel =
+        chart.profit || locale?.th_expected_profit || "Profit"
+
+    return `
+<div class="chart-box">
+    ${rowsData
+        .map((row) => {
+            const scenario = row?.[0] || ""
+            const revenue = parseMoney(row?.[2])
+            const marketing = parseMoney(row?.[3])
+            const profit = parseMoney(row?.[4])
+
+            const max = Math.max(revenue, marketing, Math.abs(profit), 1)
+            const revenueW = Math.max(5, Math.min(100, (revenue / max) * 100))
+            const marketingW = Math.max(
+                5,
+                Math.min(100, (marketing / max) * 100)
+            )
+            const profitW = Math.max(
+                5,
+                Math.min(100, (Math.abs(profit) / max) * 100)
+            )
+
+            return `
+<div class="scenario-chart">
+    <div class="scenario-title">${esc(scenario)}</div>
+
+    <div class="mini-bar-row">
+        <span>${esc(revenueLabel)}</span>
+        <div class="chart-track">
+            <div class="chart-fill" style="width:${revenueW}%"></div>
+        </div>
+        <b>${esc(row?.[2] || "")}</b>
+    </div>
+
+    <div class="mini-bar-row">
+        <span>${esc(marketingCostLabel)}</span>
+        <div class="chart-track">
+            <div class="chart-fill light" style="width:${marketingW}%"></div>
+        </div>
+        <b>${esc(row?.[3] || "")}</b>
+    </div>
+
+    <div class="mini-bar-row">
+        <span>${esc(profitLabel)}</span>
+        <div class="chart-track">
+            <div class="chart-fill ${profit < 0 ? "danger" : ""}" style="width:${profitW}%"></div>
+        </div>
+        <b>${esc(row?.[4] || "")}</b>
+    </div>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function cacLtvRiskChart(rowsData = [], locale = {}) {
+    if (!Array.isArray(rowsData)) return ""
+
+    const chart = locale?.chart || {}
+    const ratioLabel = chart.ltvCac || "LTV/CAC"
+
+    return `
+<div class="chart-box">
+    ${rowsData
+        .map((row) => {
+            const scenario = row?.[0] || ""
+            const cac = parseMoney(row?.[1])
+            const ltv = parseMoney(row?.[2])
+            const ratio = cac > 0 ? ltv / cac : 0
+            const width = Math.max(5, Math.min(100, ratio * 30))
+            const statusClass =
+                ratio >= 3 ? "" : ratio >= 1.5 ? "light" : "danger"
+
+            return `
+<div class="scenario-chart">
+    <div class="scenario-title">${esc(scenario)}</div>
+    <div class="mini-bar-row">
+        <span>${esc(ratioLabel)}</span>
+        <div class="chart-track">
+            <div class="chart-fill ${statusClass}" style="width:${width}%"></div>
+        </div>
+        <b>${ratio.toFixed(1)}x</b>
+    </div>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function buildDecisionChart(report, locale = {}) {
+    const scores = report?.visualScores || {}
+
+    const items = [
+        ["Market", scores.market],
+        ["Profitability", scores.profitability],
+        ["Execution", scores.execution],
+        ["Risk", scores.risk],
+    ]
+
+    return `
+<div class="decision-chart">
+    ${items
+        .map(([label, value]) => {
+            const score = toScore(value, 50)
+
+            return `
+<div class="score-row">
+    <div class="score-row-label">${esc(label)}</div>
+    <div class="score-row-track">
+        <div class="score-row-fill" style="width:${score}%"></div>
+    </div>
+    <div class="score-row-value">${score}</div>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function competitionPositionChart(rowsData = [], locale = {}) {
+    if (!Array.isArray(rowsData)) return ""
+
+    return `
+<div class="position-chart">
+    ${rowsData
+        .slice(0, 4)
+        .map((row, index) => {
+            const name = row?.[0] || `Competitor ${index + 1}`
+            const x = 18 + index * 20
+            const y = 70 - index * 12
+
+            return `
+<div class="position-dot" style="left:${x}%; top:${y}%;">
+    <span>${esc(name)}</span>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function riskHeatmap(rowsData = [], locale = {}) {
+    if (!Array.isArray(rowsData)) return ""
+
+    return `
+<div class="risk-heatmap">
+    ${rowsData
+        .map((row, index) => {
+            const risk = row?.[0] || ""
+            const level = index === 0 ? "high" : index === 1 ? "medium" : "low"
+
+            return `
+<div class="risk-cell ${level}">
+    <b>${esc(risk)}</b>
+    <span>${esc(row?.[1] || "")}</span>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function executionTimeline(rowsData = [], locale = {}) {
+    if (!Array.isArray(rowsData)) return ""
+
+    return `
+<div class="timeline">
+    ${rowsData
+        .map((row) => {
+            return `
+<div class="timeline-item">
+    <div class="timeline-phase">${esc(row?.[0] || "")}</div>
+    <div class="timeline-title">${esc(row?.[1] || "")}</div>
+    <div class="timeline-desc">${esc(row?.[2] || "")}</div>
+</div>
+`
+        })
+        .join("")}
+</div>
+`
+}
+
+function decisionSummaryBox(report, locale = {}) {
+    const decision = report?.cover?.decision || "HOLD"
+    const score = report?.cover?.score || 0
+    const verdict = report?.cover?.oneLineVerdict || ""
+
+    return `
+<div class="decision-summary-box ${getStatusClass(decision)}">
+    <div class="decision-summary-score">${esc(score)} / 100</div>
+    <div class="decision-summary-decision">${esc(decision)}</div>
+    <div class="decision-summary-verdict">${esc(verdict)}</div>
+</div>
+`
+}
+
+function checklistItems(items = []) {
+    if (!Array.isArray(items)) return ""
+
+    return items
+        .map((item) => {
+            const label = item?.label || ""
+            const status = item?.status || "WATCH"
+            const cls = getStatusClass(status)
+
+            return `
+<li class="${cls}">
+    <span>${esc(label)}</span>
+    <b>${esc(status)}</b>
+</li>
+`
+        })
+        .join("")
+}
+
+// =========================================================
+// [35] SERVER START
+// =========================================================
 
 app.listen(PORT, () => {
-    console.log(`GoNoGo Report Server running on port ${PORT}`)
+    console.log(`🚀 GoNoGo Report Server running on port ${PORT}`)
 })
