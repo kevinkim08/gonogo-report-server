@@ -19,6 +19,8 @@ import chromium from "@sparticuz/chromium"
 const app = express()
 const PORT = process.env.PORT || 3000
 
+app.set("trust proxy", true)
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -546,10 +548,10 @@ app.get("/api/dev-create-paid-token", (req, res) => {
         targetCustomer,
     })
 
-    const downloadUrl = `${req.protocol}://${req.get(
-        "host"
-    )}/api/download-paid-pdf?${params.toString()}`
+    const baseUrl = process.env.PUBLIC_BASE_URL || `https://${req.get("host")}`
 
+    const downloadUrl = `${baseUrl}/api/download-paid-pdf?${params.toString()}`
+    
     res.setHeader("Content-Type", "text/html; charset=utf-8")
 
     return res.send(`
@@ -3074,10 +3076,10 @@ body {
             지금 확인하지 않으면 잘못된 방향으로 몇 달의 시간과 마케팅 비용을 낭비할 수 있습니다.
         </div>
 
-        <a 
-    class="free-upgrade-button" 
-    href="${process.env.PAYMENT_LINK || "#"}" 
-    target="_blank" 
+     <a
+    class="free-upgrade-button"
+    href="${process.env.PAYMENT_LINK || "#"}"
+    target="_blank"
     rel="noopener noreferrer"
 >
     ${esc(report?.freeCta?.buttonText || "전체 유료 보고서 열기")} — $49
