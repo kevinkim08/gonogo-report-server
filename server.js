@@ -97,13 +97,23 @@ function validatePaidDownloadToken(token) {
         }
     }
 
-    if (record.downloadCount >= record.downloadLimit) {
-        if (record.used === true) {
-    return {
-        ok: false,
-        status: 403,
-        message: "This download link has already been used.",
+    if (record.used === true) {
+        return {
+            ok: false,
+            status: 403,
+            message: "This download link has already been used.",
+        }
     }
+
+    if (record.downloadCount >= record.downloadLimit) {
+        return {
+            ok: false,
+            status: 403,
+            message: "Download limit exceeded.",
+        }
+    }
+
+    return { ok: true, record }
 }
 
     return { ok: true, record }
@@ -596,7 +606,7 @@ app.get("/api/dev-create-paid-token", (req, res) => {
 <body style="font-family:Arial;padding:40px;">
     <h1>Paid token created</h1>
     <p>PayPal 연결 전 테스트용 다운로드 링크야.</p>
-    <p>다운로드 가능 횟수: 3회</p>
+    <p>다운로드 가능 횟수: 1회</p>
 
     <a href="${esc(downloadUrl)}" style="
         display:inline-block;
@@ -3787,9 +3797,10 @@ ${freePart}
 
 function injectReportBackButton(html, locale = {}) {
     const backText = t(locale, "report.backToSite", "Back to site")
+    const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
 
     const buttonHtml = `
-<a href="/" style="
+<a href="${esc(siteUrl)}" style="
   position:fixed;
   right:18px;
   bottom:18px;
