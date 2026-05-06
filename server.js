@@ -116,9 +116,6 @@ function validatePaidDownloadToken(token) {
     return { ok: true, record }
 }
 
-    return { ok: true, record }
-}
-
 // =========================================================
 // [06] BASIC ROUTES
 // =========================================================
