@@ -211,7 +211,8 @@ app.get("/api/report-loading", (req, res) => {
 <!doctype html>
 <html lang="${esc(lang)}">
 <head>
-<meta charset="utf-8" />
+    <meta charset="UTF-8">
+    ${getPdfFontLinks()}
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>GoNoGo Report Loading</title>
 
@@ -462,6 +463,34 @@ app.get("/api/debug-html", async (req, res) => {
     }
 })
 
+
+function getPdfFontLinks() {
+    return `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&family=Noto+Sans+Mongolian&display=swap" rel="stylesheet">
+`
+}
+
+function getPdfFontFamily(lang) {
+    if (lang === "ko") {
+        return `"Noto Sans KR", "Noto Sans", Arial, sans-serif`
+    }
+
+    if (lang === "ja") {
+        return `"Noto Sans JP", "Noto Sans", Arial, sans-serif`
+    }
+
+    if (lang === "zh") {
+        return `"Noto Sans SC", "Noto Sans", Arial, sans-serif`
+    }
+
+    if (lang === "mn") {
+        return `"Noto Sans Mongolian", "Noto Sans", Arial, sans-serif`
+    }
+
+    return `"Noto Sans", Arial, sans-serif`
+}
 // =========================================================
 // [09] GENERATE REPORT PDF ROUTE
 // =========================================================
@@ -2114,7 +2143,7 @@ body {
     margin: 0;
     background: #f4f6f2;
     color: #0D2418;
-    font-family: ${locale?.fontFamily || "Inter, Arial, sans-serif"};
+    font-family: ${getPdfFontFamily(locale?.lang || lang || "ko")};
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
@@ -3849,7 +3878,11 @@ async function htmlToPdf(html) {
             timeout: 0,
         })
 
-        await page.evaluateHandle("document.fonts.ready")
+        await page.setContent(html, {
+    waitUntil: ["load", "networkidle0"],
+})
+
+await page.evaluateHandle("document.fonts.ready")
 
         const pdf = await page.pdf({
             format: "A4",
