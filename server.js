@@ -60,8 +60,9 @@ function createPaidDownloadToken() {
 
     paidDownloadTokens.set(token, {
         paid: true,
-        downloadLimit: 3,
+        downloadLimit: 1,
         downloadCount: 0,
+        used: false,
         createdAt: Date.now(),
         expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
     })
@@ -97,12 +98,13 @@ function validatePaidDownloadToken(token) {
     }
 
     if (record.downloadCount >= record.downloadLimit) {
-        return {
-            ok: false,
-            status: 403,
-            message: "Download limit exceeded.",
-        }
+        if (record.used === true) {
+    return {
+        ok: false,
+        status: 403,
+        message: "This download link has already been used.",
     }
+}
 
     return { ok: true, record }
 }
@@ -640,6 +642,7 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         }
 
         validation.record.downloadCount += 1
+        validation.record.used = true
 
         const brandName = req.query.brandName || "PaidReport"
         const productService =
