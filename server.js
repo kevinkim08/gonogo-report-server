@@ -299,16 +299,6 @@ body {
     backdrop-filter: blur(18px);
 }
 
-.spinner {
-    width: 52px;
-    height: 52px;
-    border: 4px solid rgba(13,36,24,0.12);
-    border-top-color: #0D2418;
-    border-radius: 50%;
-    margin: 0 auto 24px;
-    animation: spin 0.85s linear infinite;
-}
-
 h1 {
     margin: 0 0 12px;
     font-size: 31px;
@@ -346,12 +336,23 @@ h1 {
     height: 15px;
     border-radius: 999px;
     background: #DDE6E1;
-    transition: background .25s ease, transform .25s ease;
+    transition:
+        background .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
 }
 
 .loading-dot.active {
-    background: #082818;
-    transform: scale(1.05);
+    background: linear-gradient(
+        90deg,
+        #082818 0%,
+        #1F6B46 58%,
+        #B6FF5A 100%
+    );
+    transform: scale(1.06);
+    box-shadow:
+        0 0 8px rgba(8,40,24,.16),
+        0 0 14px rgba(182,255,90,.22);
 }
 
 .progress-top {
@@ -380,12 +381,6 @@ h1 {
     font-weight: 700;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 @media (max-width: 480px) {
     body {
         padding: 18px;
@@ -405,6 +400,15 @@ h1 {
     .desc {
         font-size: 13px;
     }
+
+    .progress {
+        gap: 6px;
+    }
+
+    .loading-dot {
+        width: 12px;
+        height: 12px;
+    }
 }
 </style>
 </head>
@@ -417,9 +421,8 @@ h1 {
     </div>
 
     <section class="card">
-        <div class="spinner"></div>
-
-        <h1>${esc(copy.title)}</h1>
+ 
+         <h1>${esc(copy.title)}</h1>
         <p class="desc">${esc(copy.desc)}</p>
 
         <div class="progress-top">
@@ -1165,50 +1168,33 @@ btn.addEventListener("click", async () => {
 
         startFakeProgress()
 
-        const response = await fetch(downloadUrl,{
-            method:"GET",
-            cache:"no-store",
-        })
+       const response = await fetch(downloadUrl, {
+    method: "GET",
+    cache: "no-store",
+})
 
-        if(!response.ok){
+if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(errorText || "Download failed")
+}
 
-            const errorText =
-                await response.text()
+const blob = await response.blob()
 
-            throw new Error(
-                errorText || "Download failed"
-            )
-        }
+const blobUrl = window.URL.createObjectURL(blob)
+const a = document.createElement("a")
 
-        const blob =
-            await response.blob()
+a.href = blobUrl
+a.download = fileName
+a.style.display = "none"
 
-        if(!blob || blob.size === 0){
-            throw new Error("Empty PDF file.")
-        }
+document.body.appendChild(a)
+a.click()
 
-        const blobUrl =
-            window.URL.createObjectURL(blob)
-
-        const a =
-            document.createElement("a")
-
-        a.href = blobUrl
-        a.download = fileName
-
-        document.body.appendChild(a)
-
-        a.click()
-
-        setTimeout(() => {
-
-            a.remove()
-
-            window.URL.revokeObjectURL(blobUrl)
-
-            completeProgress()
-
-        }, 300)
+setTimeout(() => {
+    a.remove()
+    window.URL.revokeObjectURL(blobUrl)
+    completeProgress()
+}, 500)
 
     }catch(error){
 
@@ -1558,14 +1544,20 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         
         const safeBrand = sanitizeFileName(brandName)
 
-        res.setHeader("Content-Type", "application/pdf")
-        res.setHeader("Content-Length", pdfBuffer.length)
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="GoNoGo_Paid_Report_${safeBrand}_${language}.pdf"`
-        )
+        res.setHeader("Content-Type", "application/octet-stream")
+res.setHeader("X-Content-Type-Options", "nosniff")
+res.setHeader("Cache-Control", "no-store")
+res.setHeader("Pragma", "no-cache")
+res.setHeader("Expires", "0")
 
-        return res.end(pdfBuffer)
+res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${fileName}"`
+)
+
+res.setHeader("Content-Length", pdfBuffer.length)
+
+return res.end(pdfBuffer)
     } catch (error) {
         console.error("[DOWNLOAD_PAID_PDF_ERROR]", error)
 
