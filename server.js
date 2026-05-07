@@ -3931,14 +3931,26 @@ async function htmlToPdf(html) {
     try {
         const page = await browser.newPage()
 
-        await page.setContent(html, {
-            waitUntil: ["domcontentloaded", "networkidle0"],
-            timeout: 0,
-        })
-
-        await page.setContent(html, {
+      await page.setContent(html, {
     waitUntil: ["load", "networkidle0"],
+    timeout: 0,
 })
+
+// Google Fonts 로딩 대기
+await page.evaluateHandle("document.fonts.ready")
+
+// CJK 폰트 렌더 안정화 대기
+await new Promise((resolve) => setTimeout(resolve, 3000))
+
+// 폰트 로딩 상태 확인 로그
+const loadedFonts = await page.evaluate(() => {
+    return Array.from(document.fonts).map((font) => ({
+        family: font.family,
+        status: font.status,
+    }))
+})
+
+console.log("[PDF_FONT_STATUS]", loadedFonts)
 
 await page.evaluateHandle("document.fonts.ready")
 
