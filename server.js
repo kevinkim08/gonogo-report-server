@@ -216,210 +216,231 @@ app.get("/api/report-loading", (req, res) => {
 
     res.setHeader("Content-Type", "text/html; charset=utf-8")
 
-    return res.send(`
+ return res.send(`
 <!doctype html>
 <html lang="${esc(lang)}">
 <head>
-    <meta charset="UTF-8">
-    ${getPdfFontLinks()}
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GoNoGo Report Loading</title>
+<title>${esc(copy.title)}</title>
 
 <style>
+* {
+    box-sizing: border-box;
+}
+
 body {
-  margin: 0;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 20% 18%, rgba(182,255,90,0.18), transparent 28%),
-    radial-gradient(circle at 80% 82%, rgba(13,36,24,0.08), transparent 32%),
-    #ffffff;
-  color: #0D2418;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px;
-  overflow: hidden;
+    margin: 0;
+    min-height: 100vh;
+    font-family: ${getPdfFontFamily(lang)};
+    background: #ffffff;
+    color: #0D2418;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
 }
 
 .wrap {
-  width: 100%;
-  max-width: 430px;
-  text-align: center;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 13px;
-  border: 1px solid rgba(13,36,24,0.12);
-  border-radius: 999px;
-  background: rgba(255,255,255,0.74);
-  backdrop-filter: blur(12px);
-  font-size: 12px;
-  font-weight: 950;
-  margin-bottom: 30px;
-  box-shadow: 0 12px 32px rgba(13,36,24,0.05);
-}
-
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #B6FF5A;
-  box-shadow: 0 0 18px rgba(182,255,90,0.9);
-}
-
-.card {
-  background: rgba(255,255,255,0.84);
-  border: 1px solid rgba(13,36,24,0.12);
-  border-radius: 30px;
-  padding: 34px 24px 28px;
-  box-shadow:
-    0 30px 90px rgba(13,36,24,0.10),
-    inset 0 1px 0 rgba(255,255,255,0.9);
-  backdrop-filter: blur(18px);
-}
-
-.spinner {
-  width: 52px;
-  height: 52px;
-  border: 4px solid rgba(13,36,24,0.12);
-  border-top-color: #0D2418;
-  border-radius: 50%;
-  margin: 0 auto 24px;
-  animation: spin 0.85s linear infinite;
+    width: 100%;
+    max-width: 440px;
+    text-align: center;
 }
 
 h1 {
-  margin: 0 0 12px;
-  font-size: 31px;
-  line-height: 1.04;
-  letter-spacing: -0.065em;
-  font-weight: 950;
+    margin: 0 0 16px;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.05em;
+    font-weight: 950;
 }
 
-.desc {
-  margin: 0 auto 26px;
-  max-width: 340px;
-  color: #53645A;
-  font-size: 14px;
-  line-height: 1.65;
-  font-weight: 650;
+p {
+    margin: 10px 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #4B5A52;
+    font-weight: 700;
 }
 
-.progress {
-  height: 10px;
-  width: 100%;
-  background: #E5EDE8;
-  border-radius: 999px;
-  overflow: hidden;
-  margin-bottom: 14px;
+button {
+    margin-top: 22px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 190px;
+    padding: 17px 24px;
+    background: #082818;
+    color: white;
+    border-radius: 14px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 900;
 }
 
-.bar {
-  height: 100%;
-  width: 8%;
-  background: #0D2418;
-  border-radius: 999px;
-  transition: width 0.45s ease;
+button:disabled {
+    opacity: 0.75;
+    cursor: wait;
 }
 
-.step {
-  min-height: 22px;
-  color: #0D2418;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
+.loader {
+    display: none;
+    width: 17px;
+    height: 17px;
+    margin-right: 10px;
+    border: 3px solid rgba(255,255,255,0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
-.note {
-  margin-top: 22px;
-  font-size: 11px;
-  line-height: 1.5;
-  color: #7B8B82;
-  font-weight: 700;
+button.loading .loader {
+    display: inline-block;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-@media (max-width: 480px) {
-  body {
-    padding: 18px;
-    align-items: flex-start;
-    padding-top: 78px;
-  }
+.note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #7B8B82;
+}
+.note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #7B8B82;
+}
 
-  .card {
-    border-radius: 26px;
-    padding: 32px 20px 26px;
-  }
+.progress-wrap {
+    display: none;
+    margin: 26px auto 0;
+    width: 100%;
+    max-width: 360px;
+}
 
-  h1 {
-    font-size: 28px;
-  }
+.progress-wrap.active {
+    display: block;
+}
 
-  .desc {
-    font-size: 13px;
-  }
+.progress-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #0D2418;
+}
+
+.progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #E4ECE7;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: 999px;
+    background: #0D2418;
+    transition: width 0.35s ease;
 }
 </style>
 </head>
 
 <body>
-<div class="wrap">
-  <div class="badge">
-    <span class="dot"></span>
-    GoNoGo™ Report Engine
-  </div>
+    <main class="wrap">
+        <h1>${esc(copy.title)}</h1>
+        <p>${esc(copy.desc)}</p>
+        <p>${esc(copy.limit)}</p>
 
-  <section class="card">
-    <div class="spinner"></div>
-    <h1>${esc(copy.title)}</h1>
-    <p class="desc">${esc(copy.desc)}</p>
+        <button id="downloadBtn" type="button">
+            <span class="loader"></span>
+            <span id="buttonText">${esc(copy.button)}</span>
+        </button>
 
-    <div class="progress">
-      <div class="bar" id="bar"></div>
+        <div class="progress-wrap" id="progressWrap">
+    <div class="progress-top">
+        <span id="progressStep"></span>
+        <span id="progressPercent">0%</span>
     </div>
-
-    <div class="step" id="step">${esc(copy.steps[0])}</div>
-
-    <div class="note">
-      Do not close this page. Your report will open automatically.
+    <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
     </div>
-  </section>
 </div>
 
+<p class="note" id="loadingNote"></p>
+    </main>
+
 <script>
-const steps = ${stepsJson};
-const bar = document.getElementById("bar");
-const step = document.getElementById("step");
+const downloadUrl = ${JSON.stringify(downloadUrl)};
+const loadingText = ${JSON.stringify(copy.loading || "Creating your PDF. Please wait.")};
+const progressSteps = ${JSON.stringify(copy.progressSteps || [])};
 
-let index = 0;
-let progress = 8;
+const btn = document.getElementById("downloadBtn");
+const buttonText = document.getElementById("buttonText");
+const loadingNote = document.getElementById("loadingNote");
+const progressWrap = document.getElementById("progressWrap");
+const progressFill = document.getElementById("progressFill");
+const progressPercent = document.getElementById("progressPercent");
+const progressStep = document.getElementById("progressStep");
 
-const timer = setInterval(() => {
-  index = Math.min(index + 1, steps.length - 1);
-  progress = Math.min(progress + 18, 94);
+let progress = 0;
+let stepIndex = 0;
+let progressTimer = null;
 
-  if (bar) bar.style.width = progress + "%";
-  if (step) step.textContent = steps[index];
+function startFakeProgress() {
+    progressWrap.classList.add("active");
 
-  if (index >= steps.length - 1) {
-    clearInterval(timer);
+    progressStep.textContent = progressSteps[0] || loadingText;
+    progressPercent.textContent = "0%";
+    progressFill.style.width = "0%";
+
+    progressTimer = setInterval(() => {
+        if (progress < 92) {
+            progress += Math.floor(Math.random() * 7) + 3;
+            progress = Math.min(progress, 92);
+        }
+
+        const nextStepIndex = Math.min(
+            Math.floor((progress / 100) * progressSteps.length),
+            progressSteps.length - 1
+        );
+
+        if (nextStepIndex !== stepIndex) {
+            stepIndex = nextStepIndex;
+            progressStep.textContent = progressSteps[stepIndex] || loadingText;
+        }
+
+        progressPercent.textContent = progress + "%";
+        progressFill.style.width = progress + "%";
+    }, 700);
+}
+
+btn.addEventListener("click", () => {
+    btn.disabled = true;
+    btn.classList.add("loading");
+    buttonText.textContent = loadingText;
+    loadingNote.textContent = loadingText;
+
+    startFakeProgress();
 
     setTimeout(() => {
-      window.location.href = "${targetUrl}";
-    }, 900);
-  }
-}, 850);
+        window.location.href = downloadUrl;
+    }, 450);
+});
 </script>
 </body>
 </html>
-`)
+`)  
 })
 
 // =========================================================
@@ -575,35 +596,85 @@ app.get("/api/dev-create-paid-token", (req, res) => {
     const lang = normalizeLanguage(req.query.lang || "ko")
     const tokenPageCopy = {
     ko: {
-        title: "유료 다운로드 토큰 생성 완료",
-        desc: "PayPal 연결 전 테스트용 다운로드 링크야.",
-        limit: "다운로드 가능 횟수: 1회",
-        button: "유료 PDF 다운로드",
-    },
-    en: {
-        title: "Paid token created",
-        desc: "This is a test download link before PayPal is fully connected.",
-        limit: "Download limit: 1 time",
-        button: "Download Paid PDF",
-    },
-    ja: {
-        title: "有料ダウンロードトークンを作成しました",
-        desc: "PayPal接続前のテスト用ダウンロードリンクです。",
-        limit: "ダウンロード可能回数：1回",
-        button: "有料PDFをダウンロード",
-    },
-    zh: {
-        title: "付费下载令牌已创建",
-        desc: "这是 PayPal 完全连接前的测试下载链接。",
-        limit: "可下载次数：1次",
-        button: "下载付费 PDF",
-    },
-    mn: {
-        title: "Төлбөртэй татах токен үүссэн",
-        desc: "PayPal бүрэн холбогдохоос өмнөх туршилтын татах холбоос.",
-        limit: "Татах боломж: 1 удаа",
-        button: "Төлбөртэй PDF татах",
-    },
+    title: "유료 다운로드 토큰 생성 완료",
+    desc: "PayPal 연결 전 테스트용 다운로드 링크야.",
+    limit: "다운로드 가능 횟수: 1회",
+    button: "유료 PDF 다운로드",
+    loading: "PDF를 생성하고 있어. 잠시만 기다려줘.",
+},
+        progressSteps: [
+    "입력값 분석 중",
+    "사업 구조 판단 중",
+    "브랜딩 전략 생성 중",
+    "시장·고객 분석 중",
+    "보고서 페이지 구성 중",
+    "PDF 렌더링 중",
+    "다운로드 준비 중",
+],
+en: {
+    title: "Paid token created",
+    desc: "This is a test download link before PayPal is fully connected.",
+    limit: "Download limit: 1 time",
+    button: "Download Paid PDF",
+    loading: "Creating your PDF. Please wait.",
+},
+        progressSteps: [
+    "Analyzing input",
+    "Structuring business logic",
+    "Building brand strategy",
+    "Analyzing market and customers",
+    "Composing report pages",
+    "Rendering PDF",
+    "Preparing download",
+],
+ja: {
+    title: "有料ダウンロードトークンを作成しました",
+    desc: "PayPal接続前のテスト用ダウンロードリンクです。",
+    limit: "ダウンロード可能回数：1回",
+    button: "有料PDFをダウンロード",
+    loading: "PDFを生成しています。しばらくお待ちください。",
+},
+     progressSteps: [
+    "入力内容を分析中",
+    "事業構造を判断中",
+    "ブランド戦略を生成中",
+    "市場・顧客を分析中",
+    "レポートページを構成中",
+    "PDFをレンダリング中",
+    "ダウンロードを準備中",
+],   
+zh: {
+    title: "付费下载令牌已创建",
+    desc: "这是 PayPal 完全连接前的测试下载链接。",
+    limit: "可下载次数：1次",
+    button: "下载付费 PDF",
+    loading: "正在生成 PDF，请稍候。",
+},
+      progressSteps: [
+    "正在分析输入内容",
+    "正在判断商业结构",
+    "正在生成品牌策略",
+    "正在分析市场与客户",
+    "正在构建报告页面",
+    "正在渲染 PDF",
+    "正在准备下载",
+],  
+mn: {
+    title: "Төлбөртэй татах токен үүссэн",
+    desc: "PayPal бүрэн холбогдохоос өмнөх туршилтын татах холбоос.",
+    limit: "Татах боломж: 1 удаа",
+    button: "Төлбөртэй PDF татах",
+    loading: "PDF үүсгэж байна. Түр хүлээнэ үү.",
+},
+    progressSteps: [
+    "Оролтын мэдээллийг шинжилж байна",
+    "Бизнесийн бүтцийг үнэлж байна",
+    "Брэндийн стратеги боловсруулж байна",
+    "Зах зээл ба хэрэглэгчийг шинжилж байна",
+    "Тайлангийн хуудсыг бүрдүүлж байна",
+    "PDF үүсгэж байна",
+    "Татахад бэлдэж байна",
+],    
 }
 
 const copy = tokenPageCopy[lang] || tokenPageCopy.en
