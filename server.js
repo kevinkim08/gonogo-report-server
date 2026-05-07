@@ -635,9 +635,9 @@ const copy = tokenPageCopy[lang] || tokenPageCopy.en
 <title>Paid token created</title>
 </head>
 <body style="font-family:Arial;padding:40px;">
-    <h1>Paid token created</h1>
-    <p>PayPal 연결 전 테스트용 다운로드 링크야.</p>
-    <p>다운로드 가능 횟수: 1회</p>
+    <h1>${esc(copy.title)}</h1>
+<p>${esc(copy.desc)}</p>
+<p>${esc(copy.limit)}</p>
 
     <a href="${esc(downloadUrl)}" style="
         display:inline-block;
@@ -648,7 +648,7 @@ const copy = tokenPageCopy[lang] || tokenPageCopy.en
         text-decoration:none;
         font-weight:700;
     ">
-        Download Paid PDF
+        ${esc(copy.button)}
     </a>
 </body>
 </html>
@@ -3826,8 +3826,21 @@ ${freePart}
 // [26] REPORT BACK BUTTON
 // =========================================================
 
+function getBackToSiteText(lang = "en") {
+    const map = {
+        ko: "사이트로 돌아가기",
+        en: "Back to site",
+        ja: "サイトに戻る",
+        zh: "返回网站",
+        mn: "Сайт руу буцах",
+    }
+
+    return map[lang] || map.en
+}
+
 function injectReportBackButton(html, locale = {}) {
-    const backText = t(locale, "report.backToSite", "Back to site")
+    const lang = locale?.lang || "en"
+    const backText = getBackToSiteText(lang)
     const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
 
     const buttonHtml = `
