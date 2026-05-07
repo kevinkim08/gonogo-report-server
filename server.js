@@ -64,7 +64,7 @@ function createPaidDownloadToken(payload = {}) {
 
     paidDownloadTokens.set(token, {
         paid: true,
-        downloadLimit: 2,
+        downloadLimit: 5,
         downloadCount: 0,
         used: false,
         createdAt: Date.now(),
@@ -327,20 +327,31 @@ h1 {
 }
 
 .progress {
-    height: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 7px;
     width: 100%;
-    background: #E5EDE8;
-    border-radius: 999px;
-    overflow: hidden;
+    height: auto;
+    background: transparent;
+    overflow: visible;
     margin-bottom: 14px;
 }
 
 .bar {
-    height: 100%;
-    width: 8%;
-    background: #0D2418;
+    display: none;
+}
+
+.loading-dot {
+    width: 15px;
+    height: 15px;
     border-radius: 999px;
-    transition: width 0.45s ease;
+    background: #DDE6E1;
+    transition: background .25s ease, transform .25s ease;
+}
+
+.loading-dot.active {
+    background: #082818;
+    transform: scale(1.05);
 }
 
 .progress-top {
@@ -416,9 +427,7 @@ h1 {
             <span id="percent">0%</span>
         </div>
 
-        <div class="progress">
-            <div class="bar" id="bar"></div>
-        </div>
+        <div class="progress" id="dotProgress"></div>
 
         <div class="note">
             ${esc(copy.note)}
@@ -428,7 +437,17 @@ h1 {
 
 <script>
 const steps = ${stepsJson};
-const bar = document.getElementById("bar");
+const dotProgress = document.getElementById("dotProgress");
+
+const dotCount = 14;
+
+for (let i = 0; i < dotCount; i++) {
+    const dot = document.createElement("span");
+    dot.className = "loading-dot";
+    dotProgress.appendChild(dot);
+}
+
+const dots = Array.from(document.querySelectorAll(".loading-dot"));
 const step = document.getElementById("step");
 const percent = document.getElementById("percent");
 
@@ -448,7 +467,14 @@ const timer = setInterval(() => {
         if (step) step.textContent = steps[index];
     }
 
-    if (bar) bar.style.width = progress + "%";
+   const activeCount = Math.max(
+    1,
+    Math.min(dotCount, Math.ceil((progress / 100) * dotCount))
+);
+
+dots.forEach((dot, dotIndex) => {
+    dot.classList.toggle("active", dotIndex < activeCount);
+});
     if (percent) percent.textContent = progress + "%";
 
     if (progress >= 98) {
@@ -911,75 +937,33 @@ button.loading{
 
 .progress-bar{
     width:100%;
-    height:12px;
-    border-radius:999px;
-    background:#ececec;
-    overflow:hidden;
-}
-
-.progress-fill{
-    position:relative;
-    width:0%;
-    height:100%;
-    background:linear-gradient(
-        90deg,
-        #082818 0%,
-        #1f6b46 45%,
-        #48b07a 75%,
-        #b6ff5a 100%
-    );
-    transition:width .4s ease;
+    display:flex;
+    justify-content:center;
+    gap:7px;
+    background:transparent;
+    height:auto;
     overflow:visible;
 }
 
-.progress-fill::after{
-    content:"";
-    position:absolute;
-    right:-7px;
-    top:50%;
-    width:14px;
-    height:14px;
+.progress-fill{
+    display:none;
+}
+
+.loading-dot{
+    width:15px;
+    height:15px;
     border-radius:999px;
-    background:#b6ff5a;
+    background:#DDE6E1;
+    transition:
+        background .25s ease,
+        transform .25s ease;
+}
+
+.loading-dot.active{
+    background:#082818;
+    transform:scale(1.05);
     box-shadow:
-        0 0 10px rgba(182,255,90,.9),
-        0 0 24px rgba(182,255,90,.65);
-    transform:translateY(-50%);
-    animation:pulseGlow .9s ease-in-out infinite;
-}
-
-.progress-fill::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255,255,255,.35) 50%,
-        transparent 100%
-    );
-    transform:translateX(-100%);
-    animation:progressShine 1.4s linear infinite;
-}
-
-@keyframes pulseGlow{
-    0%,100%{
-        transform:translateY(-50%) scale(.85);
-        opacity:.65;
-    }
-    50%{
-        transform:translateY(-50%) scale(1.15);
-        opacity:1;
-    }
-}
-
-@keyframes progressShine{
-    from{
-        transform:translateX(-100%);
-    }
-    to{
-        transform:translateX(100%);
-    }
+        0 0 8px rgba(8,40,24,.18);
 }
 
 .progress-info{
@@ -1023,9 +1007,7 @@ button.loading{
 
     <div class="progress-wrap" id="progressWrap">
 
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
+        <div class="progress-bar" id="paidDotProgress"></div>
 
         <div class="progress-info">
             <span id="progressPercent">0%</span>
@@ -1058,8 +1040,20 @@ const loadingNote = document.getElementById("loadingNote");
 const progressWrap =
 document.getElementById("progressWrap");
 
-const progressFill =
-document.getElementById("progressFill");
+const paidDotProgress =
+document.getElementById("paidDotProgress");
+
+const dotCount = 14;
+
+for(let i = 0; i < dotCount; i++){
+    const dot = document.createElement("span");
+    dot.className = "loading-dot";
+    paidDotProgress.appendChild(dot);
+}
+
+const dots = Array.from(
+    document.querySelectorAll(".loading-dot")
+);
 
 const progressPercent =
 document.getElementById("progressPercent");
@@ -1107,8 +1101,14 @@ function startFakeProgress(){
         progressPercent.textContent =
             progress + "%"
 
-        progressFill.style.width =
-            progress + "%"
+        const activeCount = Math.max(
+    1,
+    Math.min(dotCount, Math.ceil((progress / 100) * dotCount))
+);
+
+dots.forEach((dot, dotIndex) => {
+    dot.classList.toggle("active", dotIndex < activeCount);
+});
 
     }, 800)
 }
@@ -1120,7 +1120,7 @@ function completeProgress(){
     }
 
     progressPercent.textContent = "100%"
-    progressFill.style.width = "100%"
+    dots.forEach((dot) => dot.classList.add("active"))
 
     progressStep.textContent = completeText
     loadingNote.textContent = redirectText
@@ -1486,7 +1486,7 @@ app.post("/api/paypal/capture-order", async (req, res) => {
         return res.json({
             ok: true,
             token,
-            downloadLimit: 2,
+            downloadLimit: 5,
             downloadUrl,
             orderId,
             captureId,
