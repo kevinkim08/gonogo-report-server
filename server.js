@@ -3692,6 +3692,44 @@ function buildHtmlFromTemplate(report, locale) {
     const templatePath = path.join(__dirname, "templates", "deep-report.html")
     let html = fs.readFileSync(templatePath, "utf8")
 
+    html = html.replace(
+    "</head>",
+    `
+${getPdfFontLinks()}
+<style>
+html,
+body,
+section,
+div,
+p,
+span,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+table,
+thead,
+tbody,
+tr,
+th,
+td,
+li,
+strong,
+em,
+small {
+    font-family: ${getPdfFontFamily(locale?.lang || "ko")} !important;
+}
+
+* {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+}
+</style>
+</head>`
+)
+
     const matrix = objectFromPairs(report.decisionMatrix)
     const market = objectFromPairs(report.marketCards)
     const unit = objectFromPairs(report.unitEconomicsCards)
