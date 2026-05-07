@@ -634,9 +634,9 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "보고서 페이지 구성 중",
                 "PDF 렌더링 중",
                 "다운로드 준비 중",
+            ],
             complete: "PDF 다운로드가 시작됐어.",
             redirect: "사이트로 돌아가는 중이야.",
-            ],
         },
         en: {
             title: "Paid token created",
@@ -652,9 +652,9 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "Composing report pages",
                 "Rendering PDF",
                 "Preparing download",
+            ],
             complete: "PDF download has started.",
             redirect: "Returning to the site...",
-            ],
         },
         ja: {
             title: "有料ダウンロードトークンを作成しました",
@@ -670,9 +670,9 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "レポートページを構成中",
                 "PDFをレンダリング中",
                 "ダウンロードを準備中",
+            ],
             complete: "PDFのダウンロードが開始されました。",
             redirect: "サイトに戻っています。",
-            ],
         },
         zh: {
             title: "付费下载令牌已创建",
@@ -688,9 +688,9 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "正在构建报告页面",
                 "正在渲染 PDF",
                 "正在准备下载",
+            ],
             complete: "PDF 下载已开始。",
             redirect: "正在返回网站。",
-            ],
         },
         mn: {
             title: "Төлбөртэй татах токен үүссэн",
@@ -706,9 +706,9 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "Тайлангийн хуудсыг бүрдүүлж байна",
                 "PDF үүсгэж байна",
                 "Татахад бэлдэж байна",
+            ],
             complete: "PDF таталт эхэллээ.",
             redirect: "Сайт руу буцаж байна.",
-            ],
         },
     }
 
