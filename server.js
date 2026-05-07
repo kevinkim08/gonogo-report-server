@@ -64,7 +64,7 @@ function createPaidDownloadToken() {
 
     paidDownloadTokens.set(token, {
         paid: true,
-        downloadLimit: 1,
+        downloadLimit: 2,
         downloadCount: 0,
         used: false,
         createdAt: Date.now(),
@@ -699,7 +699,7 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
             ko: {
                 title: "유료 다운로드 토큰 생성 완료",
                 desc: "테스트용 유료 PDF 다운로드 페이지야.",
-                limit: "다운로드 가능 횟수: 1회",
+                limit: "다운로드 가능 횟수: 2회",
                 button: "유료 PDF 다운로드",
                 loading: "PDF를 생성하고 있어. 잠시만 기다려줘.",
                 complete: "PDF 다운로드가 시작됐어.",
@@ -711,14 +711,14 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
                     "시장·고객 분석 중",
                     "보고서 페이지 구성 중",
                     "PDF 렌더링 중",
-                    "다운로드 준비 중",
+                    "PDF 파일을 마무리하는 중 — 창을 닫지 마세요",
                 ],
             },
 
             en: {
                 title: "Paid token created",
                 desc: "This is a test paid PDF download page.",
-                limit: "Download limit: 1 time",
+                limit: "Download limit: 2 time",
                 button: "Download Paid PDF",
                 loading: "Creating your PDF. Please wait.",
                 complete: "PDF download started.",
@@ -730,14 +730,14 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
                     "Analyzing market and customers",
                     "Composing report pages",
                     "Rendering PDF",
-                    "Preparing download",
+                    "Finalizing PDF — please keep this window open",
                 ],
             },
 
             ja: {
                 title: "有料ダウンロードトークン作成完了",
                 desc: "テスト用の有料PDFダウンロードページです。",
-                limit: "ダウンロード可能回数：1回",
+                limit: "ダウンロード可能回数：2回",
                 button: "有料PDFをダウンロード",
                 loading: "PDFを生成しています。",
                 complete: "PDFのダウンロードが開始されました。",
@@ -749,14 +749,14 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
                     "市場と顧客を分析中",
                     "レポートページを構成中",
                     "PDFをレンダリング中",
-                    "ダウンロードを準備中",
+                    "PDFを最終処理中です — この画面を閉じないでください",
                 ],
             },
 
             zh: {
                 title: "付费下载令牌已创建",
                 desc: "这是测试用的付费 PDF 下载页面。",
-                limit: "可下载次数：1次",
+                limit: "可下载次数：2次",
                 button: "下载付费 PDF",
                 loading: "正在生成 PDF，请稍候。",
                 complete: "PDF 下载已开始。",
@@ -768,14 +768,14 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
                     "正在分析市场与客户",
                     "正在构建报告页面",
                     "正在渲染 PDF",
-                    "正在准备下载",
+                    "正在完成 PDF — 请不要关闭此页面",
                 ],
             },
 
             mn: {
                 title: "Төлбөртэй татах токен үүслээ",
                 desc: "Туршилтын төлбөртэй PDF татах хуудас.",
-                limit: "Татах боломж: 1 удаа",
+                limit: "Татах боломж: 2 удаа",
                 button: "Төлбөртэй PDF татах",
                 loading: "PDF үүсгэж байна.",
                 complete: "PDF таталт эхэллээ.",
@@ -787,7 +787,7 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
                     "Зах зээл ба хэрэглэгчийг шинжилж байна",
                     "Тайлангийн хуудсуудыг бэлтгэж байна",
                     "PDF үүсгэж байна",
-                    "Татахад бэлдэж байна",
+                   "PDF-г дуусгаж байна — энэ хуудсыг битгий хаагаарай",
                 ],
             },
         }
@@ -843,17 +843,29 @@ h1{
 
 button{
     width:100%;
-    border:none;
-    background:#111;
-    color:#fff;
+    border:1px solid #082818;
+    background:#082818;
+    color:#ffffff;
     padding:18px;
     border-radius:18px;
     font-size:16px;
+    font-weight:900;
     cursor:pointer;
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        transform .2s ease;
+}
+
+button:hover{
+    transform:translateY(-1px);
 }
 
 button.loading{
-    opacity:.7;
+    background:#ffffff;
+    color:#082818;
+    border-color:#082818;
     cursor:wait;
 }
 
@@ -882,10 +894,68 @@ button.loading{
 }
 
 .progress-fill{
+    position:relative;
     width:0%;
     height:100%;
-    background:#111;
+    background:linear-gradient(
+        90deg,
+        #082818 0%,
+        #1f6b46 45%,
+        #48b07a 75%,
+        #b6ff5a 100%
+    );
     transition:width .4s ease;
+    overflow:visible;
+}
+
+.progress-fill::after{
+    content:"";
+    position:absolute;
+    right:-7px;
+    top:50%;
+    width:14px;
+    height:14px;
+    border-radius:999px;
+    background:#b6ff5a;
+    box-shadow:
+        0 0 10px rgba(182,255,90,.9),
+        0 0 24px rgba(182,255,90,.65);
+    transform:translateY(-50%);
+    animation:pulseGlow .9s ease-in-out infinite;
+}
+
+.progress-fill::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,.35) 50%,
+        transparent 100%
+    );
+    transform:translateX(-100%);
+    animation:progressShine 1.4s linear infinite;
+}
+
+@keyframes pulseGlow{
+    0%,100%{
+        transform:translateY(-50%) scale(.85);
+        opacity:.65;
+    }
+    50%{
+        transform:translateY(-50%) scale(1.15);
+        opacity:1;
+    }
+}
+
+@keyframes progressShine{
+    from{
+        transform:translateX(-100%);
+    }
+    to{
+        transform:translateX(100%);
+    }
 }
 
 .progress-info{
@@ -989,12 +1059,12 @@ function startFakeProgress(){
 
     timer = setInterval(() => {
 
-        if(progress < 92){
-            progress +=
-                Math.floor(Math.random() * 5) + 2
+       if(progress < 96){
+    progress +=
+        Math.random() < 0.7 ? 1 : 2
 
-            progress = Math.min(progress, 92)
-        }
+    progress = Math.min(progress, 96)
+}
 
         const nextStepIndex = Math.min(
             Math.floor(
@@ -5400,7 +5470,7 @@ function decisionSummaryBox(report, locale = {}) {
 }
 .decision-summary-box.danger .decision-summary-score,
 .decision-summary-box.danger .decision-summary-decision {
-    color: #b94a48;
+    color: #b94a48; 
 }
 </style>
 
