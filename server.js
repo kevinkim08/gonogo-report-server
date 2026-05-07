@@ -1295,6 +1295,7 @@ app.get("/api/paypal/start-order", async (req, res) => {
         const accessToken = await getPayPalAccessToken()
 
         const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+        
         const baseUrl =
         process.env.PUBLIC_BASE_URL ||
         "https://gonogo-report-server.onrender.com"
@@ -4978,25 +4979,7 @@ function getLocaleList(locale, key, fallback = []) {
     const value = getByPath(locale, key)
     return Array.isArray(value) ? value : fallback
 }
-function buildPayPalStartOrderUrl(report = {}) {
-    const baseUrl =
-        process.env.PUBLIC_BASE_URL ||
-        "https://gonogo-report-server.onrender.com"
 
-    const params = new URLSearchParams({
-        lang: report?.lang || "ko",
-        brandName: report?.brandName || "PaidReport",
-        productService:
-            report?.productService ||
-            report?.idea ||
-            "A paid business report",
-        targetCustomer:
-            report?.targetCustomer ||
-            "Target customers",
-    })
-
-    return `${baseUrl}/api/paypal/start-order?${params.toString()}`
-}
 // =========================================================
 // [30] DATA UTILS
 // =========================================================
