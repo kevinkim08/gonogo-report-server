@@ -4625,10 +4625,7 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
         report?.brandNaming?.recommendedName?.reason ||
         t(locale, "premium.defaultBrandReason", "This direction connects the offer, target customer, and market position.")
 
-    const checkoutUrl =
-        process.env.PAYMENT_LINK ||
-        process.env.PAYWALL_CHECKOUT_URL ||
-        "/api/dev-create-paid-token"
+    const checkoutUrl = buildPayPalStartOrderUrl(report, locale)
 
     return `
 ${freePart}
