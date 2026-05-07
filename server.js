@@ -573,6 +573,40 @@ app.post("/api/generate-report", async (req, res) => {
 app.get("/api/dev-create-paid-token", (req, res) => {
     const token = createPaidDownloadToken()
     const lang = normalizeLanguage(req.query.lang || "ko")
+    const tokenPageCopy = {
+    ko: {
+        title: "유료 다운로드 토큰 생성 완료",
+        desc: "PayPal 연결 전 테스트용 다운로드 링크야.",
+        limit: "다운로드 가능 횟수: 1회",
+        button: "유료 PDF 다운로드",
+    },
+    en: {
+        title: "Paid token created",
+        desc: "This is a test download link before PayPal is fully connected.",
+        limit: "Download limit: 1 time",
+        button: "Download Paid PDF",
+    },
+    ja: {
+        title: "有料ダウンロードトークンを作成しました",
+        desc: "PayPal接続前のテスト用ダウンロードリンクです。",
+        limit: "ダウンロード可能回数：1回",
+        button: "有料PDFをダウンロード",
+    },
+    zh: {
+        title: "付费下载令牌已创建",
+        desc: "这是 PayPal 完全连接前的测试下载链接。",
+        limit: "可下载次数：1次",
+        button: "下载付费 PDF",
+    },
+    mn: {
+        title: "Төлбөртэй татах токен үүссэн",
+        desc: "PayPal бүрэн холбогдохоос өмнөх туршилтын татах холбоос.",
+        limit: "Татах боломж: 1 удаа",
+        button: "Төлбөртэй PDF татах",
+    },
+}
+
+const copy = tokenPageCopy[lang] || tokenPageCopy.en
 
     const brandName = req.query.brandName || ""
     const productService = req.query.productService || ""
