@@ -4242,7 +4242,9 @@ html = html
     // [24] BACK BUTTON
     // =========================================================
 
-    html = injectReportBackButton(html, locale)
+   html = injectReportBackButton(html, locale, {
+    showBackButton: report?.reportMode === "free",
+})
 
     html = html.replace(/{{[^}]+}}/g, "")
 
@@ -4387,7 +4389,13 @@ function getBackToSiteText(lang = "en") {
     return map[lang] || map.en
 }
 
-function injectReportBackButton(html, locale = {}) {
+function injectReportBackButton(html, locale = {}, options = {}) {
+    const shouldShowBackButton = options?.showBackButton === true
+
+    if (!shouldShowBackButton) {
+        return html
+    }
+
     const lang = locale?.lang || "en"
     const backText = getBackToSiteText(lang)
     const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
