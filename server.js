@@ -457,7 +457,7 @@ const percent = document.getElementById("percent");
 let progress = 1;
 
 const timer = setInterval(() => {
-    progress = Math.min(progress + 1, 96);
+    progress = Math.min(progress + 1, 94);
 
     const nextIndex = Math.min(
         Math.floor((progress / 100) * steps.length),
@@ -467,14 +467,22 @@ const timer = setInterval(() => {
     if (step) step.textContent = steps[nextIndex];
     if (percent) percent.textContent = progress + "%";
 
-    if (progress >= 96) {
-        clearInterval(timer);
+   if (progress >= 94) {
+    clearInterval(timer);
+
+    if (step) {
+        step.textContent =
+            steps[steps.length - 1] || step.textContent;
+    }
+
+    setTimeout(() => {
+        if (percent) percent.textContent = "99%";
 
         setTimeout(() => {
-            if (percent) percent.textContent = "100%";
             window.location.href = "${targetUrl}";
-        }, 500);
-    }
+        }, 250);
+    }, 350);
+}
 }, 90);
 </script>
 </body>
