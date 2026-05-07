@@ -591,93 +591,98 @@ app.post("/api/generate-report", async (req, res) => {
 // [10] DEV PAID TOKEN ROUTE
 // =========================================================
 
+// =========================================================
+// [10] DEV PAID TOKEN ROUTE
+// =========================================================
+
 app.get("/api/dev-create-paid-token", (req, res) => {
     const token = createPaidDownloadToken()
     const lang = normalizeLanguage(req.query.lang || "ko")
-    const tokenPageCopy = {
-    ko: {
-    title: "유료 다운로드 토큰 생성 완료",
-    desc: "PayPal 연결 전 테스트용 다운로드 링크야.",
-    limit: "다운로드 가능 횟수: 1회",
-    button: "유료 PDF 다운로드",
-    loading: "PDF를 생성하고 있어. 잠시만 기다려줘.",
-},
-        progressSteps: [
-    "입력값 분석 중",
-    "사업 구조 판단 중",
-    "브랜딩 전략 생성 중",
-    "시장·고객 분석 중",
-    "보고서 페이지 구성 중",
-    "PDF 렌더링 중",
-    "다운로드 준비 중",
-],
-en: {
-    title: "Paid token created",
-    desc: "This is a test download link before PayPal is fully connected.",
-    limit: "Download limit: 1 time",
-    button: "Download Paid PDF",
-    loading: "Creating your PDF. Please wait.",
-},
-        progressSteps: [
-    "Analyzing input",
-    "Structuring business logic",
-    "Building brand strategy",
-    "Analyzing market and customers",
-    "Composing report pages",
-    "Rendering PDF",
-    "Preparing download",
-],
-ja: {
-    title: "有料ダウンロードトークンを作成しました",
-    desc: "PayPal接続前のテスト用ダウンロードリンクです。",
-    limit: "ダウンロード可能回数：1回",
-    button: "有料PDFをダウンロード",
-    loading: "PDFを生成しています。しばらくお待ちください。",
-},
-     progressSteps: [
-    "入力内容を分析中",
-    "事業構造を判断中",
-    "ブランド戦略を生成中",
-    "市場・顧客を分析中",
-    "レポートページを構成中",
-    "PDFをレンダリング中",
-    "ダウンロードを準備中",
-],   
-zh: {
-    title: "付费下载令牌已创建",
-    desc: "这是 PayPal 完全连接前的测试下载链接。",
-    limit: "可下载次数：1次",
-    button: "下载付费 PDF",
-    loading: "正在生成 PDF，请稍候。",
-},
-      progressSteps: [
-    "正在分析输入内容",
-    "正在判断商业结构",
-    "正在生成品牌策略",
-    "正在分析市场与客户",
-    "正在构建报告页面",
-    "正在渲染 PDF",
-    "正在准备下载",
-],  
-mn: {
-    title: "Төлбөртэй татах токен үүссэн",
-    desc: "PayPal бүрэн холбогдохоос өмнөх туршилтын татах холбоос.",
-    limit: "Татах боломж: 1 удаа",
-    button: "Төлбөртэй PDF татах",
-    loading: "PDF үүсгэж байна. Түр хүлээнэ үү.",
-},
-    progressSteps: [
-    "Оролтын мэдээллийг шинжилж байна",
-    "Бизнесийн бүтцийг үнэлж байна",
-    "Брэндийн стратеги боловсруулж байна",
-    "Зах зээл ба хэрэглэгчийг шинжилж байна",
-    "Тайлангийн хуудсыг бүрдүүлж байна",
-    "PDF үүсгэж байна",
-    "Татахад бэлдэж байна",
-],    
-}
 
-const copy = tokenPageCopy[lang] || tokenPageCopy.en
+    const tokenPageCopy = {
+        ko: {
+            title: "유료 다운로드 토큰 생성 완료",
+            desc: "PayPal 연결 전 테스트용 다운로드 링크야.",
+            limit: "다운로드 가능 횟수: 1회",
+            button: "유료 PDF 다운로드",
+            loading: "PDF를 생성하고 있어. 잠시만 기다려줘.",
+            progressSteps: [
+                "입력값 분석 중",
+                "사업 구조 판단 중",
+                "브랜딩 전략 생성 중",
+                "시장·고객 분석 중",
+                "보고서 페이지 구성 중",
+                "PDF 렌더링 중",
+                "다운로드 준비 중",
+            ],
+        },
+        en: {
+            title: "Paid token created",
+            desc: "This is a test download link before PayPal is fully connected.",
+            limit: "Download limit: 1 time",
+            button: "Download Paid PDF",
+            loading: "Creating your PDF. Please wait.",
+            progressSteps: [
+                "Analyzing input",
+                "Structuring business logic",
+                "Building brand strategy",
+                "Analyzing market and customers",
+                "Composing report pages",
+                "Rendering PDF",
+                "Preparing download",
+            ],
+        },
+        ja: {
+            title: "有料ダウンロードトークンを作成しました",
+            desc: "PayPal接続前のテスト用ダウンロードリンクです。",
+            limit: "ダウンロード可能回数：1回",
+            button: "有料PDFをダウンロード",
+            loading: "PDFを生成しています。しばらくお待ちください。",
+            progressSteps: [
+                "入力内容を分析中",
+                "事業構造を判断中",
+                "ブランド戦略を生成中",
+                "市場・顧客を分析中",
+                "レポートページを構成中",
+                "PDFをレンダリング中",
+                "ダウンロードを準備中",
+            ],
+        },
+        zh: {
+            title: "付费下载令牌已创建",
+            desc: "这是 PayPal 完全连接前的测试下载链接。",
+            limit: "可下载次数：1次",
+            button: "下载付费 PDF",
+            loading: "正在生成 PDF，请稍候。",
+            progressSteps: [
+                "正在分析输入内容",
+                "正在判断商业结构",
+                "正在生成品牌策略",
+                "正在分析市场与客户",
+                "正在构建报告页面",
+                "正在渲染 PDF",
+                "正在准备下载",
+            ],
+        },
+        mn: {
+            title: "Төлбөртэй татах токен үүссэн",
+            desc: "PayPal бүрэн холбогдохоос өмнөх туршилтын татах холбоос.",
+            limit: "Татах боломж: 1 удаа",
+            button: "Төлбөртэй PDF татах",
+            loading: "PDF үүсгэж байна. Түр хүлээнэ үү.",
+            progressSteps: [
+                "Оролтын мэдээллийг шинжилж байна",
+                "Бизнесийн бүтцийг үнэлж байна",
+                "Брэндийн стратеги боловсруулж байна",
+                "Зах зээл ба хэрэглэгчийг шинжилж байна",
+                "Тайлангийн хуудсыг бүрдүүлж байна",
+                "PDF үүсгэж байна",
+                "Татахад бэлдэж байна",
+            ],
+        },
+    }
+
+    const copy = tokenPageCopy[lang] || tokenPageCopy.en
 
     const brandName = req.query.brandName || ""
     const productService = req.query.productService || ""
@@ -692,35 +697,224 @@ const copy = tokenPageCopy[lang] || tokenPageCopy.en
     })
 
     const baseUrl = process.env.PUBLIC_BASE_URL || `https://${req.get("host")}`
-
     const downloadUrl = `${baseUrl}/api/download-paid-pdf?${params.toString()}`
-    
+
     res.setHeader("Content-Type", "text/html; charset=utf-8")
 
     return res.send(`
 <!doctype html>
-<html>
+<html lang="${esc(lang)}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Paid token created</title>
-</head>
-<body style="font-family:Arial;padding:40px;">
-    <h1>${esc(copy.title)}</h1>
-<p>${esc(copy.desc)}</p>
-<p>${esc(copy.limit)}</p>
+<title>${esc(copy.title)}</title>
 
-    <a href="${esc(downloadUrl)}" style="
-        display:inline-block;
-        padding:16px 24px;
-        background:#082818;
-        color:white;
-        border-radius:12px;
-        text-decoration:none;
-        font-weight:700;
-    ">
-        ${esc(copy.button)}
-    </a>
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: ${getPdfFontFamily(lang)};
+    background: #ffffff;
+    color: #0D2418;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.wrap {
+    width: 100%;
+    max-width: 460px;
+    text-align: center;
+}
+
+h1 {
+    margin: 0 0 16px;
+    font-size: 32px;
+    line-height: 1.15;
+    letter-spacing: -0.05em;
+    font-weight: 950;
+}
+
+p {
+    margin: 10px 0;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #4B5A52;
+    font-weight: 700;
+}
+
+button {
+    margin-top: 22px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 190px;
+    padding: 17px 24px;
+    background: #082818;
+    color: white;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 900;
+}
+
+button:disabled {
+    opacity: 0.78;
+    cursor: wait;
+}
+
+.loader {
+    display: none;
+    width: 17px;
+    height: 17px;
+    margin-right: 10px;
+    border: 3px solid rgba(255,255,255,0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+button.loading .loader {
+    display: inline-block;
+}
+
+.progress-wrap {
+    display: none;
+    margin: 28px auto 0;
+    width: 100%;
+    max-width: 380px;
+}
+
+.progress-wrap.active {
+    display: block;
+}
+
+.progress-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #0D2418;
+}
+
+.progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #E4ECE7;
+    overflow: hidden;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    border-radius: 999px;
+    background: #0D2418;
+    transition: width 0.35s ease;
+}
+
+.note {
+    margin-top: 18px;
+    font-size: 12px;
+    color: #7B8B82;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>
+</head>
+
+<body>
+    <main class="wrap">
+        <h1>${esc(copy.title)}</h1>
+        <p>${esc(copy.desc)}</p>
+        <p>${esc(copy.limit)}</p>
+
+        <button id="downloadBtn" type="button">
+            <span class="loader"></span>
+            <span id="buttonText">${esc(copy.button)}</span>
+        </button>
+
+        <div class="progress-wrap" id="progressWrap">
+            <div class="progress-top">
+                <span id="progressStep"></span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <p class="note" id="loadingNote"></p>
+    </main>
+
+<script>
+const downloadUrl = ${JSON.stringify(downloadUrl)};
+const loadingText = ${JSON.stringify(copy.loading)};
+const progressSteps = ${JSON.stringify(copy.progressSteps)};
+
+const btn = document.getElementById("downloadBtn");
+const buttonText = document.getElementById("buttonText");
+const loadingNote = document.getElementById("loadingNote");
+const progressWrap = document.getElementById("progressWrap");
+const progressFill = document.getElementById("progressFill");
+const progressPercent = document.getElementById("progressPercent");
+const progressStep = document.getElementById("progressStep");
+
+let progress = 0;
+let stepIndex = 0;
+
+function startFakeProgress() {
+    progressWrap.classList.add("active");
+    progressStep.textContent = progressSteps[0] || loadingText;
+    progressPercent.textContent = "0%";
+    progressFill.style.width = "0%";
+
+    setInterval(() => {
+        if (progress < 96) {
+            progress += Math.floor(Math.random() * 6) + 3;
+            progress = Math.min(progress, 96);
+        }
+
+        const nextStepIndex = Math.min(
+            Math.floor((progress / 100) * progressSteps.length),
+            progressSteps.length - 1
+        );
+
+        if (nextStepIndex !== stepIndex) {
+            stepIndex = nextStepIndex;
+            progressStep.textContent = progressSteps[stepIndex] || loadingText;
+        }
+
+        progressPercent.textContent = progress + "%";
+        progressFill.style.width = progress + "%";
+    }, 700);
+}
+
+btn.addEventListener("click", () => {
+    btn.disabled = true;
+    btn.classList.add("loading");
+    buttonText.textContent = loadingText;
+    loadingNote.textContent = loadingText;
+
+    startFakeProgress();
+
+    setTimeout(() => {
+        window.location.href = downloadUrl;
+    }, 450);
+});
+</script>
 </body>
 </html>
 `)
