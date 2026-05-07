@@ -936,13 +936,27 @@ button.loading .loader {
         <p class="note" id="loadingNote"></p>
     </main>
 
-<script>
+
+</body>
+</html>
+`)
+})
+
+// =========================================================
+// [11] DOWNLOAD PAID PDF ROUTE
+// =========================================================
+
+app.get("/api/download-paid-pdf", async (req, res) => {
+    try {
+        const { token } = req.query
+        co<script>
 const downloadUrl = ${JSON.stringify(downloadUrl)};
 const siteUrl = ${JSON.stringify(process.env.PUBLIC_SITE_URL || "https://gonogo.so")};
 const loadingText = ${JSON.stringify(copy.loading)};
-const completeText = ${JSON.stringify(copy.complete || "PDF download has started.")};
+const completeText = ${JSON.stringify(copy.complete || "PDF download is ready.")};
 const redirectText = ${JSON.stringify(copy.redirect || "Returning to the site...")};
 const progressSteps = ${JSON.stringify(copy.progressSteps)};
+const fileName = ${JSON.stringify(`GoNoGo_Paid_Report_${lang}.pdf`)};
 
 const btn = document.getElementById("downloadBtn");
 const buttonText = document.getElementById("buttonText");
@@ -964,7 +978,7 @@ function startFakeProgress() {
 
     timer = setInterval(() => {
         if (progress < 92) {
-            progress += Math.floor(Math.random() * 6) + 4;
+            progress += Math.floor(Math.random() * 5) + 2;
             progress = Math.min(progress, 92);
         }
 
@@ -980,7 +994,7 @@ function startFakeProgress() {
 
         progressPercent.textContent = progress + "%";
         progressFill.style.width = progress + "%";
-    }, 650);
+    }, 800);
 }
 
 function completeProgress() {
@@ -1000,37 +1014,51 @@ function completeProgress() {
     }, 1800);
 }
 
-btn.addEventListener("click", () => {
-    btn.disabled = true;
-    btn.classList.add("loading");
-    buttonText.textContent = loadingText;
-    loadingNote.textContent = loadingText;
+function failProgress(message) {
+    if (timer) clearInterval(timer);
 
-    startFakeProgress();
+    btn.disabled = false;
+    btn.classList.remove("loading");
+    buttonText.textContent = ${JSON.stringify(copy.button)};
+    loadingNote.textContent = message || "PDF download failed. Please try again.";
+    progressStep.textContent = message || "Download failed";
+}
 
-    const hiddenFrame = document.createElement("iframe");
-    hiddenFrame.style.display = "none";
-    hiddenFrame.src = downloadUrl;
-    document.body.appendChild(hiddenFrame);
-
-    setTimeout(() => {
-        completeProgress();
-    }, 5500);
-});
-</script>
-</body>
-</html>
-`)
-})
-
-// =========================================================
-// [11] DOWNLOAD PAID PDF ROUTE
-// =========================================================
-
-app.get("/api/download-paid-pdf", async (req, res) => {
+btn.addEventListener("click", async () => {
     try {
-        const { token } = req.query
-        const language = normalizeLanguage(req.query.lang || "ko")
+        btn.disabled = true;
+        btn.classList.add("loading");
+        buttonText.textContent = loadingText;
+        loadingNote.textContent = loadingText;
+
+        startFakeProgress();
+
+        const response = await fetch(downloadUrl);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Download failed");
+        }
+
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+
+        a.remove();
+        window.URL.revokeObjectURL(blobUrl);
+
+        completeProgress();
+    } catch (error) {
+        console.error(error);
+        failProgress("PDF download failed. Please try again.");
+    }
+});
+</script>nst language = normalizeLanguage(req.query.lang || "ko")
 
         const validation = validatePaidDownloadToken(token)
 
