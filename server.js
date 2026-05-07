@@ -29,6 +29,10 @@ const __dirname = path.dirname(__filename)
 // =========================================================
 
 app.use(express.json({ limit: "5mb" }))
+app.use(
+    "/fonts",
+    express.static(path.join(__dirname, "fonts"))
+)
 
 app.use(
     cors({
