@@ -1544,20 +1544,31 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         
         const safeBrand = sanitizeFileName(brandName)
 
-        res.setHeader("Content-Type", "application/octet-stream")
+
+const asciiFileName =
+    `GoNoGo_Paid_Report_${language}_${Date.now()}.pdf`
+
+const encodedFileName =
+    encodeURIComponent(
+        `GoNoGo_Paid_Report_${safeBrand}_${language}.pdf`
+    )
+
+res.setHeader("Content-Type", "application/octet-stream")
 res.setHeader("X-Content-Type-Options", "nosniff")
-res.setHeader("Cache-Control", "no-store")
+res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
 res.setHeader("Pragma", "no-cache")
 res.setHeader("Expires", "0")
+res.setHeader("Surrogate-Control", "no-store")
 
 res.setHeader(
     "Content-Disposition",
-    `attachment; filename="${fileName}"`
+    `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`
 )
 
-res.setHeader("Content-Length", pdfBuffer.length)
+res.setHeader("Content-Length", String(pdfBuffer.length))
 
 return res.end(pdfBuffer)
+        
     } catch (error) {
         console.error("[DOWNLOAD_PAID_PDF_ERROR]", error)
 
