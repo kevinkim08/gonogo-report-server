@@ -615,10 +615,6 @@ app.post("/api/generate-report", async (req, res) => {
 // [10] DEV PAID TOKEN ROUTE
 // =========================================================
 
-// =========================================================
-// [10] DEV PAID TOKEN ROUTE
-// =========================================================
-
 app.get("/api/dev-create-paid-token", (req, res) => {
     const token = createPaidDownloadToken()
     const lang = normalizeLanguage(req.query.lang || "ko")
@@ -638,6 +634,8 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "보고서 페이지 구성 중",
                 "PDF 렌더링 중",
                 "다운로드 준비 중",
+            complete: "PDF 다운로드가 시작됐어.",
+            redirect: "사이트로 돌아가는 중이야.",
             ],
         },
         en: {
@@ -654,6 +652,8 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "Composing report pages",
                 "Rendering PDF",
                 "Preparing download",
+            complete: "PDF download has started.",
+            redirect: "Returning to the site...",
             ],
         },
         ja: {
@@ -670,6 +670,8 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "レポートページを構成中",
                 "PDFをレンダリング中",
                 "ダウンロードを準備中",
+            complete: "PDFのダウンロードが開始されました。",
+            redirect: "サイトに戻っています。",
             ],
         },
         zh: {
@@ -686,6 +688,8 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "正在构建报告页面",
                 "正在渲染 PDF",
                 "正在准备下载",
+            complete: "PDF 下载已开始。",
+            redirect: "正在返回网站。",
             ],
         },
         mn: {
@@ -702,6 +706,8 @@ app.get("/api/dev-create-paid-token", (req, res) => {
                 "Тайлангийн хуудсыг бүрдүүлж байна",
                 "PDF үүсгэж байна",
                 "Татахад бэлдэж байна",
+            complete: "PDF таталт эхэллээ.",
+            redirect: "Сайт руу буцаж байна.",
             ],
         },
     }
@@ -885,7 +891,10 @@ button.loading .loader {
 
 <script>
 const downloadUrl = ${JSON.stringify(downloadUrl)};
+const siteUrl = ${JSON.stringify(process.env.PUBLIC_SITE_URL || "https://gonogo.so")};
 const loadingText = ${JSON.stringify(copy.loading)};
+const completeText = ${JSON.stringify(copy.complete || "PDF download has started.")};
+const redirectText = ${JSON.stringify(copy.redirect || "Returning to the site...")};
 const progressSteps = ${JSON.stringify(copy.progressSteps)};
 
 const btn = document.getElementById("downloadBtn");
@@ -898,6 +907,7 @@ const progressStep = document.getElementById("progressStep");
 
 let progress = 0;
 let stepIndex = 0;
+let timer = null;
 
 function startFakeProgress() {
     progressWrap.classList.add("active");
@@ -905,10 +915,10 @@ function startFakeProgress() {
     progressPercent.textContent = "0%";
     progressFill.style.width = "0%";
 
-    setInterval(() => {
-        if (progress < 96) {
-            progress += Math.floor(Math.random() * 6) + 3;
-            progress = Math.min(progress, 96);
+    timer = setInterval(() => {
+        if (progress < 92) {
+            progress += Math.floor(Math.random() * 6) + 4;
+            progress = Math.min(progress, 92);
         }
 
         const nextStepIndex = Math.min(
@@ -923,7 +933,24 @@ function startFakeProgress() {
 
         progressPercent.textContent = progress + "%";
         progressFill.style.width = progress + "%";
-    }, 700);
+    }, 650);
+}
+
+function completeProgress() {
+    if (timer) clearInterval(timer);
+
+    progress = 100;
+    progressPercent.textContent = "100%";
+    progressFill.style.width = "100%";
+    progressStep.textContent = completeText;
+    loadingNote.textContent = redirectText;
+
+    btn.classList.remove("loading");
+    buttonText.textContent = completeText;
+
+    setTimeout(() => {
+        window.location.href = siteUrl;
+    }, 1800);
 }
 
 btn.addEventListener("click", () => {
@@ -934,9 +961,14 @@ btn.addEventListener("click", () => {
 
     startFakeProgress();
 
+    const hiddenFrame = document.createElement("iframe");
+    hiddenFrame.style.display = "none";
+    hiddenFrame.src = downloadUrl;
+    document.body.appendChild(hiddenFrame);
+
     setTimeout(() => {
-        window.location.href = downloadUrl;
-    }, 450);
+        completeProgress();
+    }, 5500);
 });
 </script>
 </body>
