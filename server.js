@@ -316,55 +316,6 @@ h1 {
     font-weight: 650;
 }
 
-.progress {
-    display: flex;
-    justify-content: center;
-    gap: 7px;
-    width: 100%;
-    height: auto;
-    background: transparent;
-    overflow: visible;
-    margin-bottom: 14px;
-}
-
-.bar {
-    display: none;
-}
-
-.loading-dot {
-    width: 15px;
-    height: 15px;
-    border-radius: 999px;
-    background: #DDE6E1;
-    transition:
-        background .25s ease,
-        transform .25s ease,
-        box-shadow .25s ease;
-}
-
-.loading-dot.active {
-    background: linear-gradient(
-        90deg,
-        #082818 0%,
-        #1F6B46 58%,
-        #B6FF5A 100%
-    );
-    transform: scale(1.06);
-    box-shadow:
-        0 0 8px rgba(8,40,24,.16),
-        0 0 14px rgba(182,255,90,.22);
-}
-
-.progress-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 10px;
-    font-size: 12px;
-    font-weight: 900;
-    color: #0D2418;
-}
-
 .step {
     min-height: 22px;
     color: #0D2418;
@@ -379,6 +330,66 @@ h1 {
     line-height: 1.5;
     color: #7B8B82;
     font-weight: 700;
+}
+
+.spinner-wrap {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 24px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spinner-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    background:
+        conic-gradient(
+            from 0deg,
+            #082818 0deg,
+            #1F6B46 105deg,
+            #B6FF5A 170deg,
+            rgba(255,255,255,0.92) 235deg,
+            rgba(221,230,225,0.55) 360deg
+        );
+    -webkit-mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 8px),
+            #000 calc(100% - 7px)
+        );
+    mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 8px),
+            #000 calc(100% - 7px)
+        );
+    animation: gonogoSpin 0.95s linear infinite;
+    box-shadow:
+        0 0 18px rgba(8,40,24,0.10),
+        0 0 28px rgba(182,255,90,0.20);
+}
+
+.spinner-percent {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #082818;
+    font-size: 12px;
+    font-weight: 950;
+    letter-spacing: -0.04em;
+    pointer-events: none;
+}
+
+@keyframes gonogoSpin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @media (max-width: 480px) {
@@ -425,12 +436,12 @@ h1 {
          <h1>${esc(copy.title)}</h1>
         <p class="desc">${esc(copy.desc)}</p>
 
-        <div class="progress-top">
-            <span id="step">${esc(copy.steps[0])}</span>
-            <span id="percent">0%</span>
-        </div>
+        <div class="spinner-wrap">
+    <div class="spinner-ring"></div>
+    <div class="spinner-percent" id="percent">1%</div>
+</div>
 
-        <div class="progress" id="dotProgress"></div>
+<div class="step" id="step">${esc(copy.steps[0])}</div>
 
         <div class="note">
             ${esc(copy.note)}
@@ -440,54 +451,31 @@ h1 {
 
 <script>
 const steps = ${stepsJson};
-const dotProgress = document.getElementById("dotProgress");
-
-const dotCount = 14;
-
-for (let i = 0; i < dotCount; i++) {
-    const dot = document.createElement("span");
-    dot.className = "loading-dot";
-    dotProgress.appendChild(dot);
-}
-
-const dots = Array.from(document.querySelectorAll(".loading-dot"));
 const step = document.getElementById("step");
 const percent = document.getElementById("percent");
 
-let index = 0;
-let progress = 0;
+let progress = 1;
 
 const timer = setInterval(() => {
-    progress = Math.min(progress + 14, 98);
+    progress = Math.min(progress + 1, 96);
 
     const nextIndex = Math.min(
         Math.floor((progress / 100) * steps.length),
         steps.length - 1
     );
 
-    if (nextIndex !== index) {
-        index = nextIndex;
-        if (step) step.textContent = steps[index];
-    }
-
-   const activeCount = Math.max(
-    1,
-    Math.min(dotCount, Math.ceil((progress / 100) * dotCount))
-);
-
-dots.forEach((dot, dotIndex) => {
-    dot.classList.toggle("active", dotIndex < activeCount);
-});
+    if (step) step.textContent = steps[nextIndex];
     if (percent) percent.textContent = progress + "%";
 
-    if (progress >= 98) {
+    if (progress >= 96) {
         clearInterval(timer);
 
         setTimeout(() => {
+            if (percent) percent.textContent = "100%";
             window.location.href = "${targetUrl}";
-        }, 700);
+        }, 500);
     }
-}, 650);
+}, 90);
 </script>
 </body>
 </html>
@@ -1372,10 +1360,13 @@ app.get("/api/paypal/return", (req, res) => {
             return res.redirect(`${siteUrl}/paid-success?error=missing_order_id`)
         }
 
-        const params = new URLSearchParams({
-            orderId,
-            token: orderId,
-        })
+        const context = paypalOrderContext.get(orderId) || {}
+
+const params = new URLSearchParams({
+    orderId,
+    token: orderId,
+    lang: context.lang || "ko",
+})
 
         return res.redirect(`${siteUrl}/paid-success?${params.toString()}`)
     } catch (error) {
@@ -3432,45 +3423,6 @@ body {
     line-height: 1.75;
     color: #53645A;
     font-weight: 700;
-}
-
-.free-progress-card {
-    margin-top: 28px;
-    padding: 22px;
-    border-radius: 26px;
-    background: #ffffff;
-    border: 1px solid #dfe7e2;
-}
-
-.free-progress-top {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 950;
-    color: #0D2418;
-    letter-spacing: 0.04em;
-}
-
-.free-progress-track {
-    margin-top: 13px;
-    height: 12px;
-    border-radius: 999px;
-    background: #e4ece7;
-    overflow: hidden;
-}
-
-.free-progress-fill {
-    height: 100%;
-    width: 65%;
-    border-radius: 999px;
-    background: #0D2418;
-}
-
-.free-progress-note {
-    margin-top: 10px;
-    font-size: 12px;
-    color: #6f7e75;
-    font-weight: 800;
 }
 
 .free-upgrade-grid {
