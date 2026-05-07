@@ -157,55 +157,70 @@ app.get("/api/report-loading", (req, res) => {
         ko: {
             title: "보고서를 만들고 있어",
             desc: "시장 위험, 고객 구매 이유, 수익 구조, 실행 가능성을 분석하는 중이야.",
+            note: "페이지를 닫지 마. 보고서가 자동으로 열릴 거야.",
             steps: [
-                "사업 아이디어 구조 분석 중",
+                "입력값 분석 중",
+                "사업 구조 판단 중",
                 "고객 구매 가능성 계산 중",
                 "시장·경쟁 리스크 확인 중",
                 "수익 구조와 실행 조건 정리 중",
+                "브랜딩 방향 생성 중",
                 "최종 Go / No-Go 판단 생성 중",
             ],
         },
         en: {
             title: "Building your decision report",
             desc: "Analyzing market risk, customer logic, profit structure, and execution signals.",
+            note: "Do not close this page. Your report will open automatically.",
             steps: [
-                "Reading your business idea",
+                "Analyzing input",
+                "Structuring business logic",
                 "Checking customer buying logic",
                 "Mapping market and competition risk",
                 "Calculating profit structure",
+                "Building brand direction",
                 "Generating your Go / No-Go decision",
             ],
         },
         ja: {
             title: "レポートを生成しています",
             desc: "市場リスク、顧客心理、収益構造、実行可能性を分析しています。",
+            note: "このページを閉じないでください。レポートは自動で開きます。",
             steps: [
-                "事業アイデアを分析中",
+                "入力内容を分析中",
+                "事業構造を判断中",
                 "顧客の購入理由を確認中",
                 "市場と競合リスクを確認中",
                 "収益構造を整理中",
+                "ブランド方向性を生成中",
                 "Go / No-Go 判断を生成中",
             ],
         },
         zh: {
             title: "正在生成决策报告",
             desc: "正在分析市场风险、客户购买逻辑、盈利结构和执行条件。",
+            note: "请不要关闭此页面。报告将自动打开。",
             steps: [
-                "分析商业想法结构",
-                "判断客户购买动机",
-                "检查市场与竞争风险",
-                "整理盈利结构",
-                "生成 Go / No-Go 判断",
+                "正在分析输入内容",
+                "正在判断商业结构",
+                "正在检查客户购买逻辑",
+                "正在检查市场与竞争风险",
+                "正在整理盈利结构",
+                "正在生成品牌方向",
+                "正在生成 Go / No-Go 判断",
             ],
         },
         mn: {
             title: "Тайлан боловсруулж байна",
             desc: "Зах зээлийн эрсдэл, хэрэглэгчийн логик, ашигт ажиллагаа, хэрэгжүүлэх боломжийг шинжилж байна.",
+            note: "Энэ хуудсыг битгий хаагаарай. Тайлан автоматаар нээгдэнэ.",
             steps: [
-                "Бизнес санааг шинжилж байна",
+                "Оролтын мэдээллийг шинжилж байна",
+                "Бизнесийн бүтцийг үнэлж байна",
                 "Хэрэглэгчийн худалдан авах шалтгааныг шалгаж байна",
                 "Зах зээл ба өрсөлдөөний эрсдэлийг тооцож байна",
                 "Ашгийн бүтцийг боловсруулж байна",
+                "Брэндийн чиглэлийг боловсруулж байна",
                 "Go / No-Go шийдвэр гаргаж байна",
             ],
         },
@@ -216,11 +231,12 @@ app.get("/api/report-loading", (req, res) => {
 
     res.setHeader("Content-Type", "text/html; charset=utf-8")
 
- return res.send(`
+    return res.send(`
 <!doctype html>
 <html lang="${esc(lang)}">
 <head>
-<meta charset="utf-8" />
+<meta charset="UTF-8">
+${getPdfFontLinks()}
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${esc(copy.title)}</title>
 
@@ -232,100 +248,101 @@ app.get("/api/report-loading", (req, res) => {
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: ${getPdfFontFamily(lang)};
-    background: #ffffff;
+    background:
+        radial-gradient(circle at 20% 18%, rgba(182,255,90,0.18), transparent 28%),
+        radial-gradient(circle at 80% 82%, rgba(13,36,24,0.08), transparent 32%),
+        #ffffff;
     color: #0D2418;
+    font-family: ${getPdfFontFamily(lang)};
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 28px;
+    overflow: hidden;
 }
 
 .wrap {
     width: 100%;
-    max-width: 440px;
+    max-width: 460px;
     text-align: center;
 }
 
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 13px;
+    border: 1px solid rgba(13,36,24,0.12);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.74);
+    backdrop-filter: blur(12px);
+    font-size: 12px;
+    font-weight: 950;
+    margin-bottom: 30px;
+    box-shadow: 0 12px 32px rgba(13,36,24,0.05);
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #B6FF5A;
+    box-shadow: 0 0 18px rgba(182,255,90,0.9);
+}
+
+.card {
+    background: rgba(255,255,255,0.84);
+    border: 1px solid rgba(13,36,24,0.12);
+    border-radius: 30px;
+    padding: 34px 24px 28px;
+    box-shadow:
+        0 30px 90px rgba(13,36,24,0.10),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+    backdrop-filter: blur(18px);
+}
+
+.spinner {
+    width: 52px;
+    height: 52px;
+    border: 4px solid rgba(13,36,24,0.12);
+    border-top-color: #0D2418;
+    border-radius: 50%;
+    margin: 0 auto 24px;
+    animation: spin 0.85s linear infinite;
+}
+
 h1 {
-    margin: 0 0 16px;
-    font-size: 32px;
-    line-height: 1.15;
-    letter-spacing: -0.05em;
+    margin: 0 0 12px;
+    font-size: 31px;
+    line-height: 1.04;
+    letter-spacing: -0.065em;
     font-weight: 950;
 }
 
-p {
-    margin: 10px 0;
-    font-size: 15px;
-    line-height: 1.6;
-    color: #4B5A52;
-    font-weight: 700;
+.desc {
+    margin: 0 auto 26px;
+    max-width: 350px;
+    color: #53645A;
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 650;
 }
 
-button {
-    margin-top: 22px;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 190px;
-    padding: 17px 24px;
-    background: #082818;
-    color: white;
-    border-radius: 14px;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 900;
-}
-
-button:disabled {
-    opacity: 0.75;
-    cursor: wait;
-}
-
-.loader {
-    display: none;
-    width: 17px;
-    height: 17px;
-    margin-right: 10px;
-    border: 3px solid rgba(255,255,255,0.35);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-button.loading .loader {
-    display: inline-block;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.note {
-    margin-top: 18px;
-    font-size: 12px;
-    color: #7B8B82;
-}
-.note {
-    margin-top: 18px;
-    font-size: 12px;
-    color: #7B8B82;
-}
-
-.progress-wrap {
-    display: none;
-    margin: 26px auto 0;
+.progress {
+    height: 10px;
     width: 100%;
-    max-width: 360px;
+    background: #E5EDE8;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 14px;
 }
 
-.progress-wrap.active {
-    display: block;
+.bar {
+    height: 100%;
+    width: 8%;
+    background: #0D2418;
+    border-radius: 999px;
+    transition: width 0.45s ease;
 }
 
 .progress-top {
@@ -338,109 +355,116 @@ button.loading .loader {
     color: #0D2418;
 }
 
-.progress-track {
-    width: 100%;
-    height: 10px;
-    border-radius: 999px;
-    background: #E4ECE7;
-    overflow: hidden;
+.step {
+    min-height: 22px;
+    color: #0D2418;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
 }
 
-.progress-fill {
-    width: 0%;
-    height: 100%;
-    border-radius: 999px;
-    background: #0D2418;
-    transition: width 0.35s ease;
+.note {
+    margin-top: 22px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: #7B8B82;
+    font-weight: 700;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 18px;
+        align-items: flex-start;
+        padding-top: 78px;
+    }
+
+    .card {
+        border-radius: 26px;
+        padding: 32px 20px 26px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .desc {
+        font-size: 13px;
+    }
 }
 </style>
 </head>
 
 <body>
-    <main class="wrap">
+<div class="wrap">
+    <div class="badge">
+        <span class="dot"></span>
+        GoNoGo™ Report Engine
+    </div>
+
+    <section class="card">
+        <div class="spinner"></div>
+
         <h1>${esc(copy.title)}</h1>
-        <p>${esc(copy.desc)}</p>
-        <p>${esc(copy.limit)}</p>
+        <p class="desc">${esc(copy.desc)}</p>
 
-        <button id="downloadBtn" type="button">
-            <span class="loader"></span>
-            <span id="buttonText">${esc(copy.button)}</span>
-        </button>
+        <div class="progress-top">
+            <span id="step">${esc(copy.steps[0])}</span>
+            <span id="percent">0%</span>
+        </div>
 
-        <div class="progress-wrap" id="progressWrap">
-    <div class="progress-top">
-        <span id="progressStep"></span>
-        <span id="progressPercent">0%</span>
-    </div>
-    <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
-    </div>
+        <div class="progress">
+            <div class="bar" id="bar"></div>
+        </div>
+
+        <div class="note">
+            ${esc(copy.note)}
+        </div>
+    </section>
 </div>
 
-<p class="note" id="loadingNote"></p>
-    </main>
-
 <script>
-const downloadUrl = ${JSON.stringify(downloadUrl)};
-const loadingText = ${JSON.stringify(copy.loading || "Creating your PDF. Please wait.")};
-const progressSteps = ${JSON.stringify(copy.progressSteps || [])};
+const steps = ${stepsJson};
+const bar = document.getElementById("bar");
+const step = document.getElementById("step");
+const percent = document.getElementById("percent");
 
-const btn = document.getElementById("downloadBtn");
-const buttonText = document.getElementById("buttonText");
-const loadingNote = document.getElementById("loadingNote");
-const progressWrap = document.getElementById("progressWrap");
-const progressFill = document.getElementById("progressFill");
-const progressPercent = document.getElementById("progressPercent");
-const progressStep = document.getElementById("progressStep");
-
+let index = 0;
 let progress = 0;
-let stepIndex = 0;
-let progressTimer = null;
 
-function startFakeProgress() {
-    progressWrap.classList.add("active");
+const timer = setInterval(() => {
+    progress = Math.min(progress + 14, 98);
 
-    progressStep.textContent = progressSteps[0] || loadingText;
-    progressPercent.textContent = "0%";
-    progressFill.style.width = "0%";
+    const nextIndex = Math.min(
+        Math.floor((progress / 100) * steps.length),
+        steps.length - 1
+    );
 
-    progressTimer = setInterval(() => {
-        if (progress < 92) {
-            progress += Math.floor(Math.random() * 7) + 3;
-            progress = Math.min(progress, 92);
-        }
+    if (nextIndex !== index) {
+        index = nextIndex;
+        if (step) step.textContent = steps[index];
+    }
 
-        const nextStepIndex = Math.min(
-            Math.floor((progress / 100) * progressSteps.length),
-            progressSteps.length - 1
-        );
+    if (bar) bar.style.width = progress + "%";
+    if (percent) percent.textContent = progress + "%";
 
-        if (nextStepIndex !== stepIndex) {
-            stepIndex = nextStepIndex;
-            progressStep.textContent = progressSteps[stepIndex] || loadingText;
-        }
+    if (progress >= 98) {
+        clearInterval(timer);
 
-        progressPercent.textContent = progress + "%";
-        progressFill.style.width = progress + "%";
-    }, 700);
-}
-
-btn.addEventListener("click", () => {
-    btn.disabled = true;
-    btn.classList.add("loading");
-    buttonText.textContent = loadingText;
-    loadingNote.textContent = loadingText;
-
-    startFakeProgress();
-
-    setTimeout(() => {
-        window.location.href = downloadUrl;
-    }, 450);
-});
+        setTimeout(() => {
+            window.location.href = "${targetUrl}";
+        }, 700);
+    }
+}, 650);
 </script>
 </body>
 </html>
-`)  
+`)
 })
 
 // =========================================================
