@@ -1295,6 +1295,9 @@ app.get("/api/paypal/start-order", async (req, res) => {
         const accessToken = await getPayPalAccessToken()
 
         const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+        const baseUrl =
+        process.env.PUBLIC_BASE_URL ||
+        "https://gonogo-report-server.onrender.com"
 
         const response = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
             method: "POST",
