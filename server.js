@@ -524,30 +524,73 @@ app.get("/api/debug-html", async (req, res) => {
 
 function getPdfFontLinks() {
     return `
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&family=Noto+Sans+Mongolian&display=swap" rel="stylesheet">
+<style>
+
+@font-face {
+    font-family: "GoNoGoKR";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansKR-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "GoNoGoKR";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansKR-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "GoNoGoJP";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansJP-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "GoNoGoJP";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansJP-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "GoNoGoSC";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansSC-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: "GoNoGoSC";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansSC-Bold.ttf") format("truetype");
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "GoNoGoMN";
+    src: url("https://gonogo-report-server.onrender.com/fonts/NotoSansMongolian-Regular.ttf") format("truetype");
+    font-weight: 400;
+}
+
+</style>
 `
 }
 
 function getPdfFontFamily(lang) {
+
     if (lang === "ko") {
-        return `"Noto Sans KR", "Noto Sans", Arial, sans-serif`
+        return `"GoNoGoKR", Arial, sans-serif`
     }
 
     if (lang === "ja") {
-        return `"Noto Sans JP", "Noto Sans", Arial, sans-serif`
+        return `"GoNoGoJP", Arial, sans-serif`
     }
 
     if (lang === "zh") {
-        return `"Noto Sans SC", "Noto Sans", Arial, sans-serif`
+        return `"GoNoGoSC", Arial, sans-serif`
     }
 
     if (lang === "mn") {
-        return `"Noto Sans Mongolian", "Noto Sans", Arial, sans-serif`
+        return `"GoNoGoMN", Arial, sans-serif`
     }
 
-    return `"Noto Sans", Arial, sans-serif`
+    return `"GoNoGoKR", Arial, sans-serif`
 }
 // =========================================================
 // [09] GENERATE REPORT PDF ROUTE
@@ -2512,7 +2555,7 @@ body {
     margin: 0;
     background: #f4f6f2;
     color: #0D2418;
-    font-family: ${getPdfFontFamily(locale?.lang || lang || "ko")};
+    font-family: ${getPdfFontFamily(locale?.lang || "ko")};
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
