@@ -59,7 +59,7 @@ const openai = new OpenAI({
 
 const paidDownloadTokens = new Map()
 
-function createPaidDownloadToken() {
+function createPaidDownloadToken(payload = {}) {
     const token = crypto.randomBytes(24).toString("hex")
 
     paidDownloadTokens.set(token, {
@@ -69,6 +69,7 @@ function createPaidDownloadToken() {
         used: false,
         createdAt: Date.now(),
         expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        payload,
     })
 
     return token
@@ -101,14 +102,7 @@ function validatePaidDownloadToken(token) {
         }
     }
 
-    if (record.used === true) {
-        return {
-            ok: false,
-            status: 403,
-            message: "This download link has already been used.",
-        }
-    }
-
+   
     if (record.downloadCount >= record.downloadLimit) {
         return {
             ok: false,
@@ -592,6 +586,36 @@ function getPdfFontFamily(lang) {
 
     return `"GoNoGoKR", Arial, sans-serif`
 }
+
+function buildPayPalStartOrderUrl(report = {}, locale = {}) {
+    const baseUrl =
+        process.env.PUBLIC_BASE_URL ||
+        "https://gonogo-report-server.onrender.com"
+
+    const lang =
+        locale?.lang ||
+        report?.lang ||
+        report?.language ||
+        "ko"
+
+    const params = new URLSearchParams({
+        lang,
+        brandName:
+            report?.cover?.brandName ||
+            report?.brandName ||
+            "PaidReport",
+        productService:
+            report?.productService ||
+            report?.cover?.subtitle ||
+            "A paid business report",
+        targetCustomer:
+            report?.targetCustomer ||
+            "Target customers",
+    })
+
+    return `${baseUrl}/api/paypal/start-order?${params.toString()}`
+}
+
 // =========================================================
 // [09] GENERATE REPORT PDF ROUTE
 // =========================================================
@@ -1224,6 +1248,258 @@ btn.addEventListener("click", async () => {
 })
 
 // =========================================================
+// [10-1] PAYPAL ORDER SYSTEM
+// =========================================================
+
+const paypalOrderContext = new Map()
+
+function getPayPalBaseUrl() {
+    return process.env.PAYPAL_ENV === "live"
+        ? "https://api-m.paypal.com"
+        : "https://api-m.sandbox.paypal.com"
+}
+
+async function getPayPalAccessToken() {
+    const auth = Buffer.from(
+        `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+    ).toString("base64")
+
+    const response = await fetch(`${getPayPalBaseUrl()}/v1/oauth2/token`, {
+        method: "POST",
+        headers: {
+            Authorization: `Basic ${auth}`,
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "grant_type=client_credentials",
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+        console.error("[PAYPAL_ACCESS_TOKEN_ERROR]", data)
+        throw new Error("Failed to get PayPal access token.")
+    }
+
+    return data.access_token
+}
+
+app.get("/api/paypal/start-order", async (req, res) => {
+    try {
+        const lang = normalizeLanguage(req.query.lang || "ko")
+        const brandName = req.query.brandName || "PaidReport"
+        const productService =
+            req.query.productService || "A paid business report"
+        const targetCustomer =
+            req.query.targetCustomer || "Target customers"
+
+        const accessToken = await getPayPalAccessToken()
+
+        const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+
+        const response = await fetch(`${getPayPalBaseUrl()}/v2/checkout/orders`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                intent: "CAPTURE",
+                purchase_units: [
+                    {
+                        description: "GONOGO Business Decision Report",
+                        amount: {
+                            currency_code: "USD",
+                            value: "49.00",
+                        },
+                    },
+                ],
+                payment_source: {
+                    paypal: {
+                        experience_context: {
+                            brand_name: "GONOGO",
+                            user_action: "PAY_NOW",
+                            shipping_preference: "NO_SHIPPING",
+                            return_url: `${baseUrl}/api/paypal/return`,
+                            cancel_url: `${siteUrl}`,
+                        },
+                    },
+                },
+            }),
+        })
+
+        const order = await response.json()
+
+        console.log("[PAYPAL_ORDER_ID]", order.id)
+        console.log("[PAYPAL_ORDER_LINKS]", JSON.stringify(order.links, null, 2))
+
+        if (!response.ok) {
+            console.error("[PAYPAL_CREATE_ORDER_ERROR]", order)
+            throw new Error("Failed to create PayPal order.")
+        }
+
+        paypalOrderContext.set(order.id, {
+            lang,
+            brandName,
+            productService,
+            targetCustomer,
+            createdAt: Date.now(),
+        })
+
+        const approveLink = order.links?.find(
+            (link) => link.rel === "payer-action" || link.rel === "approve"
+        )?.href
+
+        if (!approveLink) {
+            throw new Error("PayPal approval link not found.")
+        }
+
+        return res.redirect(approveLink)
+    } catch (error) {
+        console.error("[PAYPAL_START_ORDER_ERROR]", error)
+
+        return res.status(500).send(`
+<!doctype html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family:Arial;padding:40px;">
+<h1>PayPal order failed</h1>
+<pre>${esc(error?.message || String(error))}</pre>
+</body>
+</html>
+`)
+    }
+})
+
+app.get("/api/paypal/return", (req, res) => {
+    try {
+        const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+
+        const orderId =
+            req.query.orderId ||
+            req.query.token
+
+        if (!orderId) {
+            return res.redirect(`${siteUrl}/paid-success?error=missing_order_id`)
+        }
+
+        const params = new URLSearchParams({
+            orderId,
+            token: orderId,
+        })
+
+        return res.redirect(`${siteUrl}/paid-success?${params.toString()}`)
+    } catch (error) {
+        console.error("[PAYPAL_RETURN_ERROR]", error)
+        return res.status(500).send("PayPal return failed.")
+    }
+})
+
+app.post("/api/paypal/capture-order", async (req, res) => {
+    try {
+        const orderId = req.body?.orderId || req.query?.orderId
+
+        if (!orderId) {
+            return res.status(400).json({
+                ok: false,
+                error: "MISSING_ORDER_ID",
+            })
+        }
+
+        const accessToken = await getPayPalAccessToken()
+
+        const response = await fetch(
+            `${getPayPalBaseUrl()}/v2/checkout/orders/${orderId}/capture`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        )
+
+        const capture = await response.json()
+
+        if (!response.ok) {
+            console.error("[PAYPAL_CAPTURE_ERROR]", capture)
+
+            return res.status(400).json({
+                ok: false,
+                error: "PAYPAL_CAPTURE_FAILED",
+                detail: capture,
+            })
+        }
+
+        const status = capture?.status
+        const payment =
+            capture?.purchase_units?.[0]?.payments?.captures?.[0]
+
+        const amount = payment?.amount?.value
+        const currency = payment?.amount?.currency_code
+        const captureId = payment?.id
+
+        if (status !== "COMPLETED" || currency !== "USD" || amount !== "49.00") {
+            return res.status(400).json({
+                ok: false,
+                error: "INVALID_PAYMENT_STATUS_OR_AMOUNT",
+                status,
+                amount,
+                currency,
+            })
+        }
+
+        const context = paypalOrderContext.get(orderId) || {}
+
+        const token = createPaidDownloadToken({
+            source: "paypal",
+            orderId,
+            captureId,
+            lang: context.lang || "ko",
+            brandName: context.brandName || "PaidReport",
+            productService:
+                context.productService || "A paid business report",
+            targetCustomer:
+                context.targetCustomer || "Target customers",
+        })
+
+        const baseUrl =
+            process.env.PUBLIC_BASE_URL ||
+            "https://gonogo-report-server.onrender.com"
+
+        const params = new URLSearchParams({
+            token,
+            lang: context.lang || "ko",
+            brandName: context.brandName || "PaidReport",
+            productService:
+                context.productService || "A paid business report",
+            targetCustomer:
+                context.targetCustomer || "Target customers",
+        })
+
+        const downloadUrl =
+            `${baseUrl}/api/download-paid-pdf?${params.toString()}`
+
+        return res.json({
+            ok: true,
+            token,
+            downloadLimit: 2,
+            downloadUrl,
+            orderId,
+            captureId,
+        })
+    } catch (error) {
+        console.error("[PAYPAL_CAPTURE_ORDER_ERROR]", error)
+
+        return res.status(500).json({
+            ok: false,
+            error: "PAYPAL_CAPTURE_ORDER_FAILED",
+            detail: error?.message || String(error),
+        })
+    }
+})
+
+
+// =========================================================
 // [11] DOWNLOAD PAID PDF ROUTE
 // =========================================================
 
@@ -1275,8 +1551,7 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         const pdfBuffer = await htmlToPdf(html)
 
         validation.record.downloadCount += 1
-        validation.record.used = true
-
+        
         const safeBrand = sanitizeFileName(brandName)
 
         res.setHeader("Content-Type", "application/pdf")
@@ -3732,7 +4007,7 @@ body {
 
      <a
     class="free-upgrade-button"
-    href="${process.env.PAYMENT_LINK || "#"}"
+    href="${buildPayPalStartOrderUrl(report)}"
     target="_blank"
     rel="noopener noreferrer"
 >
@@ -4469,6 +4744,9 @@ function injectReportBackButton(html, locale = {}, options = {}) {
     const lang = locale?.lang || "en"
     const backText = getBackToSiteText(lang)
     const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+    const baseUrl =
+    process.env.PUBLIC_BASE_URL ||
+    "https://gonogo-report-server.onrender.com"
 
     const buttonHtml = `
 <a href="${esc(siteUrl)}" style="
@@ -4697,7 +4975,25 @@ function getLocaleList(locale, key, fallback = []) {
     const value = getByPath(locale, key)
     return Array.isArray(value) ? value : fallback
 }
+function buildPayPalStartOrderUrl(report = {}) {
+    const baseUrl =
+        process.env.PUBLIC_BASE_URL ||
+        "https://gonogo-report-server.onrender.com"
 
+    const params = new URLSearchParams({
+        lang: report?.lang || "ko",
+        brandName: report?.brandName || "PaidReport",
+        productService:
+            report?.productService ||
+            report?.idea ||
+            "A paid business report",
+        targetCustomer:
+            report?.targetCustomer ||
+            "Target customers",
+    })
+
+    return `${baseUrl}/api/paypal/start-order?${params.toString()}`
+}
 // =========================================================
 // [30] DATA UTILS
 // =========================================================
