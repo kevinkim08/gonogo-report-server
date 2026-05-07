@@ -662,284 +662,495 @@ app.post("/api/generate-report", async (req, res) => {
 // [10] DEV PAID TOKEN ROUTE
 // =========================================================
 
-app.get("/api/dev-create-paid-token", (req, res) => {
-    const token = createPaidDownloadToken()
-    const lang = normalizeLanguage(req.query.lang || "ko")
+app.get("/api/dev-create-paid-token", async (req, res) => {
+    try {
+        const lang = normalizeLanguage(req.query.lang || "ko")
 
-    const tokenPageCopy = {
-        ko: {
-            title: "유료 다운로드 토큰 생성 완료",
-            desc: "PayPal 연결 전 테스트용 다운로드 링크야.",
-            limit: "다운로드 가능 횟수: 1회",
-            button: "유료 PDF 다운로드",
-            loading: "PDF를 생성하고 있어. 잠시만 기다려줘.",
-            progressSteps: [
-                "입력값 분석 중",
-                "사업 구조 판단 중",
-                "브랜딩 전략 생성 중",
-                "시장·고객 분석 중",
-                "보고서 페이지 구성 중",
-                "PDF 렌더링 중",
-                "다운로드 준비 중",
-            ],
-            complete: "PDF 다운로드가 시작됐어.",
-            redirect: "사이트로 돌아가는 중이야.",
-        },
-        en: {
-            title: "Paid token created",
-            desc: "This is a test download link before PayPal is fully connected.",
-            limit: "Download limit: 1 time",
-            button: "Download Paid PDF",
-            loading: "Creating your PDF. Please wait.",
-            progressSteps: [
-                "Analyzing input",
-                "Structuring business logic",
-                "Building brand strategy",
-                "Analyzing market and customers",
-                "Composing report pages",
-                "Rendering PDF",
-                "Preparing download",
-            ],
-            complete: "PDF download has started.",
-            redirect: "Returning to the site...",
-        },
-        ja: {
-            title: "有料ダウンロードトークンを作成しました",
-            desc: "PayPal接続前のテスト用ダウンロードリンクです。",
-            limit: "ダウンロード可能回数：1回",
-            button: "有料PDFをダウンロード",
-            loading: "PDFを生成しています。しばらくお待ちください。",
-            progressSteps: [
-                "入力内容を分析中",
-                "事業構造を判断中",
-                "ブランド戦略を生成中",
-                "市場・顧客を分析中",
-                "レポートページを構成中",
-                "PDFをレンダリング中",
-                "ダウンロードを準備中",
-            ],
-            complete: "PDFのダウンロードが開始されました。",
-            redirect: "サイトに戻っています。",
-        },
-        zh: {
-            title: "付费下载令牌已创建",
-            desc: "这是 PayPal 完全连接前的测试下载链接。",
-            limit: "可下载次数：1次",
-            button: "下载付费 PDF",
-            loading: "正在生成 PDF，请稍候。",
-            progressSteps: [
-                "正在分析输入内容",
-                "正在判断商业结构",
-                "正在生成品牌策略",
-                "正在分析市场与客户",
-                "正在构建报告页面",
-                "正在渲染 PDF",
-                "正在准备下载",
-            ],
-            complete: "PDF 下载已开始。",
-            redirect: "正在返回网站。",
-        },
-        mn: {
-            title: "Төлбөртэй татах токен үүссэн",
-            desc: "PayPal бүрэн холбогдохоос өмнөх туршилтын татах холбоос.",
-            limit: "Татах боломж: 1 удаа",
-            button: "Төлбөртэй PDF татах",
-            loading: "PDF үүсгэж байна. Түр хүлээнэ үү.",
-            progressSteps: [
-                "Оролтын мэдээллийг шинжилж байна",
-                "Бизнесийн бүтцийг үнэлж байна",
-                "Брэндийн стратеги боловсруулж байна",
-                "Зах зээл ба хэрэглэгчийг шинжилж байна",
-                "Тайлангийн хуудсыг бүрдүүлж байна",
-                "PDF үүсгэж байна",
-                "Татахад бэлдэж байна",
-            ],
-            complete: "PDF таталт эхэллээ.",
-            redirect: "Сайт руу буцаж байна.",
-        },
-    }
+        const brandName = req.query.brandName || "TEST"
+        const productService =
+            req.query.productService || "AI Fashion Platform"
 
-    const copy = tokenPageCopy[lang] || tokenPageCopy.en
+        const targetCustomer =
+            req.query.targetCustomer || "Fashion Brands"
 
-    const brandName = req.query.brandName || ""
-    const productService = req.query.productService || ""
-    const targetCustomer = req.query.targetCustomer || ""
+        const token = createPaidDownloadToken({
+            brandName,
+            productService,
+            targetCustomer,
+            lang,
+        })
 
-    const params = new URLSearchParams({
-        token,
-        lang,
-        brandName,
-        productService,
-        targetCustomer,
-    })
+        const params = new URLSearchParams({
+            token,
+            lang,
+            brandName,
+            productService,
+            targetCustomer,
+        })
 
-    const baseUrl = process.env.PUBLIC_BASE_URL || `https://${req.get("host")}`
-    const downloadUrl = `${baseUrl}/api/download-paid-pdf?${params.toString()}`
+        const baseUrl =
+            process.env.PUBLIC_BASE_URL ||
+            `https://${req.get("host")}`
 
-    res.setHeader("Content-Type", "text/html; charset=utf-8")
+        const downloadUrl =
+            `${baseUrl}/api/download-paid-pdf?${params.toString()}`
 
-    return res.send(`
+        const tokenPageCopy = {
+            ko: {
+                title: "유료 다운로드 토큰 생성 완료",
+                desc: "테스트용 유료 PDF 다운로드 페이지야.",
+                limit: "다운로드 가능 횟수: 1회",
+                button: "유료 PDF 다운로드",
+                loading: "PDF를 생성하고 있어. 잠시만 기다려줘.",
+                complete: "PDF 다운로드가 시작됐어.",
+                redirect: "사이트로 이동 중이야.",
+                progressSteps: [
+                    "입력값 분석 중",
+                    "사업 구조 판단 중",
+                    "브랜딩 전략 생성 중",
+                    "시장·고객 분석 중",
+                    "보고서 페이지 구성 중",
+                    "PDF 렌더링 중",
+                    "다운로드 준비 중",
+                ],
+            },
+
+            en: {
+                title: "Paid token created",
+                desc: "This is a test paid PDF download page.",
+                limit: "Download limit: 1 time",
+                button: "Download Paid PDF",
+                loading: "Creating your PDF. Please wait.",
+                complete: "PDF download started.",
+                redirect: "Redirecting to the site.",
+                progressSteps: [
+                    "Analyzing input",
+                    "Structuring business logic",
+                    "Building brand strategy",
+                    "Analyzing market and customers",
+                    "Composing report pages",
+                    "Rendering PDF",
+                    "Preparing download",
+                ],
+            },
+
+            ja: {
+                title: "有料ダウンロードトークン作成完了",
+                desc: "テスト用の有料PDFダウンロードページです。",
+                limit: "ダウンロード可能回数：1回",
+                button: "有料PDFをダウンロード",
+                loading: "PDFを生成しています。",
+                complete: "PDFのダウンロードが開始されました。",
+                redirect: "サイトへ移動しています。",
+                progressSteps: [
+                    "入力内容を分析中",
+                    "事業構造を分析中",
+                    "ブランド戦略を生成中",
+                    "市場と顧客を分析中",
+                    "レポートページを構成中",
+                    "PDFをレンダリング中",
+                    "ダウンロードを準備中",
+                ],
+            },
+
+            zh: {
+                title: "付费下载令牌已创建",
+                desc: "这是测试用的付费 PDF 下载页面。",
+                limit: "可下载次数：1次",
+                button: "下载付费 PDF",
+                loading: "正在生成 PDF，请稍候。",
+                complete: "PDF 下载已开始。",
+                redirect: "正在跳转到网站。",
+                progressSteps: [
+                    "正在分析输入内容",
+                    "正在分析商业结构",
+                    "正在生成品牌策略",
+                    "正在分析市场与客户",
+                    "正在构建报告页面",
+                    "正在渲染 PDF",
+                    "正在准备下载",
+                ],
+            },
+
+            mn: {
+                title: "Төлбөртэй татах токен үүслээ",
+                desc: "Туршилтын төлбөртэй PDF татах хуудас.",
+                limit: "Татах боломж: 1 удаа",
+                button: "Төлбөртэй PDF татах",
+                loading: "PDF үүсгэж байна.",
+                complete: "PDF таталт эхэллээ.",
+                redirect: "Сайт руу шилжиж байна.",
+                progressSteps: [
+                    "Оролтын мэдээллийг шинжилж байна",
+                    "Бизнесийн бүтцийг шинжилж байна",
+                    "Брэндийн стратеги боловсруулж байна",
+                    "Зах зээл ба хэрэглэгчийг шинжилж байна",
+                    "Тайлангийн хуудсуудыг бэлтгэж байна",
+                    "PDF үүсгэж байна",
+                    "Татахад бэлдэж байна",
+                ],
+            },
+        }
+
+        const copy =
+            tokenPageCopy[lang] || tokenPageCopy.ko
+
+        return res.send(`
 <!doctype html>
-<html lang="${esc(lang)}">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+
 <title>${esc(copy.title)}</title>
 
 <style>
-* {
-    box-sizing: border-box;
+
+body{
+    margin:0;
+    background:#ffffff;
+    color:#111111;
+    font-family:${getPdfFontFamily(lang)};
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
 }
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    font-family: ${getPdfFontFamily(lang)};
-    background: #ffffff;
-    color: #0D2418;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+.wrap{
+    width:100%;
+    max-width:560px;
+    padding:40px;
+    text-align:center;
 }
 
-.wrap {
-    width: 100%;
-    max-width: 460px;
-    text-align: center;
+h1{
+    font-size:32px;
+    margin-bottom:14px;
 }
 
-h1 {
-    margin: 0 0 16px;
-    font-size: 32px;
-    line-height: 1.15;
-    letter-spacing: -0.05em;
-    font-weight: 950;
+.desc{
+    opacity:.7;
+    line-height:1.6;
+    margin-bottom:10px;
 }
 
-p {
-    margin: 10px 0;
-    font-size: 15px;
-    line-height: 1.6;
-    color: #4B5A52;
-    font-weight: 700;
+.limit{
+    font-size:14px;
+    opacity:.5;
+    margin-bottom:28px;
 }
 
-button {
-    margin-top: 22px;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 190px;
-    padding: 17px 24px;
-    background: #082818;
-    color: white;
-    border-radius: 14px;
-    font-size: 15px;
-    font-weight: 900;
+button{
+    width:100%;
+    border:none;
+    background:#111;
+    color:#fff;
+    padding:18px;
+    border-radius:18px;
+    font-size:16px;
+    cursor:pointer;
 }
 
-button:disabled {
-    opacity: 0.78;
-    cursor: wait;
+button.loading{
+    opacity:.7;
+    cursor:wait;
 }
 
-.loader {
-    display: none;
-    width: 17px;
-    height: 17px;
-    margin-right: 10px;
-    border: 3px solid rgba(255,255,255,0.35);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+.loading-note{
+    margin-top:18px;
+    font-size:14px;
+    opacity:.65;
 }
 
-button.loading .loader {
-    display: inline-block;
+.progress-wrap{
+    width:100%;
+    margin-top:26px;
+    display:none;
 }
 
-.progress-wrap {
-    display: none;
-    margin: 28px auto 0;
-    width: 100%;
-    max-width: 380px;
+.progress-wrap.active{
+    display:block;
 }
 
-.progress-wrap.active {
-    display: block;
+.progress-bar{
+    width:100%;
+    height:12px;
+    border-radius:999px;
+    background:#ececec;
+    overflow:hidden;
 }
 
-.progress-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 10px;
-    font-size: 12px;
-    font-weight: 900;
-    color: #0D2418;
+.progress-fill{
+    width:0%;
+    height:100%;
+    background:#111;
+    transition:width .4s ease;
 }
 
-.progress-track {
-    width: 100%;
-    height: 10px;
-    border-radius: 999px;
-    background: #E4ECE7;
-    overflow: hidden;
+.progress-info{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+    font-size:13px;
+    opacity:.65;
 }
 
-.progress-fill {
-    width: 0%;
-    height: 100%;
-    border-radius: 999px;
-    background: #0D2418;
-    transition: width 0.35s ease;
+.progress-step{
+    margin-top:12px;
+    font-size:14px;
+    opacity:.8;
 }
 
-.note {
-    margin-top: 18px;
-    font-size: 12px;
-    color: #7B8B82;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
 </style>
 </head>
 
 <body>
-    <main class="wrap">
-        <h1>${esc(copy.title)}</h1>
-        <p>${esc(copy.desc)}</p>
-        <p>${esc(copy.limit)}</p>
 
-        <button id="downloadBtn" type="button">
-            <span class="loader"></span>
-            <span id="buttonText">${esc(copy.button)}</span>
-        </button>
+<div class="wrap">
 
-        <div class="progress-wrap" id="progressWrap">
-            <div class="progress-top">
-                <span id="progressStep"></span>
-                <span id="progressPercent">0%</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
+    <h1>${esc(copy.title)}</h1>
+
+    <div class="desc">
+        ${esc(copy.desc)}
+    </div>
+
+    <div class="limit">
+        ${esc(copy.limit)}
+    </div>
+
+    <button id="downloadBtn">
+        <span id="buttonText">
+            ${esc(copy.button)}
+        </span>
+    </button>
+
+    <div class="loading-note" id="loadingNote"></div>
+
+    <div class="progress-wrap" id="progressWrap">
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
         </div>
 
-        <p class="note" id="loadingNote"></p>
-    </main>
+        <div class="progress-info">
+            <span id="progressPercent">0%</span>
+        </div>
 
+        <div class="progress-step" id="progressStep"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+const downloadUrl = ${JSON.stringify(downloadUrl)};
+const siteUrl = ${JSON.stringify(process.env.PUBLIC_SITE_URL || "https://gonogo.so")};
+
+const loadingText = ${JSON.stringify(copy.loading)};
+const completeText = ${JSON.stringify(copy.complete)};
+const redirectText = ${JSON.stringify(copy.redirect)};
+const progressSteps = ${JSON.stringify(copy.progressSteps)};
+const defaultButtonText = ${JSON.stringify(copy.button)};
+
+const fileName =
+${JSON.stringify(`GoNoGo_Paid_Report_${lang}.pdf`)};
+
+const btn = document.getElementById("downloadBtn");
+const buttonText = document.getElementById("buttonText");
+const loadingNote = document.getElementById("loadingNote");
+
+const progressWrap =
+document.getElementById("progressWrap");
+
+const progressFill =
+document.getElementById("progressFill");
+
+const progressPercent =
+document.getElementById("progressPercent");
+
+const progressStep =
+document.getElementById("progressStep");
+
+let progress = 0;
+let stepIndex = 0;
+let timer = null;
+
+function startFakeProgress(){
+
+    progressWrap.classList.add("active");
+
+    progressStep.textContent =
+        progressSteps[0] || loadingText;
+
+    progressPercent.textContent = "0%";
+    progressFill.style.width = "0%";
+
+    timer = setInterval(() => {
+
+        if(progress < 92){
+            progress +=
+                Math.floor(Math.random() * 5) + 2
+
+            progress = Math.min(progress, 92)
+        }
+
+        const nextStepIndex = Math.min(
+            Math.floor(
+                (progress / 100) * progressSteps.length
+            ),
+            progressSteps.length - 1
+        )
+
+        if(nextStepIndex !== stepIndex){
+            stepIndex = nextStepIndex
+
+            progressStep.textContent =
+                progressSteps[stepIndex] || loadingText
+        }
+
+        progressPercent.textContent =
+            progress + "%"
+
+        progressFill.style.width =
+            progress + "%"
+
+    }, 800)
+}
+
+function completeProgress(){
+
+    if(timer){
+        clearInterval(timer)
+    }
+
+    progressPercent.textContent = "100%"
+    progressFill.style.width = "100%"
+
+    progressStep.textContent = completeText
+    loadingNote.textContent = redirectText
+
+    btn.classList.remove("loading")
+
+    buttonText.textContent = completeText
+
+    setTimeout(() => {
+        window.location.href = siteUrl
+    }, 1800)
+}
+
+function failProgress(message){
+
+    if(timer){
+        clearInterval(timer)
+    }
+
+    btn.disabled = false
+    btn.classList.remove("loading")
+
+    buttonText.textContent =
+        defaultButtonText
+
+    loadingNote.textContent =
+        message || "PDF download failed."
+
+    progressStep.textContent =
+        message || "Download failed"
+}
+
+btn.addEventListener("click", async () => {
+
+    try{
+
+        btn.disabled = true
+        btn.classList.add("loading")
+
+        buttonText.textContent = loadingText
+        loadingNote.textContent = loadingText
+
+        startFakeProgress()
+
+        const response = await fetch(downloadUrl,{
+            method:"GET",
+            cache:"no-store",
+        })
+
+        if(!response.ok){
+
+            const errorText =
+                await response.text()
+
+            throw new Error(
+                errorText || "Download failed"
+            )
+        }
+
+        const blob =
+            await response.blob()
+
+        if(!blob || blob.size === 0){
+            throw new Error("Empty PDF file.")
+        }
+
+        const blobUrl =
+            window.URL.createObjectURL(blob)
+
+        const a =
+            document.createElement("a")
+
+        a.href = blobUrl
+        a.download = fileName
+
+        document.body.appendChild(a)
+
+        a.click()
+
+        setTimeout(() => {
+
+            a.remove()
+
+            window.URL.revokeObjectURL(blobUrl)
+
+            completeProgress()
+
+        }, 300)
+
+    }catch(error){
+
+        console.error(
+            "[PDF_DOWNLOAD_CLIENT_ERROR]",
+            error
+        )
+
+        failProgress(
+            "PDF download failed. Please try again."
+        )
+    }
+})
+
+</script>
 
 </body>
 </html>
 `)
+    } catch (error) {
+        console.error("[DEV_CREATE_PAID_TOKEN_ERROR]", error)
+
+        return res.status(500).send(`
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Error</title>
+</head>
+<body style="font-family:Arial;padding:40px;">
+<h1>Failed to create paid token</h1>
+<pre>${esc(error?.message || String(error))}</pre>
+</body>
+</html>
+`)
+    }
 })
 
 // =========================================================
@@ -949,116 +1160,7 @@ button.loading .loader {
 app.get("/api/download-paid-pdf", async (req, res) => {
     try {
         const { token } = req.query
-        co<script>
-const downloadUrl = ${JSON.stringify(downloadUrl)};
-const siteUrl = ${JSON.stringify(process.env.PUBLIC_SITE_URL || "https://gonogo.so")};
-const loadingText = ${JSON.stringify(copy.loading)};
-const completeText = ${JSON.stringify(copy.complete || "PDF download is ready.")};
-const redirectText = ${JSON.stringify(copy.redirect || "Returning to the site...")};
-const progressSteps = ${JSON.stringify(copy.progressSteps)};
-const fileName = ${JSON.stringify(`GoNoGo_Paid_Report_${lang}.pdf`)};
-
-const btn = document.getElementById("downloadBtn");
-const buttonText = document.getElementById("buttonText");
-const loadingNote = document.getElementById("loadingNote");
-const progressWrap = document.getElementById("progressWrap");
-const progressFill = document.getElementById("progressFill");
-const progressPercent = document.getElementById("progressPercent");
-const progressStep = document.getElementById("progressStep");
-
-let progress = 0;
-let stepIndex = 0;
-let timer = null;
-
-function startFakeProgress() {
-    progressWrap.classList.add("active");
-    progressStep.textContent = progressSteps[0] || loadingText;
-    progressPercent.textContent = "0%";
-    progressFill.style.width = "0%";
-
-    timer = setInterval(() => {
-        if (progress < 92) {
-            progress += Math.floor(Math.random() * 5) + 2;
-            progress = Math.min(progress, 92);
-        }
-
-        const nextStepIndex = Math.min(
-            Math.floor((progress / 100) * progressSteps.length),
-            progressSteps.length - 1
-        );
-
-        if (nextStepIndex !== stepIndex) {
-            stepIndex = nextStepIndex;
-            progressStep.textContent = progressSteps[stepIndex] || loadingText;
-        }
-
-        progressPercent.textContent = progress + "%";
-        progressFill.style.width = progress + "%";
-    }, 800);
-}
-
-function completeProgress() {
-    if (timer) clearInterval(timer);
-
-    progress = 100;
-    progressPercent.textContent = "100%";
-    progressFill.style.width = "100%";
-    progressStep.textContent = completeText;
-    loadingNote.textContent = redirectText;
-
-    btn.classList.remove("loading");
-    buttonText.textContent = completeText;
-
-    setTimeout(() => {
-        window.location.href = siteUrl;
-    }, 1800);
-}
-
-function failProgress(message) {
-    if (timer) clearInterval(timer);
-
-    btn.disabled = false;
-    btn.classList.remove("loading");
-    buttonText.textContent = ${JSON.stringify(copy.button)};
-    loadingNote.textContent = message || "PDF download failed. Please try again.";
-    progressStep.textContent = message || "Download failed";
-}
-
-btn.addEventListener("click", async () => {
-    try {
-        btn.disabled = true;
-        btn.classList.add("loading");
-        buttonText.textContent = loadingText;
-        loadingNote.textContent = loadingText;
-
-        startFakeProgress();
-
-        const response = await fetch(downloadUrl);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || "Download failed");
-        }
-
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-
-        a.remove();
-        window.URL.revokeObjectURL(blobUrl);
-
-        completeProgress();
-    } catch (error) {
-        console.error(error);
-        failProgress("PDF download failed. Please try again.");
-    }
-});
-</script>nst language = normalizeLanguage(req.query.lang || "ko")
+        const language = normalizeLanguage(req.query.lang || "ko")
 
         const validation = validatePaidDownloadToken(token)
 
@@ -1077,9 +1179,6 @@ btn.addEventListener("click", async () => {
 </html>
 `)
         }
-
-        validation.record.downloadCount += 1
-        validation.record.used = true
 
         const brandName = req.query.brandName || "PaidReport"
         const productService =
@@ -1105,6 +1204,9 @@ btn.addEventListener("click", async () => {
         const html = buildHtmlFromTemplate(finalReport, locale)
         const pdfBuffer = await htmlToPdf(html)
 
+        validation.record.downloadCount += 1
+        validation.record.used = true
+
         const safeBrand = sanitizeFileName(brandName)
 
         res.setHeader("Content-Type", "application/pdf")
@@ -1117,10 +1219,23 @@ btn.addEventListener("click", async () => {
         return res.end(pdfBuffer)
     } catch (error) {
         console.error("[DOWNLOAD_PAID_PDF_ERROR]", error)
-        return res.status(500).send("Failed to download paid PDF.")
+
+        return res.status(500).send(`
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Download failed</title>
+</head>
+<body style="font-family:Arial;padding:40px;">
+    <h1>Download failed</h1>
+    <p>Failed to download paid PDF.</p>
+    <pre>${esc(error?.message || String(error))}</pre>
+</body>
+</html>
+`)
     }
 })
-
 // =========================================================
 // [13] PAID REPORT PROMPT JSON SHAPE
 // =========================================================
