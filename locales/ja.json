@@ -342,5 +342,11 @@
   "domain_availability_note": "ドメイン利用可能性はリアルタイム登録確認ではなく、ブランド名の独自性と一般的なドメイン希少性にもとづく推定判断です。",
   "th_name": "名称",
   "th_domain": "ドメイン",
-  "th_availability": "推定可能性"
+  "th_availability": "推定可能性",
+  "downloadLimitTitle": "ダウンロード回数の上限に達しました。",
+"downloadLimitDescription": "利用可能なダウンロード回数をすべて使用しました。必要な場合はサポートへお問い合わせください。",
+"downloadExpiredTitle": "ダウンロードリンクの有効期限が切れました。",
+"downloadExpiredDescription": "このリンクの有効期限は終了しています。サポートへお問い合わせください。",
+"downloadInvalidTitle": "無効なダウンロードリンクです。",
+"downloadInvalidDescription": "このリンクは無効、または利用できません。"
 }
