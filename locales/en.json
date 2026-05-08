@@ -342,5 +342,11 @@
   "domain_availability_note": "Domain availability is an estimated judgment based on brand name distinctiveness and general domain scarcity, not a real-time registration check.",
   "th_name": "Name",
   "th_domain": "Domain",
-  "th_availability": "Estimated Availability"
+  "th_availability": "Estimated Availability",
+  "downloadLimitTitle": "Download limit reached.",
+"downloadLimitDescription": "You have already used all available downloads. Please contact support if needed.",
+"downloadExpiredTitle": "Download link expired.",
+"downloadExpiredDescription": "This download link has expired. Please contact support.",
+"downloadInvalidTitle": "Invalid download link.",
+"downloadInvalidDescription": "This link is invalid or no longer available."
 }
