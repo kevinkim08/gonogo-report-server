@@ -1691,21 +1691,46 @@ app.get("/api/download-paid-pdf", async (req, res) => {
 
         const validation = await validatePaidDownloadToken(token)
 
-        if (!validation.ok) {
-            return res.status(validation.status).send(`
+     if (!validation.ok) {
+    const locale = loadLocale(language)
+
+    let title = locale.downloadInvalidTitle || "Invalid download link."
+    let message =
+        locale.downloadInvalidDescription ||
+        "This link is invalid or no longer available."
+
+    if (validation.reason === "DOWNLOAD_LIMIT_EXCEEDED") {
+        title = locale.downloadLimitTitle || "Download limit reached."
+        message =
+            locale.downloadLimitDescription ||
+            "You have already used all available downloads. Please contact support if needed."
+    }
+
+    if (validation.reason === "TOKEN_EXPIRED") {
+        title = locale.downloadExpiredTitle || "Download link expired."
+        message =
+            locale.downloadExpiredDescription ||
+            "This download link has expired. Please contact support."
+    }
+
+    return res.status(validation.status || 403).send(`
 <!doctype html>
-<html>
+<html lang="${esc(language)}">
 <head>
 <meta charset="utf-8" />
-<title>Download unavailable</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${esc(title)}</title>
 </head>
-<body style="font-family:Arial;padding:40px;">
-    <h1>Download unavailable</h1>
-    <p>${esc(validation.message)}</p>
+<body style="margin:0;background:#f6f6f6;font-family:Arial,Helvetica,sans-serif;color:#111;">
+    <main style="max-width:560px;margin:80px auto;padding:32px;background:#fff;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,0.08);">
+        <h1 style="font-size:24px;line-height:1.3;margin:0 0 14px;">${esc(title)}</h1>
+        <p style="font-size:15px;line-height:1.7;margin:0;color:#555;">${esc(message)}</p>
+        <p style="font-size:13px;line-height:1.6;margin:24px 0 0;color:#888;">hello@gonogo.so</p>
+    </main>
 </body>
 </html>
 `)
-        }
+}  
 
         const brandName =
             req.query.brandName ||
