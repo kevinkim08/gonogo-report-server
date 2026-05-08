@@ -11,7 +11,7 @@ import path from "path"
 import { fileURLToPath } from "url"
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
-
+import { createClient } from "@supabase/supabase-js"
 // =========================================================
 // [02] APP INITIALIZATION
 // =========================================================
@@ -52,6 +52,25 @@ app.options("*", cors())
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
+
+// =========================================================
+// [04-1] SUPABASE CLIENT
+// =========================================================
+
+const SUPABASE_URL =
+    process.env.SUPABASE_URL || ""
+
+const SUPABASE_SERVICE_ROLE_KEY =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+
+const supabase =
+    SUPABASE_URL &&
+    SUPABASE_SERVICE_ROLE_KEY
+        ? createClient(
+              SUPABASE_URL,
+              SUPABASE_SERVICE_ROLE_KEY
+          )
+        : null
 
 // =========================================================
 // [05] PAID DOWNLOAD TOKEN SYSTEM
@@ -5758,6 +5777,12 @@ app.get("/health", (req, res) => {
         uptime: process.uptime(),
         timestamp: Date.now(),
     })
+})
+
+console.log("[SUPABASE]", {
+    enabled: !!supabase,
+    hasUrl: !!SUPABASE_URL,
+    hasServiceKey: !!SUPABASE_SERVICE_ROLE_KEY,
 })
 
 app.listen(PORT, () => {
