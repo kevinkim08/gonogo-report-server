@@ -71,6 +71,8 @@ const supabase =
               SUPABASE_SERVICE_ROLE_KEY
           )
         : null
+const SUPABASE_PDF_BUCKET = "paid-pdfs"
+
 // =========================================================
 // [05] PAID DOWNLOAD TOKEN SYSTEM
 // =========================================================
@@ -1612,6 +1614,71 @@ app.post("/api/paypal/capture-order", async (req, res) => {
     }
 })
 
+async function uploadPdfToSupabaseStorage({
+    token,
+    pdfBuffer,
+}) {
+    if (!supabase) {
+        return {
+            ok: false,
+            error: "Supabase client is not configured.",
+        }
+    }
+
+    if (!token || !pdfBuffer) {
+        return {
+            ok: false,
+            error: "Missing token or PDF buffer.",
+        }
+    }
+
+    const storagePath = `paid-reports/${token}.pdf`
+
+    const { error } = await supabase.storage
+        .from(SUPABASE_PDF_BUCKET)
+        .upload(storagePath, pdfBuffer, {
+            contentType: "application/pdf",
+            upsert: true,
+        })
+
+    if (error) {
+        console.error("[SUPABASE_PDF_UPLOAD_ERROR]", error)
+
+        return {
+            ok: false,
+            error: error.message || "PDF upload failed.",
+        }
+    }
+
+    console.log("[SUPABASE_PDF_UPLOADED]", {
+        token,
+        storagePath,
+    })
+
+    return {
+        ok: true,
+        storagePath,
+    }
+}
+
+async function downloadPdfFromSupabaseStorage(storagePath) {
+    if (!supabase || !storagePath) {
+        return null
+    }
+
+    const { data, error } = await supabase.storage
+        .from(SUPABASE_PDF_BUCKET)
+        .download(storagePath)
+
+    if (error || !data) {
+        console.error("[SUPABASE_PDF_DOWNLOAD_ERROR]", error)
+        return null
+    }
+
+    const arrayBuffer = await data.arrayBuffer()
+
+    return Buffer.from(arrayBuffer)
+}
 
 // =========================================================
 // [11] DOWNLOAD PAID PDF ROUTE
