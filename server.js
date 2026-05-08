@@ -5751,6 +5751,15 @@ function checklistItems(items = []) {
 // [35] SERVER START
 // =========================================================
 
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        ok: true,
+        service: "gonogo-report-server",
+        uptime: process.uptime(),
+        timestamp: Date.now(),
+    })
+})
+
 app.listen(PORT, () => {
     console.log(`🚀 GoNoGo Report Server running on port ${PORT}`)
 })
