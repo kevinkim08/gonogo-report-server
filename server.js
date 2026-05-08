@@ -134,12 +134,76 @@ async function createPaidDownloadToken(payload = {}) {
     return token
 }
 
-function validatePaidDownloadToken(token) {
+async function validatePaidDownloadToken(token) {
     if (!token) {
         return {
             ok: false,
             status: 401,
             message: "Missing download token.",
+        }
+    }
+
+    if (supabase) {
+        const { data, error } = await supabase
+            .from("paid_orders")
+            .select("*")
+            .eq("token", token)
+            .single()
+
+        if (error || !data) {
+            console.error("[SUPABASE_TOKEN_LOOKUP_ERROR]", error)
+
+            return {
+                ok: false,
+                status: 403,
+                message: "Invalid payment token.",
+            }
+        }
+
+        if (data.status !== "paid") {
+            return {
+                ok: false,
+                status: 403,
+                message: "Invalid payment status.",
+            }
+        }
+
+        if (data.expires_at && new Date(data.expires_at).getTime() < Date.now()) {
+            return {
+                ok: false,
+                status: 403,
+                message: "This download link has expired.",
+            }
+        }
+
+        if (Number(data.download_count || 0) >= Number(data.download_limit || 5)) {
+            return {
+                ok: false,
+                status: 403,
+                message: "Download limit exceeded.",
+            }
+        }
+
+        return {
+            ok: true,
+            source: "supabase",
+            record: {
+                token: data.token,
+                downloadCount: Number(data.download_count || 0),
+                downloadLimit: Number(data.download_limit || 5),
+                payload: {
+                    lang: data.lang || "ko",
+                    brandName: data.brand_name || "PaidReport",
+                    productService:
+                        data.product_service || "A paid business report",
+                    targetCustomer:
+                        data.target_customer || "Target customers",
+                    orderId: data.order_id,
+                    captureId: data.capture_id,
+                    pdfUrl: data.pdf_url,
+                    pdfStoragePath: data.pdf_storage_path,
+                },
+            },
         }
     }
 
@@ -169,7 +233,11 @@ function validatePaidDownloadToken(token) {
         }
     }
 
-    return { ok: true, record }
+    return {
+        ok: true,
+        source: "memory",
+        record,
+    }
 }
 
 // =========================================================
@@ -1555,7 +1623,7 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         const { token } = req.query
         const language = normalizeLanguage(req.query.lang || "ko")
 
-        const validation = validatePaidDownloadToken(token)
+        const validation = await validatePaidDownloadToken(token)
 
         if (!validation.ok) {
             return res.status(validation.status).send(`
@@ -1597,7 +1665,23 @@ app.get("/api/download-paid-pdf", async (req, res) => {
         const html = buildHtmlFromTemplate(finalReport, locale)
         const pdfBuffer = await htmlToPdf(html)
 
-        validation.record.downloadCount += 1
+        if (validation.source === "supabase" && supabase) {
+    const nextDownloadCount =
+        Number(validation.record.downloadCount || 0) + 1
+
+    const { error } = await supabase
+        .from("paid_orders")
+        .update({
+            download_count: nextDownloadCount,
+        })
+        .eq("token", token)
+
+    if (error) {
+        console.error("[SUPABASE_DOWNLOAD_COUNT_UPDATE_ERROR]", error)
+    }
+} else {
+    validation.record.downloadCount += 1
+}
         
         const safeBrand = sanitizeFileName(brandName)
 
