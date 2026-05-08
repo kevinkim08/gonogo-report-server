@@ -1198,7 +1198,6 @@ function startFakeProgress(){
         progressSteps[0] || loadingText;
 
     progressPercent.textContent = "0%";
-    progressFill.style.width = "0%";
 
     timer = setInterval(() => {
 
