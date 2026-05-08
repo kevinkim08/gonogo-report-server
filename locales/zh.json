@@ -342,5 +342,11 @@
   "domain_availability_note": "域名可用性并非实时注册查询，而是基于品牌名独特性和一般域名稀缺性的估计判断。",
   "th_name": "名称",
   "th_domain": "域名",
-  "th_availability": "预计可用性"
+  "th_availability": "预计可用性",
+  "downloadLimitTitle": "已达到下载次数上限。",
+"downloadLimitDescription": "您已使用所有可用下载次数。如有问题请联系客服。",
+"downloadExpiredTitle": "下载链接已过期。",
+"downloadExpiredDescription": "此下载链接已失效，请联系客服。",
+"downloadInvalidTitle": "无效的下载链接。",
+"downloadInvalidDescription": "该链接无效或已不可用。"
 }
