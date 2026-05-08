@@ -1707,75 +1707,133 @@ app.get("/api/download-paid-pdf", async (req, res) => {
 `)
         }
 
-        const brandName = req.query.brandName || "PaidReport"
+        const brandName =
+            req.query.brandName ||
+            validation.record?.payload?.brandName ||
+            "PaidReport"
+
         const productService =
-            req.query.productService || "A paid business report"
+            req.query.productService ||
+            validation.record?.payload?.productService ||
+            "A paid business report"
+
         const targetCustomer =
-            req.query.targetCustomer || "Target customers"
+            req.query.targetCustomer ||
+            validation.record?.payload?.targetCustomer ||
+            "Target customers"
 
         const locale = loadLocale(language)
 
-        const paidReport = await generateDeepReportJson({
-            brandName,
-            productService,
-            targetCustomer,
-            language,
-        })
+        let pdfBuffer = null
 
-        const finalReport = {
-            ...paidReport,
-            isPaid: true,
-            reportMode: "paid",
+        if (
+            validation.source === "supabase" &&
+            validation.record?.payload?.pdfStoragePath
+        ) {
+            pdfBuffer = await downloadPdfFromSupabaseStorage(
+                validation.record.payload.pdfStoragePath
+            )
+
+            if (pdfBuffer) {
+                console.log("[PDF_CACHE_HIT]", {
+                    token,
+                    path: validation.record.payload.pdfStoragePath,
+                })
+            }
         }
 
-        const html = buildHtmlFromTemplate(finalReport, locale)
-        const pdfBuffer = await htmlToPdf(html)
+        if (!pdfBuffer) {
+            console.log("[PDF_CACHE_MISS]", { token })
+
+            const paidReport = await generateDeepReportJson({
+                brandName,
+                productService,
+                targetCustomer,
+                language,
+            })
+
+            const finalReport = {
+                ...paidReport,
+                isPaid: true,
+                reportMode: "paid",
+            }
+
+            const html = buildHtmlFromTemplate(finalReport, locale)
+            pdfBuffer = await htmlToPdf(html)
+
+            if (validation.source === "supabase" && supabase) {
+                const uploadResult = await uploadPdfToSupabaseStorage({
+                    token,
+                    pdfBuffer,
+                })
+
+                if (uploadResult.ok) {
+                    const { error } = await supabase
+                        .from("paid_orders")
+                        .update({
+                            pdf_storage_path: uploadResult.storagePath,
+                            pdf_url: uploadResult.storagePath,
+                        })
+                        .eq("token", token)
+
+                    if (error) {
+                        console.error("[SUPABASE_PDF_CACHE_UPDATE_ERROR]", error)
+                    } else {
+                        console.log("[SUPABASE_PDF_CACHE_UPDATED]", {
+                            token,
+                            storagePath: uploadResult.storagePath,
+                        })
+                    }
+                }
+            }
+        }
 
         if (validation.source === "supabase" && supabase) {
-    const nextDownloadCount =
-        Number(validation.record.downloadCount || 0) + 1
+            const nextDownloadCount =
+                Number(validation.record.downloadCount || 0) + 1
 
-    const { error } = await supabase
-        .from("paid_orders")
-        .update({
-            download_count: nextDownloadCount,
-        })
-        .eq("token", token)
+            const { error } = await supabase
+                .from("paid_orders")
+                .update({
+                    download_count: nextDownloadCount,
+                })
+                .eq("token", token)
 
-    if (error) {
-        console.error("[SUPABASE_DOWNLOAD_COUNT_UPDATE_ERROR]", error)
-    }
-} else {
-    validation.record.downloadCount += 1
-}
-        
+            if (error) {
+                console.error("[SUPABASE_DOWNLOAD_COUNT_UPDATE_ERROR]", error)
+            }
+        } else {
+            validation.record.downloadCount += 1
+        }
+
         const safeBrand = sanitizeFileName(brandName)
 
+        const asciiFileName =
+            `GoNoGo_Paid_Report_${language}_${Date.now()}.pdf`
 
-const asciiFileName =
-    `GoNoGo_Paid_Report_${language}_${Date.now()}.pdf`
+        const encodedFileName =
+            encodeURIComponent(
+                `GoNoGo_Paid_Report_${safeBrand}_${language}.pdf`
+            )
 
-const encodedFileName =
-    encodeURIComponent(
-        `GoNoGo_Paid_Report_${safeBrand}_${language}.pdf`
-    )
+        res.setHeader("Content-Type", "application/octet-stream")
+        res.setHeader("X-Content-Type-Options", "nosniff")
+        res.setHeader(
+            "Cache-Control",
+            "no-store, no-cache, must-revalidate, proxy-revalidate"
+        )
+        res.setHeader("Pragma", "no-cache")
+        res.setHeader("Expires", "0")
+        res.setHeader("Surrogate-Control", "no-store")
 
-res.setHeader("Content-Type", "application/octet-stream")
-res.setHeader("X-Content-Type-Options", "nosniff")
-res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
-res.setHeader("Pragma", "no-cache")
-res.setHeader("Expires", "0")
-res.setHeader("Surrogate-Control", "no-store")
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`
+        )
 
-res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`
-)
+        res.setHeader("Content-Length", String(pdfBuffer.length))
 
-res.setHeader("Content-Length", String(pdfBuffer.length))
-
-return res.end(pdfBuffer)
-        
+        return res.end(pdfBuffer)
     } catch (error) {
         console.error("[DOWNLOAD_PAID_PDF_ERROR]", error)
 
