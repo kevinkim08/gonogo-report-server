@@ -71,15 +71,20 @@ const supabase =
               SUPABASE_SERVICE_ROLE_KEY
           )
         : null
-
 // =========================================================
 // [05] PAID DOWNLOAD TOKEN SYSTEM
 // =========================================================
 
 const paidDownloadTokens = new Map()
 
-function createPaidDownloadToken(payload = {}) {
+async function createPaidDownloadToken(payload = {}) {
     const token = crypto.randomBytes(24).toString("hex")
+
+    const expiresAtMs =
+        Date.now() + 7 * 24 * 60 * 60 * 1000
+
+    const expiresAtIso =
+        new Date(expiresAtMs).toISOString()
 
     paidDownloadTokens.set(token, {
         paid: true,
@@ -87,9 +92,44 @@ function createPaidDownloadToken(payload = {}) {
         downloadCount: 0,
         used: false,
         createdAt: Date.now(),
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        expiresAt: expiresAtMs,
         payload,
     })
+
+    if (supabase) {
+        const { error } = await supabase
+            .from("paid_orders")
+            .insert({
+                order_id: payload.orderId || `dev_${token}`,
+                capture_id: payload.captureId || null,
+                token,
+
+                lang: payload.lang || "ko",
+                brand_name: payload.brandName || "PaidReport",
+                product_service:
+                    payload.productService || "A paid business report",
+                target_customer:
+                    payload.targetCustomer || "Target customers",
+
+                download_limit: 5,
+                download_count: 0,
+
+                pdf_url: null,
+                pdf_storage_path: null,
+
+                status: "paid",
+                expires_at: expiresAtIso,
+            })
+
+        if (error) {
+            console.error("[SUPABASE_PAID_ORDER_INSERT_ERROR]", error)
+        } else {
+            console.log("[SUPABASE_PAID_ORDER_INSERTED]", {
+                token,
+                orderId: payload.orderId || `dev_${token}`,
+            })
+        }
+    }
 
     return token
 }
@@ -121,7 +161,6 @@ function validatePaidDownloadToken(token) {
         }
     }
 
-   
     if (record.downloadCount >= record.downloadLimit) {
         return {
             ok: false,
@@ -741,7 +780,7 @@ app.get("/api/dev-create-paid-token", async (req, res) => {
         const targetCustomer =
             req.query.targetCustomer || "Fashion Brands"
 
-        const token = createPaidDownloadToken({
+        const token = await createPaidDownloadToken({
             brandName,
             productService,
             targetCustomer,
@@ -1458,7 +1497,7 @@ app.post("/api/paypal/capture-order", async (req, res) => {
 
         const context = paypalOrderContext.get(orderId) || {}
 
-        const token = createPaidDownloadToken({
+        const token = await createPaidDownloadToken({
             source: "paypal",
             orderId,
             captureId,
