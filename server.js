@@ -1406,6 +1406,63 @@ async function sendPaidReportEmail({
 
     const downloadUrl = buildPaidReportDownloadUrl({ token, language })
 
+    const emailCopy = {
+    ko: {
+        subject: "GoNoGo 유료 보고서가 준비되었습니다",
+        title: "유료 보고서가 준비되었습니다",
+        desc1: `<strong>${esc(brandName)}</strong> 보고서가 생성되었습니다.`,
+        desc2: "아래 버튼을 눌러 유료 PDF 보고서를 다운로드할 수 있습니다.",
+        button: "보고서 다운로드",
+        fallback: "버튼이 작동하지 않으면 아래 링크를 복사해 브라우저에 붙여넣어 주세요.",
+        footer: "GoNoGo Reports · hello@gonogo.so",
+    },
+
+    en: {
+        subject: "Your GoNoGo paid report is ready",
+        title: "Your paid report is ready",
+        desc1: `Your paid report for <strong>${esc(brandName)}</strong> is ready.`,
+        desc2: "You can download your paid PDF report using the button below.",
+        button: "Download Report",
+        fallback: "If the button does not work, copy and paste this link into your browser.",
+        footer: "GoNoGo Reports · hello@gonogo.so",
+    },
+
+    ja: {
+        subject: "GoNoGo 有料レポートの準備が完了しました",
+        title: "有料レポートの準備が完了しました",
+        desc1: `<strong>${esc(brandName)}</strong> のレポートが生成されました。`,
+        desc2: "下のボタンから有料PDFレポートをダウンロードできます。",
+        button: "レポートをダウンロード",
+        fallback: "ボタンが機能しない場合は、以下のリンクをコピーしてブラウザに貼り付けてください。",
+        footer: "GoNoGo Reports · hello@gonogo.so",
+    },
+
+    zh: {
+        subject: "您的 GoNoGo 付费报告已准备好",
+        title: "付费报告已准备好",
+        desc1: `<strong>${esc(brandName)}</strong> 的报告已生成。`,
+        desc2: "您可以点击下方按钮下载付费 PDF 报告。",
+        button: "下载报告",
+        fallback: "如果按钮无法使用，请复制以下链接并粘贴到浏览器中。",
+        footer: "GoNoGo Reports · hello@gonogo.so",
+    },
+
+    mn: {
+        subject: "Таны GoNoGo төлбөртэй тайлан бэлэн боллоо",
+        title: "Төлбөртэй тайлан бэлэн боллоо",
+        desc1: `<strong>${esc(brandName)}</strong> тайлан бэлэн боллоо.`,
+        desc2: "Доорх товчийг дарж төлбөртэй PDF тайлангаа татаж авна уу.",
+        button: "Тайлан татах",
+        fallback: "Хэрэв товч ажиллахгүй бол доорх холбоосыг хуулж браузерт оруулна уу.",
+        footer: "GoNoGo Reports · hello@gonogo.so",
+    },
+}
+
+const emailText =
+    emailCopy[language] || emailCopy.en
+
+const subject = emailText.subject
+
     const subject = "Your GoNoGo paid report is ready"
 
     const html = `
