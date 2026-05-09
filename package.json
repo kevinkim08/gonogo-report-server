@@ -12,6 +12,7 @@
     "cors": "^2.8.5",
     "docx": "^9.5.1",
     "express": "^4.19.2",
+    "resend": "^4.0.0",
     "openai": "^5.0.0",
     "puppeteer-core": "^24.1.1"
   }
