@@ -9,6 +9,7 @@ import OpenAI from "openai"
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
+import { Resend } from "resend"
 import puppeteer from "puppeteer-core"
 import chromium from "@sparticuz/chromium"
 import { createClient } from "@supabase/supabase-js"
@@ -50,7 +51,7 @@ app.options("*", cors())
 // =========================================================
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: .OPENAI_API_KEY,
 })
 
 // =========================================================
@@ -1361,6 +1362,25 @@ setTimeout(() => {
 // =========================================================
 
 const paypalOrderContext = new Map()
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY || ""
+
+const RESEND_FROM_EMAIL =
+    process.env.RESEND_FROM_EMAIL || "report@mail.gonogo.so"
+
+const RESEND_FROM_NAME =
+    process.env.RESEND_FROM_NAME || "GoNoGo Reports"
+
+const resend =
+    RESEND_API_KEY
+        ? new Resend(RESEND_API_KEY)
+        : null
+
+console.log("[RESEND]", {
+    enabled: Boolean(resend),
+    hasApiKey: Boolean(RESEND_API_KEY),
+    fromEmail: RESEND_FROM_EMAIL,
+})
 
 function getPayPalBaseUrl() {
     return process.env.PAYPAL_ENV === "live"
