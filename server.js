@@ -1754,17 +1754,25 @@ app.post("/api/paypal/capture-order", async (req, res) => {
 
         const context = paypalOrderContext.get(orderId) || {}
 
-        const token = await createPaidDownloadToken({
-            source: "paypal",
-            orderId,
-            captureId,
-            lang: context.lang || "ko",
-            brandName: context.brandName || "PaidReport",
-            productService:
-                context.productService || "A paid business report",
-            targetCustomer:
-                context.targetCustomer || "Target customers",
-        })
+       const reportLang =
+    context.reportLang ||
+    context.lang ||
+    "en"
+
+const token = await createPaidDownloadToken({
+    source: "paypal",
+    orderId,
+    captureId,
+
+    // 실제 보고서 언어
+    lang: reportLang,
+
+    brandName: context.brandName || "PaidReport",
+    productService:
+        context.productService || "A paid business report",
+    targetCustomer:
+        context.targetCustomer || "Target customers",
+})
 
         const payerEmail =
     capture?.payer?.email_address ||
@@ -1783,14 +1791,33 @@ await sendPaidReportEmail({
             "https://gonogo-report-server.onrender.com"
 
         const params = new URLSearchParams({
-            token,
-            lang: context.lang || "ko",
-            brandName: context.brandName || "PaidReport",
-            productService:
-                context.productService || "A paid business report",
-            targetCustomer:
-                context.targetCustomer || "Target customers",
-        })
+    token,
+
+    // UI 언어
+    uiLang: context.uiLang || "en",
+
+    // 실제 보고서 언어
+    reportLang:
+        context.reportLang ||
+        context.lang ||
+        "en",
+
+    // 기존 호환용
+    lang:
+        context.reportLang ||
+        context.lang ||
+        "en",
+
+    brandName: context.brandName || "PaidReport",
+
+    productService:
+        context.productService ||
+        "A paid business report",
+
+    targetCustomer:
+        context.targetCustomer ||
+        "Target customers",
+})
 
         const downloadUrl =
             `${baseUrl}/api/download-paid-pdf?${params.toString()}`
