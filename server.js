@@ -5461,8 +5461,7 @@ html = html
 
     html = applyTemplateVars(html, templateData)
 
-    if (report?.reportMode === "paid") {
-    if (report?.reportMode === "paid") {
+       if (report?.reportMode === "paid") {
     html = html.replace(
         "<!-- FOUNDER_DECISION_UPGRADE_HERE -->",
         renderFounderDecisionUpgradeSection(report, locale)
@@ -5472,7 +5471,6 @@ html = html
         "<!-- FOUNDER_DECISION_UPGRADE_HERE -->",
         ""
     )
-}
 }
 
     // =========================================================
