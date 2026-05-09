@@ -635,7 +635,15 @@ const timer = setInterval(() => {
 
 app.get("/api/debug-html", async (req, res) => {
     try {
-        const language = normalizeLanguage(req.query.lang || req.query.language || "ko")
+        const uiLang = normalizeLanguage(req.query.uiLang || "en")
+const reportLang = normalizeLanguage(
+    req.query.reportLang ||
+    req.query.lang ||
+    req.query.language ||
+    "en"
+)
+
+const language = reportLang
         const reportType = req.query.reportType === "free" ? "free" : "paid"
 
         const brandName = req.query.brandName || "SampleBrand"
