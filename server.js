@@ -4697,8 +4697,17 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
         : []
 
     const stress = upgrade?.businessStressIndex || {}
-    const mapX = Math.max(8, Math.min(92, Number(map.x ?? 50)))
-    const mapY = Math.max(8, Math.min(92, Number(map.y ?? 50)))
+const map = upgrade?.marketPositionMap || {}
+
+const mapX = Math.max(
+    8,
+    Math.min(92, Number(map.x ?? 50))
+)
+
+const mapY = Math.max(
+    8,
+    Math.min(92, Number(map.y ?? 50))
+)
 
     const clampScore = (value) => {
         const n = Number(value || 0)
