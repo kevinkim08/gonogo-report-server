@@ -349,4 +349,11 @@
 "downloadExpiredDescription": "This download link has expired. Please contact support.",
 "downloadInvalidTitle": "Invalid download link.",
 "downloadInvalidDescription": "This link is invalid or no longer available."
+  "exampleStructureTitle": "EXAMPLE STRUCTURE",
+  "exampleIdeaLabel": "Business Idea Title",
+  "exampleProductLabel": "Product / Service",
+  "exampleCustomerLabel": "Target Customer",
+  "exampleIdea": "AI-powered personalized meal subscription for office workers",
+  "exampleProduct": "A subscription-based meal platform that delivers healthy AI-personalized lunch boxes to busy office workers.\n\nThe system analyzes eating habits, calorie goals, work schedules, and food preferences to recommend daily meals.",
+  "exampleCustomer": "Office workers in their 20s to 40s who work long hours and struggle to maintain healthy eating habits.\n\nEspecially startup employees, tech workers, remote workers, and fitness-conscious professionals in large cities."
 }
