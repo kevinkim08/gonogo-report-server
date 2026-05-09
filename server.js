@@ -2473,6 +2473,54 @@ const PAID_REPORT_JSON_SHAPE = `
     "assumptions": ["", "", "", ""]
   },
 
+"founderDecisionUpgrade": {
+  "finalDecisionStatement": {
+    "decision": "GO | GO WITH CONDITIONS | HOLD | NO GO",
+    "headline": "",
+    "reason": "",
+    "doNotStartIf": "",
+    "startOnlyIf": ""
+  },
+  "whyThisMayFail": [
+    {
+      "risk": "",
+      "whyItMatters": "",
+      "earlyWarningSignal": "",
+      "counterMove": ""
+    },
+    {
+      "risk": "",
+      "whyItMatters": "",
+      "earlyWarningSignal": "",
+      "counterMove": ""
+    },
+    {
+      "risk": "",
+      "whyItMatters": "",
+      "earlyWarningSignal": "",
+      "counterMove": ""
+    }
+  ],
+  "businessStressIndex": {
+    "marketSaturation": 0,
+    "acquisitionDifficulty": 0,
+    "retentionRisk": 0,
+    "executionComplexity": 0,
+    "differentiationStrength": 0,
+    "monetizationStability": 0,
+    "founderFitRisk": 0,
+    "summary": ""
+  },
+  "marketPositionMap": {
+    "xAxis": "Competition Density",
+    "yAxis": "Profitability Potential",
+    "position": "",
+    "zone": "Premium Zone | Crowded Zone | Low-Margin Trap | Difficult Acquisition Zone | Underserved Niche",
+    "interpretation": "",
+    "recommendedMove": ""
+  }
+}
+
   "referenceLinks": [
     ["", ""],
     ["", ""],
@@ -2488,128 +2536,101 @@ const PAID_REPORT_JSON_SHAPE = `
 
 function buildPaidReportPromptTail() {
     return `
+    Founder decision upgrade rules:
+
+founderDecisionUpgrade.finalDecisionStatement must be direct, cold, and investor-like.
+Do not write generic encouragement.
+Explain whether the founder should start, stop, or only proceed under strict conditions.
+
+founderDecisionUpgrade.whyThisMayFail must contain exactly 3 structural failure risks.
+Each risk must explain why the business may fail even if the product looks attractive.
+
+founderDecisionUpgrade.businessStressIndex scores must be 0 to 100.
+Higher scores mean more pressure, except differentiationStrength and monetizationStability where higher means stronger.
+
+founderDecisionUpgrade.marketPositionMap must place the business into one clear market zone.
+The interpretation must be useful enough for a founder to change strategy.
+
 Glossary rules:
 
 Explain important business terms used in the report.
-
 Include terms such as TAM, SAM, SOM, CAC, LTV, AOV, Margin, Retention, Conversion when relevant.
-
 Meanings must be simple enough for a non-expert founder.
-
 whyItMatters must explain how the term affects the business decision.
 
 Business diagnosis rules:
 
 Classify the business industry type.
-
 Classify the business model type.
-
 Explain country-specific buying behavior.
-
 Identify the biggest bottleneck.
-
 Recommend the best first offer.
-
 Define the first validation experiment.
 
 Data confidence rules:
 
 Explain how reliable the market and unit economics assumptions are.
-
 Separate public data, platform observations, and assumptions.
-
 Clearly state what is uncertain.
-
 Do not pretend exact data exists when it does not.
 
 Reference links rules:
 
 referenceLinks must contain relevant sources for the selected country, industry, and business model.
-
 Each row must contain: Source name, URL.
-
 Use official statistics, market platforms, trend tools, or industry-specific sources when relevant.
-
 Do not use fixed pet, food, ecommerce, or Korea-only sources unless they match the user's business input.
 
 Sensitivity analysis rules:
 
 Show how the business changes when CAC rises or LTV falls.
-
 cacLtvTable columns must be: Scenario, CAC, LTV, Decision.
-
 criticalBreakPoint must explain the point where the business becomes unprofitable.
-
 founderWarning must be direct and practical.
 
 Profit simulation rules:
 
 monthlyScenarioTable columns must be: Scenario, Customers, Revenue, Marketing Cost, Estimated Profit, Judgment.
-
 Use realistic monthly customer acquisition assumptions.
-
 Include marketing cost, gross margin, fulfillment cost if relevant.
-
 breakEvenPoint must explain when the business starts making money.
-
 profitJudgment must clearly say whether this business can make money.
-
 cashRisk must explain the cashflow risk for the founder.
 
 Kill criteria rules:
 
 Define measurable stop conditions.
-
 Rules columns must be: Metric, Kill Line, Action.
-
 Include CAC, conversion rate, repeat purchase, margin, refund/churn when relevant.
-
 stopDecision must say when to stop.
-
 pivotDecision must say when to change offer/model.
-
 scaleDecision must say when to increase budget.
 
 Calculation rules:
 
 TAM must describe the total reachable category demand.
-
 SAM must narrow TAM to the country/channel/customer segment.
-
 SOM must be a realistic first 12-month obtainable market.
-
 Unit economics must include CAC, AOV, LTV, repeat purchase, margin, and payback.
-
 LTV/CAC must be calculated logically.
-
 Marketing channels must match the selected country.
-
 Execution plan must be actionable within 30 days.
-
 GO threshold must define measurable pass/fail criteria.
-
 Appendix must include assumed data sources and assumptions.
 
 Scoring logic:
 
 Market score: demand size + urgency + accessibility.
-
 Profitability score: margin + LTV/CAC + repeat purchase potential.
-
 Execution score: founder feasibility + launch cost + operational complexity.
-
 Risk score: higher number means higher risk pressure.
-
 Overall cover.score should reflect weighted judgment.
 
 Decision logic:
 
 GO: score 75+, strong demand, viable unit economics.
-
 HOLD: score 50-74, needs validation.
-
 NO GO: below 50, weak economics or market access.
-
 Now generate the JSON report.
 `
 }
