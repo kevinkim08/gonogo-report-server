@@ -267,16 +267,26 @@ app.get("/api/health", (req, res) => {
 // =========================================================
 
 app.get("/api/report-loading", (req, res) => {
-    const lang = normalizeLanguage(req.query.lang || "ko")
+   const uiLang = normalizeLanguage(req.query.uiLang || "en")
+const reportLang = normalizeLanguage(
+    req.query.reportLang || req.query.lang || "en"
+)
+
+const lang = uiLang
     const reportType = req.query.reportType === "paid" ? "paid" : "free"
 
     const params = new URLSearchParams({
-        lang,
-        reportType,
-        brandName: req.query.brandName || "",
-        productService: req.query.productService || "",
-        targetCustomer: req.query.targetCustomer || "",
-    })
+    uiLang,
+    reportLang,
+
+    // 보고서 생성 언어는 reportLang 기준
+    lang: reportLang,
+
+    reportType,
+    brandName: req.query.brandName || "",
+    productService: req.query.productService || "",
+    targetCustomer: req.query.targetCustomer || "",
+})
 
     const targetUrl = `/api/debug-html?${params.toString()}`
 
