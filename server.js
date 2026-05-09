@@ -4681,9 +4681,9 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
 
     return `
 <section class="page founder-upgrade-page">
-    <div class="page-kicker">FOUNDER DECISION UPGRADE</div>
+    <div class="page-kicker">${esc(locale.founder_upgrade_kicker || "FOUNDER DECISION UPGRADE")}</div>
 
-    <h1 class="page-title">{{founder_upgrade_title}}</h1>
+    <h1 class="page-title">${esc(locale.founder_upgrade_title || "Final Decision System")}</h1>
 
     <div style="margin-top:28px;padding:28px;border-radius:24px;background:#0D2418;color:#ffffff;">
         <div style="font-size:13px;font-weight:900;opacity:.65;margin-bottom:10px;">
@@ -4725,8 +4725,8 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
 </section>
 
 <section class="page founder-fail-page">
-    <div class="page-kicker">WHY THIS MAY FAIL</div>
-    <h1 class="page-title">Structural Failure Risks</h1>
+    <div class="page-kicker">${esc(locale.failure_risk_kicker || "WHY THIS MAY FAIL")}</div>
+    <h1 class="page-title">${esc(locale.failure_risk_title || "Structural Failure Risks")}</h1>
 
     <div style="display:grid;gap:16px;margin-top:28px;">
         ${
@@ -4772,8 +4772,8 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
 </section>
 
 <section class="page founder-stress-page">
-    <div class="page-kicker">BUSINESS STRESS INDEX</div>
-    <h1 class="page-title">Pressure Test Scores</h1>
+    <div class="page-kicker">${esc(locale.stress_index_kicker || "BUSINESS STRESS INDEX")}</div>
+    <h1 class="page-title">${esc(locale.stress_index_title || "Pressure Test Scores")}</h1>
 
     <div style="margin-top:28px;display:grid;gap:14px;">
         ${stressRows
@@ -4805,8 +4805,8 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
 </section>
 
 <section class="page founder-position-page">
-    <div class="page-kicker">MARKET POSITION MAP</div>
-    <h1 class="page-title">Competitive Position Judgment</h1>
+    <div class="page-kicker">${esc(locale.market_position_kicker || "MARKET POSITION MAP")}</div>
+    <h1 class="page-title">${esc(locale.market_position_title || "Competitive Position Judgment")}</h1>
 
     <div style="margin-top:30px;padding:26px;border-radius:24px;background:#ffffff;border:1px solid rgba(13,36,24,.12);">
         <div style="height:300px;position:relative;background:
