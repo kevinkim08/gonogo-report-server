@@ -3196,6 +3196,121 @@ function buildFreeReportFromPaidReport(fullReport) {
 
 function normalizeDeepReport(report, input) {
     return {
+        founderDecisionUpgrade: {
+    finalDecisionStatement: {
+        decision:
+            report?.founderDecisionUpgrade
+                ?.finalDecisionStatement?.decision ||
+            "GO WITH CONDITIONS",
+
+        headline:
+            report?.founderDecisionUpgrade
+                ?.finalDecisionStatement?.headline ||
+            "",
+
+        reason:
+            report?.founderDecisionUpgrade
+                ?.finalDecisionStatement?.reason ||
+            "",
+
+        doNotStartIf:
+            report?.founderDecisionUpgrade
+                ?.finalDecisionStatement?.doNotStartIf ||
+            "",
+
+        startOnlyIf:
+            report?.founderDecisionUpgrade
+                ?.finalDecisionStatement?.startOnlyIf ||
+            "",
+    },
+
+    whyThisMayFail: Array.isArray(
+        report?.founderDecisionUpgrade?.whyThisMayFail
+    )
+        ? report.founderDecisionUpgrade.whyThisMayFail.map((item) => ({
+              risk: item?.risk || "",
+              whyItMatters: item?.whyItMatters || "",
+              earlyWarningSignal:
+                  item?.earlyWarningSignal || "",
+              counterMove: item?.counterMove || "",
+          }))
+        : [],
+
+    businessStressIndex: {
+        marketSaturation: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex?.marketSaturation || 0
+        ),
+
+        acquisitionDifficulty: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex
+                ?.acquisitionDifficulty || 0
+        ),
+
+        retentionRisk: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex?.retentionRisk || 0
+        ),
+
+        executionComplexity: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex
+                ?.executionComplexity || 0
+        ),
+
+        differentiationStrength: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex
+                ?.differentiationStrength || 0
+        ),
+
+        monetizationStability: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex
+                ?.monetizationStability || 0
+        ),
+
+        founderFitRisk: Number(
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex?.founderFitRisk || 0
+        ),
+
+        summary:
+            report?.founderDecisionUpgrade
+                ?.businessStressIndex?.summary || "",
+    },
+
+    marketPositionMap: {
+        xAxis:
+            report?.founderDecisionUpgrade
+                ?.marketPositionMap?.xAxis ||
+            "Competition Density",
+
+        yAxis:
+            report?.founderDecisionUpgrade
+                ?.marketPositionMap?.yAxis ||
+            "Profitability Potential",
+
+        position:
+            report?.founderDecisionUpgrade
+                ?.marketPositionMap?.position || "",
+
+        zone:
+            report?.founderDecisionUpgrade
+                ?.marketPositionMap?.zone || "",
+
+        interpretation:
+            report?.founderDecisionUpgrade
+                ?.marketPositionMap?.interpretation ||
+            "",
+
+        recommendedMove:
+            report?.founderDecisionUpgrade
+                ?.marketPositionMap
+                ?.recommendedMove || "",
+    },
+},
         cover: {
             brandName: report?.cover?.brandName || input.brandName || "",
             decision: report?.cover?.decision || "HOLD",
