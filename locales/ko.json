@@ -348,8 +348,7 @@
 "downloadExpiredTitle": "다운로드 링크가 만료되었습니다.",
 "downloadExpiredDescription": "유효 기간이 종료되었습니다. 고객지원으로 문의해주세요.",
 "downloadInvalidTitle": "유효하지 않은 다운로드 링크입니다.",
-"downloadInvalidDescription": "링크가 올바르지 않거나 이미 삭제되었습니다."
-},
+"downloadInvalidDescription": "링크가 올바르지 않거나 이미 삭제되었습니다.",
   "exampleStructureTitle": "예시 입력 구조",
   "exampleIdeaLabel": "사업 아이디어 제목",
   "exampleProductLabel": "제품 / 서비스",
