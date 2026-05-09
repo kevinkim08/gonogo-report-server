@@ -4647,6 +4647,220 @@ body {
 </html>
 `
 }
+
+function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
+    const upgrade = report?.founderDecisionUpgrade || {}
+
+    const finalDecision =
+        upgrade?.finalDecisionStatement || {}
+
+    const failRisks = Array.isArray(upgrade?.whyThisMayFail)
+        ? upgrade.whyThisMayFail.slice(0, 3)
+        : []
+
+    const stress = upgrade?.businessStressIndex || {}
+    const map = upgrade?.marketPositionMap || {}
+
+    const clampScore = (value) => {
+        const n = Number(value || 0)
+        if (!Number.isFinite(n)) return 0
+        return Math.max(0, Math.min(100, Math.round(n)))
+    }
+
+    const stressRows = [
+        ["Market Saturation", stress.marketSaturation],
+        ["Acquisition Difficulty", stress.acquisitionDifficulty],
+        ["Retention Risk", stress.retentionRisk],
+        ["Execution Complexity", stress.executionComplexity],
+        ["Differentiation Strength", stress.differentiationStrength],
+        ["Monetization Stability", stress.monetizationStability],
+        ["Founder Fit Risk", stress.founderFitRisk],
+    ]
+
+    const decision = finalDecision.decision || "GO WITH CONDITIONS"
+
+    return `
+<section class="page founder-upgrade-page">
+    <div class="page-kicker">FOUNDER DECISION UPGRADE</div>
+
+    <h1 class="page-title">Final Decision System</h1>
+
+    <div style="margin-top:28px;padding:28px;border-radius:24px;background:#0D2418;color:#ffffff;">
+        <div style="font-size:13px;font-weight:900;opacity:.65;margin-bottom:10px;">
+            FINAL DECISION
+        </div>
+
+        <div style="font-size:38px;line-height:1;font-weight:950;letter-spacing:-0.06em;color:#B6FF5A;margin-bottom:18px;">
+            ${esc(decision)}
+        </div>
+
+        <div style="font-size:20px;line-height:1.35;font-weight:900;margin-bottom:14px;">
+            ${esc(finalDecision.headline || "This business requires strict validation before scaling.")}
+        </div>
+
+        <p style="font-size:14px;line-height:1.75;color:rgba(255,255,255,.78);margin:0;">
+            ${esc(finalDecision.reason || "")}
+        </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;">
+        <div style="padding:20px;border-radius:18px;background:#FFF2EC;border:1px solid rgba(155,61,18,.16);">
+            <div style="font-size:12px;font-weight:950;color:#9B3D12;margin-bottom:8px;">
+                DO NOT START IF
+            </div>
+            <div style="font-size:13px;line-height:1.6;color:#3B1D12;">
+                ${esc(finalDecision.doNotStartIf || "The acquisition channel is not validated.")}
+            </div>
+        </div>
+
+        <div style="padding:20px;border-radius:18px;background:#F1F8EE;border:1px solid rgba(13,36,24,.12);">
+            <div style="font-size:12px;font-weight:950;color:#0D2418;margin-bottom:8px;">
+                START ONLY IF
+            </div>
+            <div style="font-size:13px;line-height:1.6;color:#0D2418;">
+                ${esc(finalDecision.startOnlyIf || "A low-cost validation path is confirmed.")}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page founder-fail-page">
+    <div class="page-kicker">WHY THIS MAY FAIL</div>
+    <h1 class="page-title">Structural Failure Risks</h1>
+
+    <div style="display:grid;gap:16px;margin-top:28px;">
+        ${
+            failRisks.length
+                ? failRisks
+                      .map(
+                          (item, index) => `
+            <div style="padding:22px;border-radius:20px;border:1px solid rgba(13,36,24,.12);background:#ffffff;">
+                <div style="font-size:12px;font-weight:950;color:#9B3D12;margin-bottom:8px;">
+                    RISK ${index + 1}
+                </div>
+
+                <div style="font-size:20px;font-weight:950;letter-spacing:-0.04em;margin-bottom:10px;color:#0D2418;">
+                    ${esc(item?.risk || "Structural risk")}
+                </div>
+
+                <p style="font-size:13px;line-height:1.65;color:#53645A;margin:0 0 12px;">
+                    ${esc(item?.whyItMatters || "")}
+                </p>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div style="padding:14px;border-radius:14px;background:#FAFAFA;">
+                        <strong style="display:block;font-size:11px;margin-bottom:6px;">Early warning</strong>
+                        <span style="font-size:12px;line-height:1.5;color:#53645A;">
+                            ${esc(item?.earlyWarningSignal || "")}
+                        </span>
+                    </div>
+
+                    <div style="padding:14px;border-radius:14px;background:#F1F8EE;">
+                        <strong style="display:block;font-size:11px;margin-bottom:6px;">Counter move</strong>
+                        <span style="font-size:12px;line-height:1.5;color:#53645A;">
+                            ${esc(item?.counterMove || "")}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `
+                      )
+                      .join("")
+                : `<div style="padding:22px;border-radius:20px;border:1px solid rgba(13,36,24,.12);background:#fff;">No structural failure risks generated.</div>`
+        }
+    </div>
+</section>
+
+<section class="page founder-stress-page">
+    <div class="page-kicker">BUSINESS STRESS INDEX</div>
+    <h1 class="page-title">Pressure Test Scores</h1>
+
+    <div style="margin-top:28px;display:grid;gap:14px;">
+        ${stressRows
+            .map(([label, value]) => {
+                const score = clampScore(value)
+
+                return `
+                <div style="display:grid;grid-template-columns:190px 1fr 48px;gap:14px;align-items:center;">
+                    <div style="font-size:12px;font-weight:900;color:#0D2418;">
+                        ${esc(label)}
+                    </div>
+
+                    <div style="height:12px;border-radius:999px;background:#E8EEE9;overflow:hidden;">
+                        <div style="height:100%;width:${score}%;border-radius:999px;background:#0D2418;"></div>
+                    </div>
+
+                    <div style="font-size:12px;font-weight:950;text-align:right;">
+                        ${score}
+                    </div>
+                </div>
+            `
+            })
+            .join("")}
+    </div>
+
+    <div style="margin-top:28px;padding:20px;border-radius:18px;background:#F6F8F6;border:1px solid rgba(13,36,24,.10);font-size:13px;line-height:1.7;color:#53645A;">
+        ${esc(stress.summary || "This index summarizes pressure across acquisition, retention, execution, differentiation, monetization, and founder fit.")}
+    </div>
+</section>
+
+<section class="page founder-position-page">
+    <div class="page-kicker">MARKET POSITION MAP</div>
+    <h1 class="page-title">Competitive Position Judgment</h1>
+
+    <div style="margin-top:30px;padding:26px;border-radius:24px;background:#ffffff;border:1px solid rgba(13,36,24,.12);">
+        <div style="height:300px;position:relative;background:
+            linear-gradient(to right, rgba(13,36,24,.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(13,36,24,.08) 1px, transparent 1px);
+            background-size:50% 50%;
+            border:1px solid rgba(13,36,24,.16);
+            border-radius:18px;
+            overflow:hidden;
+        ">
+            <div style="position:absolute;left:18px;top:18px;font-size:11px;font-weight:900;color:#0D2418;">
+                Premium Zone
+            </div>
+
+            <div style="position:absolute;right:18px;top:18px;font-size:11px;font-weight:900;color:#9B3D12;">
+                Crowded Zone
+            </div>
+
+            <div style="position:absolute;left:18px;bottom:18px;font-size:11px;font-weight:900;color:#53645A;">
+                Underserved Niche
+            </div>
+
+            <div style="position:absolute;right:18px;bottom:18px;font-size:11px;font-weight:900;color:#9B3D12;">
+                Low-Margin Trap
+            </div>
+
+            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);">
+                <div style="width:28px;height:28px;border-radius:999px;background:#B6FF5A;border:5px solid #0D2418;box-shadow:0 12px 32px rgba(13,36,24,.28);"></div>
+            </div>
+        </div>
+
+        <div style="margin-top:18px;">
+            <div style="font-size:12px;font-weight:950;color:#53645A;margin-bottom:6px;">
+                CURRENT ZONE
+            </div>
+
+            <div style="font-size:24px;font-weight:950;letter-spacing:-0.05em;color:#0D2418;margin-bottom:10px;">
+                ${esc(map.zone || "Difficult Acquisition Zone")}
+            </div>
+
+            <p style="font-size:13px;line-height:1.7;color:#53645A;margin:0 0 12px;">
+                ${esc(map.interpretation || "")}
+            </p>
+
+            <div style="padding:16px;border-radius:16px;background:#F1F8EE;font-size:13px;line-height:1.6;color:#0D2418;">
+                <strong>Recommended move:</strong>
+                ${esc(map.recommendedMove || "")}
+            </div>
+        </div>
+    </div>
+</section>
+`
+}
+
 // =========================================================
 // [20] BUILD HTML FROM TEMPLATE
 // =========================================================
@@ -5195,6 +5409,14 @@ html = html
     validateTemplateKeys(html, templateData)
 
     html = applyTemplateVars(html, templateData)
+
+    if (report?.reportMode === "paid") {
+    html = html.replace(
+        "<!-- FREE_REPORT_CUT_HERE -->",
+        `<!-- FREE_REPORT_CUT_HERE -->
+${renderFounderDecisionUpgradeSection(report, locale)}`
+    )
+}
 
     // =========================================================
     // [23] FREE REPORT CUT
