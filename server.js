@@ -2512,13 +2512,15 @@ const PAID_REPORT_JSON_SHAPE = `
     "summary": ""
   },
   "marketPositionMap": {
-    "xAxis": "Competition Density",
-    "yAxis": "Profitability Potential",
-    "position": "",
-    "zone": "Premium Zone | Crowded Zone | Low-Margin Trap | Difficult Acquisition Zone | Underserved Niche",
-    "interpretation": "",
-    "recommendedMove": ""
-  }
+  "xAxis": "Competition Density",
+  "yAxis": "Profitability Potential",
+  "x": 50,
+  "y": 50,
+  "position": "",
+  "zone": "Premium Zone | Crowded Zone | Low-Margin Trap | Difficult Acquisition Zone | Underserved Niche",
+  "interpretation": "",
+  "recommendedMove": ""
+}
 }
 
   "referenceLinks": [
@@ -2550,6 +2552,20 @@ Higher scores mean more pressure, except differentiationStrength and monetizatio
 
 founderDecisionUpgrade.marketPositionMap must place the business into one clear market zone.
 The interpretation must be useful enough for a founder to change strategy.
+founderDecisionUpgrade.marketPositionMap.x must be a number from 0 to 100.
+x represents competition density.
+0 means very low competition, 100 means extremely crowded competition.
+
+founderDecisionUpgrade.marketPositionMap.y must be a number from 0 to 100.
+y represents profitability potential.
+0 means very weak profitability, 100 means very strong profitability.
+
+The selected zone must logically match x and y:
+- Premium Zone: low-to-medium competition and high profitability.
+- Crowded Zone: high competition and high profitability.
+- Low-Margin Trap: high competition and low profitability.
+- Difficult Acquisition Zone: medium-to-high competition with uncertain profitability.
+- Underserved Niche: low competition with medium profitability.
 
 Glossary rules:
 
@@ -3282,34 +3298,56 @@ function normalizeDeepReport(report, input) {
     },
 
     marketPositionMap: {
-        xAxis:
-            report?.founderDecisionUpgrade
-                ?.marketPositionMap?.xAxis ||
-            "Competition Density",
+    xAxis:
+        report?.founderDecisionUpgrade
+            ?.marketPositionMap?.xAxis ||
+        "Competition Density",
 
-        yAxis:
-            report?.founderDecisionUpgrade
-                ?.marketPositionMap?.yAxis ||
-            "Profitability Potential",
+    yAxis:
+        report?.founderDecisionUpgrade
+            ?.marketPositionMap?.yAxis ||
+        "Profitability Potential",
 
-        position:
-            report?.founderDecisionUpgrade
-                ?.marketPositionMap?.position || "",
+    x: Math.max(
+        0,
+        Math.min(
+            100,
+            Number(
+                report?.founderDecisionUpgrade
+                    ?.marketPositionMap?.x ?? 50
+            )
+        )
+    ),
 
-        zone:
-            report?.founderDecisionUpgrade
-                ?.marketPositionMap?.zone || "",
+    y: Math.max(
+        0,
+        Math.min(
+            100,
+            Number(
+                report?.founderDecisionUpgrade
+                    ?.marketPositionMap?.y ?? 50
+            )
+        )
+    ),
 
-        interpretation:
-            report?.founderDecisionUpgrade
-                ?.marketPositionMap?.interpretation ||
-            "",
+    position:
+        report?.founderDecisionUpgrade
+            ?.marketPositionMap?.position || "",
 
-        recommendedMove:
-            report?.founderDecisionUpgrade
-                ?.marketPositionMap
-                ?.recommendedMove || "",
-    },
+    zone:
+        report?.founderDecisionUpgrade
+            ?.marketPositionMap?.zone || "",
+
+    interpretation:
+        report?.founderDecisionUpgrade
+            ?.marketPositionMap?.interpretation ||
+        "",
+
+    recommendedMove:
+        report?.founderDecisionUpgrade
+            ?.marketPositionMap
+            ?.recommendedMove || "",
+},
 },
         cover: {
             brandName: report?.cover?.brandName || input.brandName || "",
@@ -4659,7 +4697,8 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
         : []
 
     const stress = upgrade?.businessStressIndex || {}
-    const map = upgrade?.marketPositionMap || {}
+    const mapX = Math.max(8, Math.min(92, Number(map.x ?? 50)))
+    const mapY = Math.max(8, Math.min(92, Number(map.y ?? 50)))
 
     const clampScore = (value) => {
         const n = Number(value || 0)
@@ -4833,7 +4872,7 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
                 Low-Margin Trap
             </div>
 
-            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);">
+            <div style="position:absolute;left:${mapX}%;top:${100 - mapY}%;transform:translate(-50%,-50%);">
                 <div style="width:28px;height:28px;border-radius:999px;background:#B6FF5A;border:5px solid #0D2418;box-shadow:0 12px 32px rgba(13,36,24,.28);"></div>
             </div>
         </div>
