@@ -4754,8 +4754,8 @@ const mapY = Math.max(
         </p>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;">
-        <div style="padding:20px;border-radius:18px;background:#FFF2EC;border:1px solid rgba(155,61,18,.16);">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:18px;width:100%;">
+        <div style="padding:20px;border-radius:18px;background:#FFF2EC;border:1px solid rgba(155,61,18,.16);min-width:0;overflow-wrap:anywhere;word-break:normal;">
             <div style="font-size:12px;font-weight:950;color:#9B3D12;margin-bottom:8px;">
                 DO NOT START IF
             </div>
@@ -4764,7 +4764,7 @@ const mapY = Math.max(
             </div>
         </div>
 
-        <div style="padding:20px;border-radius:18px;background:#F1F8EE;border:1px solid rgba(13,36,24,.12);">
+        <div style="padding:20px;border-radius:18px;background:#F1F8EE;border:1px solid rgba(13,36,24,.12);min-width:0;overflow-wrap:anywhere;word-break:normal;">
             <div style="font-size:12px;font-weight:950;color:#0D2418;margin-bottom:8px;">
                 START ONLY IF
             </div>
