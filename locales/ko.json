@@ -349,4 +349,12 @@
 "downloadExpiredDescription": "유효 기간이 종료되었습니다. 고객지원으로 문의해주세요.",
 "downloadInvalidTitle": "유효하지 않은 다운로드 링크입니다.",
 "downloadInvalidDescription": "링크가 올바르지 않거나 이미 삭제되었습니다."
+},
+  "exampleStructureTitle": "예시 입력 구조",
+  "exampleIdeaLabel": "사업 아이디어 제목",
+  "exampleProductLabel": "제품 / 서비스",
+  "exampleCustomerLabel": "타겟 고객",
+  "exampleIdea": "직장인을 위한 AI 맞춤형 건강 도시락 구독 서비스",
+  "exampleProduct": "바쁜 직장인에게 AI가 개인화한 건강 도시락을 정기 배송하는 구독 기반 식사 플랫폼입니다.\n\n사용자의 식습관, 칼로리 목표, 근무 일정, 음식 선호도를 분석해 매일 최적화된 식단을 추천합니다.",
+  "exampleCustomer": "장시간 근무로 건강한 식습관을 유지하기 어려운 20~40대 직장인입니다.\n\n특히 스타트업 직원, 테크 직군, 원격 근무자, 대도시에 거주하는 건강 관리 관심층에게 적합합니다."
 }
