@@ -1629,12 +1629,17 @@ app.get("/api/paypal/start-order", async (req, res) => {
         }
 
         paypalOrderContext.set(order.id, {
-            lang,
-            brandName,
-            productService,
-            targetCustomer,
-            createdAt: Date.now(),
-        })
+    uiLang: normalizeLanguage(req.query.uiLang || "en"),
+    reportLang: normalizeLanguage(req.query.reportLang || lang || "en"),
+
+    // 기존 호환용
+    lang: normalizeLanguage(req.query.reportLang || lang || "en"),
+
+    brandName,
+    productService,
+    targetCustomer,
+    createdAt: Date.now(),
+})
 
         const approveLink = order.links?.find(
             (link) => link.rel === "payer-action" || link.rel === "approve"
@@ -1678,7 +1683,12 @@ app.get("/api/paypal/return", (req, res) => {
 const params = new URLSearchParams({
     orderId,
     token: orderId,
-    lang: context.lang || "ko",
+
+    uiLang: context.uiLang || "en",
+    reportLang: context.reportLang || context.lang || "en",
+
+    // 기존 호환용
+    lang: context.reportLang || context.lang || "en",
 })
 
         return res.redirect(`${siteUrl}/paid-success?${params.toString()}`)
