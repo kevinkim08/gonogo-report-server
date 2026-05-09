@@ -348,5 +348,12 @@
 "downloadExpiredTitle": "下载链接已过期。",
 "downloadExpiredDescription": "此下载链接已失效，请联系客服。",
 "downloadInvalidTitle": "无效的下载链接。",
-"downloadInvalidDescription": "该链接无效或已不可用。"
+"downloadInvalidDescription": "该链接无效或已不可用。",
+  "exampleStructureTitle": "示例输入结构",
+  "exampleIdeaLabel": "商业想法标题",
+  "exampleProductLabel": "产品 / 服务",
+  "exampleCustomerLabel": "目标客户",
+  "exampleIdea": "面向上班族的 AI 个性化健康餐订阅服务",
+  "exampleProduct": "这是一个订阅制餐饮平台，为忙碌的上班族配送由 AI 个性化推荐的健康午餐盒。\n\n系统会分析用户的饮食习惯、热量目标、工作时间和口味偏好，并推荐每日餐食。",
+  "exampleCustomer": "目标客户是20到40岁、工作时间长且难以保持健康饮食习惯的上班族。\n\n尤其适合创业公司员工、科技行业从业者、远程工作者，以及生活在大城市、关注健康的人群。"
 }
