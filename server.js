@@ -1382,6 +1382,83 @@ console.log("[RESEND]", {
     fromEmail: RESEND_FROM_EMAIL,
 })
 
+function buildPaidReportDownloadUrl({ token, language }) {
+    const baseUrl = process.env.PUBLIC_BASE_URL || "https://gonogo-report-server.onrender.com"
+
+    return `${baseUrl}/api/download-paid-pdf?token=${encodeURIComponent(token)}&lang=${encodeURIComponent(language || "ko")}`
+}
+
+async function sendPaidReportEmail({
+    to,
+    token,
+    language = "ko",
+    brandName = "PaidReport",
+}) {
+    if (!resend) {
+        console.warn("[RESEND_SKIPPED]", { reason: "NO_RESEND_CLIENT" })
+        return { ok: false, skipped: true }
+    }
+
+    if (!to) {
+        console.warn("[RESEND_SKIPPED]", { reason: "NO_RECIPIENT_EMAIL" })
+        return { ok: false, skipped: true }
+    }
+
+    const downloadUrl = buildPaidReportDownloadUrl({ token, language })
+
+    const subject = "Your GoNoGo paid report is ready"
+
+    const html = `
+        <div style="font-family:Arial,Helvetica,sans-serif;max-width:640px;margin:0 auto;padding:32px;color:#111;">
+            <h1 style="font-size:24px;margin:0 0 16px;">Your GoNoGo report is ready</h1>
+            <p style="font-size:15px;line-height:1.7;color:#444;">
+                Your paid report for <strong>${esc(brandName)}</strong> is ready.
+            </p>
+            <p style="font-size:15px;line-height:1.7;color:#444;">
+                You can download it using the button below.
+            </p>
+            <p style="margin:28px 0;">
+                <a href="${downloadUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 20px;border-radius:10px;font-weight:700;">
+                    Download Report
+                </a>
+            </p>
+            <p style="font-size:13px;line-height:1.6;color:#777;">
+                If the button does not work, copy and paste this link into your browser:<br/>
+                <a href="${downloadUrl}">${downloadUrl}</a>
+            </p>
+            <hr style="border:none;border-top:1px solid #eee;margin:28px 0;" />
+            <p style="font-size:12px;color:#999;">
+                GoNoGo Reports · hello@gonogo.so
+            </p>
+        </div>
+    `
+
+    try {
+        const result = await resend.emails.send({
+            from: `${RESEND_FROM_NAME} <${RESEND_FROM_EMAIL}>`,
+            to,
+            subject,
+            html,
+        })
+
+        console.log("[RESEND_PAID_REPORT_EMAIL_SENT]", {
+            to,
+            token,
+            id: result?.data?.id,
+        })
+
+        return { ok: true, result }
+    } catch (error) {
+        console.error("[RESEND_PAID_REPORT_EMAIL_ERROR]", {
+            message: error?.message,
+            to,
+            token,
+        })
+
+        return { ok: false, error }
+    }
+}
+
 function getPayPalBaseUrl() {
     return process.env.PAYPAL_ENV === "live"
         ? "https://api-m.paypal.com"
@@ -1598,6 +1675,18 @@ app.post("/api/paypal/capture-order", async (req, res) => {
                 context.targetCustomer || "Target customers",
         })
 
+        const payerEmail =
+    capture?.payer?.email_address ||
+    capture?.payment_source?.paypal?.email_address ||
+    null
+
+await sendPaidReportEmail({
+    to: payerEmail,
+    token,
+    language: context.lang || "ko",
+    brandName: context.brandName || "PaidReport",
+})
+        
         const baseUrl =
             process.env.PUBLIC_BASE_URL ||
             "https://gonogo-report-server.onrender.com"
