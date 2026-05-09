@@ -4683,7 +4683,7 @@ function renderFounderDecisionUpgradeSection(report = {}, locale = {}) {
 <section class="page founder-upgrade-page">
     <div class="page-kicker">FOUNDER DECISION UPGRADE</div>
 
-    <h1 class="page-title">Final Decision System</h1>
+    <h1 class="page-title">{{founder_upgrade_title}}</h1>
 
     <div style="margin-top:28px;padding:28px;border-radius:24px;background:#0D2418;color:#ffffff;">
         <div style="font-size:13px;font-weight:900;opacity:.65;margin-bottom:10px;">
