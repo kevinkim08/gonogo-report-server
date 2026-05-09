@@ -348,5 +348,12 @@
 "downloadExpiredTitle": "ダウンロードリンクの有効期限が切れました。",
 "downloadExpiredDescription": "このリンクの有効期限は終了しています。サポートへお問い合わせください。",
 "downloadInvalidTitle": "無効なダウンロードリンクです。",
-"downloadInvalidDescription": "このリンクは無効、または利用できません。"
+"downloadInvalidDescription": "このリンクは無効、または利用できません。",
+  "exampleStructureTitle": "入力例の構成",
+  "exampleIdeaLabel": "事業アイデアのタイトル",
+  "exampleProductLabel": "製品 / サービス",
+  "exampleCustomerLabel": "ターゲット顧客",
+  "exampleIdea": "会社員向けAIパーソナライズ健康弁当サブスクリプション",
+  "exampleProduct": "忙しい会社員に、AIで個別最適化された健康的なランチボックスを届けるサブスクリプション型の食事プラットフォームです。\n\n食習慣、カロリー目標、勤務スケジュール、食の好みを分析し、毎日の食事を提案します。",
+  "exampleCustomer": "長時間働き、健康的な食生活を維持しにくい20〜40代の会社員です。\n\n特にスタートアップ社員、テック系職種、リモートワーカー、大都市に住む健康意識の高い人に適しています。"
 }
