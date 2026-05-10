@@ -4983,7 +4983,7 @@ small {
 )
 
     const matrix = objectFromPairs(report.decisionMatrix)
-    const marketCards = objectFromPairs(report.marketCards)
+    const market = objectFromPairs(report.marketCards)
     const unit = objectFromPairs(report.unitEconomicsCards)
     const execMap = objectFromPairs(report.executiveDecision)
 
