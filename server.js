@@ -2512,18 +2512,18 @@ const PAID_REPORT_JSON_SHAPE = `
     "summary": ""
   },
   "marketPositionMap": {
-  "xAxis": "Competition Density",
-  "yAxis": "Profitability Potential",
-  "x": 50,
-  "y": 50,
-  "position": "",
-  "zone": "Premium Zone | Crowded Zone | Low-Margin Trap | Difficult Acquisition Zone | Underserved Niche",
-  "interpretation": "",
-  "recommendedMove": ""
-}
+    "xAxis": "Competition Density",
+    "yAxis": "Profitability Potential",
+    "x": 50,
+    "y": 50,
+    "position": "",
+    "zone": "Premium Zone | Crowded Zone | Low-Margin Trap | Difficult Acquisition Zone | Underserved Niche",
+    "interpretation": "",
+    "recommendedMove": ""
+  }
 },
 
-  "referenceLinks": [
+"referenceLinks": [
     ["", ""],
     ["", ""],
     ["", ""],
