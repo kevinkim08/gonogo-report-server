@@ -4718,39 +4718,33 @@ const mapY = Math.max(
         return Math.max(0, Math.min(100, Math.round(n)))
     }
 
-    const stressRows = [
+   const stressRows = [
     [
-        locale.stress_market_saturation || "Market Saturation",
+        locale?.stress_market_saturation || "Market Saturation",
         stress.marketSaturation,
     ],
-
     [
-        locale.stress_acquisition_difficulty || "Acquisition Difficulty",
+        locale?.stress_acquisition_difficulty || "Acquisition Difficulty",
         stress.acquisitionDifficulty,
     ],
-
     [
-        locale.stress_retention_risk || "Retention Risk",
+        locale?.stress_retention_risk || "Retention Risk",
         stress.retentionRisk,
     ],
-
     [
-        locale.stress_execution_complexity || "Execution Complexity",
+        locale?.stress_execution_complexity || "Execution Complexity",
         stress.executionComplexity,
     ],
-
     [
-        locale.stress_differentiation_strength || "Differentiation Strength",
+        locale?.stress_differentiation_strength || "Differentiation Strength",
         stress.differentiationStrength,
     ],
-
     [
-        locale.stress_monetization_stability || "Monetization Stability",
+        locale?.stress_monetization_stability || "Monetization Stability",
         stress.monetizationStability,
     ],
-
     [
-        locale.stress_founder_fit_risk || "Founder Fit Risk",
+        locale?.stress_founder_fit_risk || "Founder Fit Risk",
         stress.founderFitRisk,
     ],
 ]
