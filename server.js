@@ -4719,14 +4719,41 @@ const mapY = Math.max(
     }
 
     const stressRows = [
-        ["Market Saturation", stress.marketSaturation],
-        ["Acquisition Difficulty", stress.acquisitionDifficulty],
-        ["Retention Risk", stress.retentionRisk],
-        ["Execution Complexity", stress.executionComplexity],
-        ["Differentiation Strength", stress.differentiationStrength],
-        ["Monetization Stability", stress.monetizationStability],
-        ["Founder Fit Risk", stress.founderFitRisk],
-    ]
+    [
+        locale.stress_market_saturation || "Market Saturation",
+        stress.marketSaturation,
+    ],
+
+    [
+        locale.stress_acquisition_difficulty || "Acquisition Difficulty",
+        stress.acquisitionDifficulty,
+    ],
+
+    [
+        locale.stress_retention_risk || "Retention Risk",
+        stress.retentionRisk,
+    ],
+
+    [
+        locale.stress_execution_complexity || "Execution Complexity",
+        stress.executionComplexity,
+    ],
+
+    [
+        locale.stress_differentiation_strength || "Differentiation Strength",
+        stress.differentiationStrength,
+    ],
+
+    [
+        locale.stress_monetization_stability || "Monetization Stability",
+        stress.monetizationStability,
+    ],
+
+    [
+        locale.stress_founder_fit_risk || "Founder Fit Risk",
+        stress.founderFitRisk,
+    ],
+]
 
     const decision = finalDecision.decision || "GO WITH CONDITIONS"
 
@@ -4856,8 +4883,8 @@ const mapY = Math.max(
 </section>
 
 <section class="page founder-position-page">
-    <div class="page-kicker">${esc(locale.market_position_kicker || "MARKET POSITION MAP")}</div>
-    <h1 class="page-title">1-6. ${esc(locale.market_position_title || "Competitive Position Judgment")}</h1>
+    <div class="page-kicker">${esc(locale._position_kicker || " POSITION MAP")}</div>
+    <h1 class="page-title">1-6. ${esc(locale._position_title || "Competitive Position Judgment")}</h1>
 
     <div style="margin-top:30px;padding:26px;border-radius:24px;background:#ffffff;border:1px solid rgba(13,36,24,.12);">
         <div style="height:300px;position:relative;background:
@@ -4903,7 +4930,7 @@ const mapY = Math.max(
             </p>
 
             <div style="padding:16px;border-radius:16px;background:#F1F8EE;font-size:13px;line-height:1.6;color:#0D2418;">
-                <strong>Recommended move:</strong>
+            <strong>${esc(locale.recommended_move || "Recommended move")}:</strong>
                 ${esc(map.recommendedMove || "")}
             </div>
         </div>
@@ -4962,11 +4989,11 @@ small {
 )
 
     const matrix = objectFromPairs(report.decisionMatrix)
-    const market = objectFromPairs(report.marketCards)
+    const  = objectFromPairs(report.Cards)
     const unit = objectFromPairs(report.unitEconomicsCards)
     const execMap = objectFromPairs(report.executiveDecision)
 
-    const funnel = normalizeFunnel(report.marketFunnel)
+    const funnel = normalizeFunnel(report.Funnel)
 
     const lockedMessage = t(
         locale,
@@ -5021,10 +5048,10 @@ small {
     const data = {
         industryType: report.businessDiagnosis?.industryType || "",
         businessModelType: report.businessDiagnosis?.businessModelType || "",
-        countryMarketBehavior:
-            report.businessDiagnosis?.countryMarketBehavior || "",
-        marketEntryDifficulty:
-            report.businessDiagnosis?.marketEntryDifficulty || "",
+        countryBehavior:
+            report.businessDiagnosis?.countryBehavior || "",
+        EntryDifficulty:
+            report.businessDiagnosis?.EntryDifficulty || "",
         mainBottleneck: report.businessDiagnosis?.mainBottleneck || "",
         bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
         validationExperiment:
@@ -5132,7 +5159,7 @@ small {
                   .join("")
             : "",
 
-        marketLevel: matrix.MARKET || "",
+        Level: matrix.MARKET || "",
         profitabilityLevel: matrix.PROFITABILITY || "",
         executionLevel: matrix.EXECUTION || "",
         riskLevel: matrix.RISK || "",
