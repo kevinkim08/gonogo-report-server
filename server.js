@@ -2521,7 +2521,7 @@ const PAID_REPORT_JSON_SHAPE = `
   "interpretation": "",
   "recommendedMove": ""
 }
-}
+},
 
   "referenceLinks": [
     ["", ""],
