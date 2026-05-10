@@ -5153,7 +5153,7 @@ small {
                   .join("")
             : "",
 
-        Level: matrix.MARKET || "",
+        marketLevel: matrix.MARKET || "",
         profitabilityLevel: matrix.PROFITABILITY || "",
         executionLevel: matrix.EXECUTION || "",
         riskLevel: matrix.RISK || "",
