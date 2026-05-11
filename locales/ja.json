@@ -268,7 +268,8 @@
     "ltvCac": "LTV / CAC",
     "risk": "リスク",
     "action": "実行",
-    "goal": "目標"
+    "goal": "目標",
+    "unlock_price": "{price}で完全レポートを解除"
   },
   "toc_title": "目次",
   "toc_section01": "1. 基本判断",
