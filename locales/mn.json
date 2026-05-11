@@ -268,7 +268,8 @@
     "ltvCac": "LTV / CAC",
     "risk": "Эрсдэл",
     "action": "Үйлдэл",
-    "goal": "Зорилго"
+    "goal": "Зорилго",
+    "unlock_price": "{price}-оор бүрэн тайланг нээх"
   },
   "toc_title": "Агуулга",
   "toc_section01": "1. Үндсэн шийдвэр",
