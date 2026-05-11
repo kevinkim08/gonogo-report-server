@@ -5218,6 +5218,14 @@ small {
     const templateData = {
     ...locale,
     ...data,
+
+        countryMarketBehavior:
+    diagnosis.countryMarketBehavior || "",
+
+marketEntryDifficulty:
+    diagnosis.marketEntryDifficulty || "",
+
+        
     priceLabel: `$${REPORT_PRICE}`,
 
         unlockPriceText: (
