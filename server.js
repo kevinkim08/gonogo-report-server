@@ -4570,7 +4570,20 @@ body {
 <!-- FOUNDER_DECISION_UPGRADE_HERE -->
 
 <!-- PAGE 6: CTA -->
-<!-- PAGE 6: CTA -->
+<!-- PAGE 6: BRAND NAMING STRATEGY -->
+<section class="page">
+    <div class="section-kicker">SECTION 02</div>
+
+    <div class="section-title">Brand naming strategy</div>
+
+    <div class="section-desc">
+        This section suggests the brand direction, naming candidates, recommended name, and domain strategy based on the business idea and customer analysis.
+    </div>
+
+    <!-- 브랜드 네이밍 전략 본문 -->
+</section>
+
+<!-- PAGE 7: CTA -->
 <section class="page free-upgrade-page">
     <div class="free-upgrade-wrap">
 
