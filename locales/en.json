@@ -305,6 +305,7 @@
   "execution_timeline_label": "Execution Timeline",
   "risk_heatmap_label": "Risk Heatmap",
   "premium": {
+    "unlockPrice": "Unlock full report for {price}",
     "kicker": "FULL REPORT LOCKED",
     "title": "Unlock the full business decision report",
     "desc": "This preview shows the decision signal and brand direction only. The full report unlocks customer truth, revenue structure, risk logic, and execution planning.",
