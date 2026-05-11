@@ -5049,14 +5049,43 @@ small {
         ? report.referenceLinks
         : []
 
-    const data = {
-        industryType: report.businessDiagnosis?.industryType || "",
-        businessModelType: report.businessDiagnosis?.businessModelType || "",
-        countryBehavior:
-            report.businessDiagnosis?.countryBehavior || "",
-        EntryDifficulty:
-            report.businessDiagnosis?.EntryDifficulty || "",
-        mainBottleneck: report.businessDiagnosis?.mainBottleneck || "",
+const businessDiagnosis = report?.businessDiagnosis || {}
+
+const data = {
+    industryType: businessDiagnosis.industryType || "",
+
+    businessModelType: businessDiagnosis.businessModelType || "",
+
+    countryBehavior:
+        businessDiagnosis.countryMarketBehavior ||
+        businessDiagnosis.countryBehavior ||
+        businessDiagnosis.countryPurchaseBehavior ||
+        "",
+
+    EntryDifficulty:
+        businessDiagnosis.marketEntryDifficulty ||
+        businessDiagnosis.EntryDifficulty ||
+        businessDiagnosis.entryDifficulty ||
+        "",
+
+    mainBottleneck:
+        businessDiagnosis.mainBottleneck ||
+        businessDiagnosis.coreBottleneck ||
+        businessDiagnosis.bottleneck ||
+        "",
+
+    bestFirstOffer:
+        businessDiagnosis.bestFirstOffer || "",
+
+    validationExperiment:
+        businessDiagnosis.validationExperiment || "",
+
+    goNoGoLogic:
+        businessDiagnosis.goNoGoLogic || "",
+
+    structureSummary:
+        businessDiagnosis.structureSummary || "",
+    
         bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
         validationExperiment:
             report.businessDiagnosis?.validationExperiment || "",
