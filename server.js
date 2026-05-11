@@ -4990,6 +4990,13 @@ small {
     const unit = objectFromPairs(report.unitEconomicsCards)
     const execMap = objectFromPairs(report.executiveDecision)
 
+    const diagnosis = objectFromPairs(
+  report?.diagnosisCards ||
+  report?.businessStructureDiagnosis ||
+  report?.structureDiagnosis ||
+  []
+)
+    
     const funnel = normalizeFunnel(report.Funnel)
 
     const lockedMessage = t(
