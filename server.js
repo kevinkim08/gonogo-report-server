@@ -5218,7 +5218,12 @@ small {
     const templateData = {
     ...locale,
     ...data,
+    priceLabel: `$${REPORT_PRICE}`,
 
+        unlockPriceText: (
+    locale.unlock_price || "Unlock full report for {price}"
+).replace("{price}", `$${REPORT_PRICE}`),
+        
     referenceLinkRows: rows(referenceLinks),
 }
     
