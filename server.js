@@ -20,6 +20,9 @@ import { createClient } from "@supabase/supabase-js"
 const app = express()
 const PORT = process.env.PORT || 3000
 
+const REPORT_PRICE = "49.00"
+const REPORT_CURRENCY = "USD"
+
 app.set("trust proxy", true)
 
 const __filename = fileURLToPath(import.meta.url)
@@ -1599,8 +1602,8 @@ app.get("/api/paypal/start-order", async (req, res) => {
                     {
                         description: "GONOGO Business Decision Report",
                         amount: {
-                            currency_code: "USD",
-                            value: "49.00",
+                            currency_code: REPORT_CURRENCY,
+                            value: REPORT_PRICE,
                         },
                     },
                 ],
