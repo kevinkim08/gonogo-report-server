@@ -5051,8 +5051,6 @@ small {
 
 const businessDiagnosis = report?.businessDiagnosis || {}
 
-const businessDiagnosis = report?.businessDiagnosis || {}
-
 const data = {
     industryType:
         businessDiagnosis.industryType || "",
