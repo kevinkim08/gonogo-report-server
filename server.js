@@ -5550,6 +5550,11 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
 
     const checkoutUrl = buildPayPalStartOrderUrl(report, locale)
 
+    const unlockPriceText = (
+    locale.unlock_price ||
+    "Unlock full report for {price}"
+).replace("{price}", `$${REPORT_PRICE}`)
+
     return `
 ${freePart}
 
