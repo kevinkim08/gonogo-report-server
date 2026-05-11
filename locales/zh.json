@@ -305,6 +305,7 @@
   "execution_timeline_label": "执行时间线",
   "risk_heatmap_label": "风险热力图",
   "premium": {
+    "unlockPrice": "解锁完整报告 {price}",
     "kicker": "完整报告已锁定",
     "title": "解锁完整商业决策报告",
     "desc": "免费预览仅展示决策信号和品牌方向。完整报告将解锁客户真相、收益结构、风险逻辑和执行计划。",
