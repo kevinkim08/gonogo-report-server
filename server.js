@@ -20,7 +20,7 @@ import { createClient } from "@supabase/supabase-js"
 const app = express()
 const PORT = process.env.PORT || 3000
 
-const REPORT_PRICE = "49.00"
+const REPORT_PRICE = "1.00"
 const REPORT_CURRENCY = "USD"
 
 app.set("trust proxy", true)
