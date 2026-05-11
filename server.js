@@ -5330,7 +5330,14 @@ html = html
     // Core charts
     .replaceAll("{{decisionChart}}", buildDecisionChart(report, locale))
     .replaceAll("{{ decisionChart }}", buildDecisionChart(report, locale))
-
+    .replaceAll(
+    "{{brandKeywordCards}}",
+    brandKeywordCards(report?.brandNaming?.keywords)
+)
+    .replaceAll(
+    "{{ brandKeywordCards }}",
+    brandKeywordCards(report?.brandNaming?.keywords)
+)
     .replaceAll(
         "{{competitionPositionChart}}",
         report?.lockedSections?.competition
@@ -5645,9 +5652,10 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
 
     const checkoutUrl = buildPayPalStartOrderUrl(report, locale)
 
-    const unlockPriceText = (
-    locale.unlock_price ||
-    "Unlock full report for {price}"
+   const unlockPriceText = t(
+    locale,
+    "premium.unlockPrice",
+    t(locale, "unlock_price", "Unlock full report for {price}")
 ).replace("{price}", `$${REPORT_PRICE}`)
 
     return `
@@ -6067,6 +6075,28 @@ function listItems(items) {
 
     return items
         .map((item) => `<li>${esc(item)}</li>`)
+        .join("")
+}
+
+function brandKeywordCards(items) {
+    const keywords = safeArray(items, [])
+
+    if (!keywords.length) return ""
+
+    return keywords
+        .map((item) => {
+            const value =
+                typeof item === "string"
+                    ? item
+                    : item?.keyword || item?.title || item?.name || ""
+
+            return `
+<div class="card">
+    <div class="card-title">KEYWORD</div>
+    <div class="card-value">${esc(value)}</div>
+</div>
+`
+        })
         .join("")
 }
 
