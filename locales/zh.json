@@ -268,7 +268,8 @@
     "ltvCac": "LTV / CAC",
     "risk": "风险",
     "action": "执行",
-    "goal": "目标"
+    "goal": "目标",
+    "unlock_price": "以 {price} 解锁完整报告"
   },
   "toc_title": "目录",
   "toc_section01": "1. 基本判断",
