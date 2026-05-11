@@ -5624,8 +5624,11 @@ ${freePart}
     </div>
 
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
-      ${esc(t(locale, "premium.ctaButton", "Open full paid report"))} — $49
-    </a>
+  ${esc(
+    unlockPriceText ||
+    `Unlock full report for $${REPORT_PRICE}`
+  )}
+</a>
 
     <div class="free-paid-bottom-note">
       ${esc(t(locale, "premium.ctaSub", "Includes brand naming, domain strategy, customer analysis, market reality, revenue structure, execution plan, and risk judgment."))}
