@@ -269,6 +269,7 @@
     "risk": "Risk",
     "action": "Action",
     "goal": "Goal"
+    "unlock_price": "Unlock full report for {price}"
   },
   "toc_title": "Table of Contents",
   "toc_section01": "1. Core Judgment",
