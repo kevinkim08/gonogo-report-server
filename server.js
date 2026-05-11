@@ -5058,13 +5058,13 @@ const data = {
     businessModelType:
         businessDiagnosis.businessModelType || "",
 
-    countryBehavior:
+   countryMarketBehavior:
         businessDiagnosis.countryMarketBehavior ||
         businessDiagnosis.countryBehavior ||
         businessDiagnosis.countryPurchaseBehavior ||
         "",
 
-    EntryDifficulty:
+   marketEntryDifficulty:
         businessDiagnosis.marketEntryDifficulty ||
         businessDiagnosis.EntryDifficulty ||
         businessDiagnosis.entryDifficulty ||
