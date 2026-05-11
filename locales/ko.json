@@ -268,7 +268,8 @@
     "ltvCac": "LTV / CAC",
     "risk": "리스크",
     "action": "실행",
-    "goal": "목표"
+    "goal": "목표",
+    "unlock_price": "{price}로 전체 보고서 잠금 해제"
   },
   "toc_title": "목차",
   "toc_section01": "1. 기본 판단",
