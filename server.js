@@ -5051,10 +5051,14 @@ small {
 
 const businessDiagnosis = report?.businessDiagnosis || {}
 
-const data = {
-    industryType: businessDiagnosis.industryType || "",
+const businessDiagnosis = report?.businessDiagnosis || {}
 
-    businessModelType: businessDiagnosis.businessModelType || "",
+const data = {
+    industryType:
+        businessDiagnosis.industryType || "",
+
+    businessModelType:
+        businessDiagnosis.businessModelType || "",
 
     countryBehavior:
         businessDiagnosis.countryMarketBehavior ||
@@ -5066,7 +5070,7 @@ const data = {
         businessDiagnosis.marketEntryDifficulty ||
         businessDiagnosis.EntryDifficulty ||
         businessDiagnosis.entryDifficulty ||
-        "",
+        "MEDIUM",
 
     mainBottleneck:
         businessDiagnosis.mainBottleneck ||
@@ -5085,190 +5089,239 @@ const data = {
 
     structureSummary:
         businessDiagnosis.structureSummary || "",
-    
-        bestFirstOffer: report.businessDiagnosis?.bestFirstOffer || "",
-        validationExperiment:
-            report.businessDiagnosis?.validationExperiment || "",
-        goNoGoLogic: report.businessDiagnosis?.goNoGoLogic || "",
-        structureSummary: report.businessDiagnosis?.structureSummary || "",
 
-        dataConfidenceLevel: report.dataConfidence?.overallLevel || "",
-        dataConfidenceSummary: report.dataConfidence?.summary || "",
-        criticalBreakPoint:
-            report.sensitivityAnalysis?.criticalBreakPoint || "",
-        founderWarning: report.sensitivityAnalysis?.founderWarning || "",
+    dataConfidenceLevel:
+        report.dataConfidence?.overallLevel || "",
 
-        breakEvenPoint: report.profitSimulation?.breakEvenPoint || "",
-        profitJudgment: report.profitSimulation?.profitJudgment || "",
-        cashRisk: report.profitSimulation?.cashRisk || "",
+    dataConfidenceSummary:
+        report.dataConfidence?.summary || "",
 
-        stopDecision: report.killCriteria?.stopDecision || "",
-        pivotDecision: report.killCriteria?.pivotDecision || "",
-        scaleDecision: report.killCriteria?.scaleDecision || "",
+    criticalBreakPoint:
+        report.sensitivityAnalysis?.criticalBreakPoint || "",
 
-        lang: locale.lang,
-        fontFamily: locale.fontFamily,
+    founderWarning:
+        report.sensitivityAnalysis?.founderWarning || "",
 
-        reportTitleSuffix: locale.reportTitleSuffix,
-        scoreLabel: locale.scoreLabel,
+    breakEvenPoint:
+        report.profitSimulation?.breakEvenPoint || "",
 
-        footerLeft: locale.footer?.left || "GoNoGo™",
+    profitJudgment:
+        report.profitSimulation?.profitJudgment || "",
 
-        ...flattenLabels(locale.labels),
-        ...flattenNotes(locale.fixedNotes),
+    cashRisk:
+        report.profitSimulation?.cashRisk || "",
 
-        brandName: report.cover.brandName,
-        decision: report.cover.decision,
-        score: report.cover.score,
+    stopDecision:
+        report.killCriteria?.stopDecision || "",
 
-        decisionClass: getStatusClass(report.cover?.decision),
-        subtitle: report.cover.subtitle,
-        oneLineVerdict: report.cover.oneLineVerdict,
+    pivotDecision:
+        report.killCriteria?.pivotDecision || "",
 
-        // Brand naming
-        brandDirection: report?.brandNaming?.brandDirection || "",
-        namingStrategy: report?.brandNaming?.namingStrategy || "",
+    scaleDecision:
+        report.killCriteria?.scaleDecision || "",
 
-        brandKeywordCards: Array.isArray(report?.brandNaming?.keywords)
-            ? report.brandNaming.keywords
-                  .slice(0, 8)
-                  .map(
-                      (keyword) => `
-                        <div class="card">
-                            <div class="card-title">${
-                                locale.brand_keyword_label || "Keyword"
-                            }</div>
-                            <div class="card-value">${esc(keyword)}</div>
-                        </div>
-                    `
-                  )
-                  .join("")
-            : "",
+    lang: locale.lang,
+    fontFamily: locale.fontFamily,
 
-        brandNameCandidateRows: Array.isArray(
-            report?.brandNaming?.nameCandidates
-        )
-            ? report.brandNaming.nameCandidates
-                  .slice(0, 5)
-                  .map(
-                      (item) => `
-                        <tr>
-                            <td>${esc(item?.name || "")}</td>
-                            <td>${esc(item?.meaning || "")}</td>
-                            <td>${esc(item?.fit || "")}</td>
-                            <td>${esc(item?.risk || "")}</td>
-                            <td>${esc(item?.score || "")}</td>
-                        </tr>
-                    `
-                  )
-                  .join("")
-            : "",
+    reportTitleSuffix:
+        locale.reportTitleSuffix,
 
-        recommendedBrandName:
-            report?.brandNaming?.recommendedName?.name || "",
+    scoreLabel:
+        locale.scoreLabel,
 
-        recommendedBrandReason: [
-            report?.brandNaming?.recommendedName?.reason || "",
-            report?.brandNaming?.recommendedName?.positioning || "",
-            report?.brandNaming?.recommendedName?.expansionPotential || "",
-        ]
-            .filter(Boolean)
-            .join(" "),
+    footerLeft:
+        locale.footer?.left || "GoNoGo™",
 
-        brandDomainRows: Array.isArray(
-            report?.brandNaming?.domainSuggestions
-        )
-            ? report.brandNaming.domainSuggestions
-                  .slice(0, 5)
-                  .map(
-                      (item) => `
-                        <tr>
-                            <td>${esc(item?.domain || "")}</td>
-                            <td>${esc(item?.reason || "")}</td>
-                            <td>${esc(item?.availability || "")}</td>
-                        </tr>
-                    `
-                  )
-                  .join("")
-            : "",
+    ...flattenLabels(locale.labels),
 
-        marketLevel: matrix.MARKET || "",
-        profitabilityLevel: matrix.PROFITABILITY || "",
-        executionLevel: matrix.EXECUTION || "",
-        riskLevel: matrix.RISK || "",
+    ...flattenNotes(locale.fixedNotes),
 
-        marketScore: report.visualScores.market,
-        profitabilityScore: report.visualScores.profitability,
-        executionScore: report.visualScores.execution,
-        riskScore: report.visualScores.risk,
+    brandName:
+        report.cover.brandName,
 
-        marketScoreClass: getScoreClass(report.visualScores.market),
-        profitabilityScoreClass: getScoreClass(
+    decision:
+        report.cover.decision,
+
+    score:
+        report.cover.score,
+
+    decisionClass:
+        getStatusClass(report.cover?.decision),
+
+    subtitle:
+        report.cover.subtitle,
+
+    oneLineVerdict:
+        report.cover.oneLineVerdict,
+
+    brandDirection:
+        report?.brandNaming?.brandDirection || "",
+
+    namingStrategy:
+        report?.brandNaming?.namingStrategy || "",
+
+    marketLevel:
+        matrix.MARKET || "",
+
+    profitabilityLevel:
+        matrix.PROFITABILITY || "",
+
+    executionLevel:
+        matrix.EXECUTION || "",
+
+    riskLevel:
+        matrix.RISK || "",
+
+    marketScore:
+        report.visualScores.market,
+
+    profitabilityScore:
+        report.visualScores.profitability,
+
+    executionScore:
+        report.visualScores.execution,
+
+    riskScore:
+        report.visualScores.risk,
+
+    marketScoreClass:
+        getScoreClass(report.visualScores.market),
+
+    profitabilityScoreClass:
+        getScoreClass(
             report.visualScores.profitability
         ),
-        executionScoreClass: getScoreClass(report.visualScores.execution),
-        riskScoreClass: getRiskScoreClass(report.visualScores.risk),
 
-        ltvToCac: report.unitEconomicsScore.ltvToCac,
-        unitEconomicsStatus: report.unitEconomicsScore.status,
-        paybackValue: report.unitEconomicsScore.payback,
+    executionScoreClass:
+        getScoreClass(
+            report.visualScores.execution
+        ),
 
-        whyItWorks: execMap["Why this works"] || "",
-        whyItFails: execMap["Why this fails"] || "",
-        whatToDoNow: execMap["What to do now"] || "",
-        founderDecision: report.founderDecision,
+    riskScoreClass:
+        getRiskScoreClass(
+            report.visualScores.risk
+        ),
 
-        tamValue: market.TAM || funnel.tam.value,
-        samValue: market.SAM || funnel.sam.value,
-        somValue: market.SOM || funnel.som.value,
-        growthValue: market.GROWTH || "",
+    ltvToCac:
+        report.unitEconomicsScore.ltvToCac,
 
-        tamScore: funnel.tam.score,
-        samScore: funnel.sam.score,
-        somScore: funnel.som.score,
+    unitEconomicsStatus:
+        report.unitEconomicsScore.status,
 
-        marketInsight: report.marketInsight,
-        buyingTrigger: report.buyingTrigger,
-        customerSummary: report.customerSummary || "",
+    paybackValue:
+        report.unitEconomicsScore.payback,
 
-        cacValue: unit.CAC || "",
-        ltvValue: unit.LTV || "",
-        aovValue: unit.AOV || "",
-        repeatValue: unit.REPEAT || "",
+    whyItWorks:
+        execMap["Why this works"] || "",
 
-        economicsJudgment: report.economicsJudgment,
-        modelJudgment: report.businessModel.modelJudgment,
-        operatingRule: report.operatingRule,
-        finalRule: report.finalRule,
+    whyItFails:
+        execMap["Why this fails"] || "",
 
-        decisionChart: buildDecisionChart(report, locale),
-        competitionPositionChart: competitionPositionChart(
+    whatToDoNow:
+        execMap["What to do now"] || "",
+
+    founderDecision:
+        report.founderDecision,
+
+    tamValue:
+        market.TAM || funnel.tam.value,
+
+    samValue:
+        market.SAM || funnel.sam.value,
+
+    somValue:
+        market.SOM || funnel.som.value,
+
+    growthValue:
+        market.GROWTH || "",
+
+    tamScore:
+        funnel.tam.score,
+
+    samScore:
+        funnel.sam.score,
+
+    somScore:
+        funnel.som.score,
+
+    marketInsight:
+        report.marketInsight,
+
+    buyingTrigger:
+        report.buyingTrigger,
+
+    customerSummary:
+        report.customerSummary || "",
+
+    cacValue:
+        unit.CAC || "",
+
+    ltvValue:
+        unit.LTV || "",
+
+    aovValue:
+        unit.AOV || "",
+
+    repeatValue:
+        unit.REPEAT || "",
+
+    economicsJudgment:
+        report.economicsJudgment,
+
+    modelJudgment:
+        report.businessModel.modelJudgment,
+
+    operatingRule:
+        report.operatingRule,
+
+    finalRule:
+        report.finalRule,
+
+    decisionChart:
+        buildDecisionChart(report, locale),
+
+    competitionPositionChart:
+        competitionPositionChart(
             report.competitionMap,
             locale
         ),
-        riskHeatmap: riskHeatmap(report.riskSystem, locale),
-        executionTimeline: executionTimeline(report.executionPlan, locale),
-        decisionSummaryBox: decisionSummaryBox(report, locale),
-    }
 
-    const templateData = {
+    riskHeatmap:
+        riskHeatmap(
+            report.riskSystem,
+            locale
+        ),
+
+    executionTimeline:
+        executionTimeline(
+            report.executionPlan,
+            locale
+        ),
+
+    decisionSummaryBox:
+        decisionSummaryBox(
+            report,
+            locale
+        ),
+}
+
+const templateData = {
     ...locale,
     ...data,
 
-        countryMarketBehavior:
-    diagnosis.countryMarketBehavior || "",
+    priceLabel:
+        `$${REPORT_PRICE}`,
 
-marketEntryDifficulty:
-    diagnosis.marketEntryDifficulty || "",
+    unlockPriceText: (
+        locale.unlock_price ||
+        "Unlock full report for {price}"
+    ).replace(
+        "{price}",
+        `$${REPORT_PRICE}`
+    ),
 
-        
-    priceLabel: `$${REPORT_PRICE}`,
-
-        unlockPriceText: (
-    locale.unlock_price || "Unlock full report for {price}"
-).replace("{price}", `$${REPORT_PRICE}`),
-        
-    referenceLinkRows: rows(referenceLinks),
+    referenceLinkRows:
+        rows(referenceLinks),
 }
     
 // =========================================================
