@@ -3285,6 +3285,22 @@ function normalizeFreePreviewReport(report, input) {
                 report?.freeCta?.message ||
                 "Full report includes customer, market, profit, execution, and risk analysis.",
 
+             pricing: {
+        originalPrice:
+            report?.freeCta?.pricing?.originalPrice || "$49",
+
+        currentPrice:
+            report?.freeCta?.pricing?.currentPrice || "$29",
+
+        pricingLabel:
+            report?.freeCta?.pricing?.pricingLabel ||
+            "Founder Launch Pricing",
+
+        pricingMessage:
+            report?.freeCta?.pricing?.pricingMessage ||
+            "Regional pricing adjusts after launch phase.",
+    },
+
             lockedItems: safeArray(report?.freeCta?.lockedItems, [
                 "Customer analysis",
                 "Market & competition",
