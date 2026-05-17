@@ -623,6 +623,7 @@ html[lang="mn"] .chart-value {
   background: linear-gradient(180deg, #eef7f1 0%, #ffffff 100%);
   border-left: 10px solid #2f7d57;
   overflow: hidden;
+  padding-bottom: 40px !important;
 }
 
 .free-paid-wrap {
@@ -765,13 +766,12 @@ html[lang="mn"] .chart-value {
 .free-paid-locked-layer {
   position: relative;
   margin-top: 16px;
-  height: 185px; /* 🔥 키움 */
+  height: 185px;
   border: 1px solid #d8e7dc;
   overflow: hidden;
   background: #ffffff;
 }
 
-/* 실제 문서 느낌 (핵심) */
 .free-paid-locked-layer::before {
   content:
     "Customer acquisition cost increasing\n"
@@ -788,7 +788,6 @@ html[lang="mn"] .chart-value {
   opacity: 0.65;
 }
 
-/* 블러 + 페이드 */
 .free-paid-locked-layer::after {
   content: "";
   position: absolute;
@@ -801,7 +800,6 @@ html[lang="mn"] .chart-value {
   );
 }
 
-/* 중앙 라벨 */
 .free-paid-locked-pill {
   position: absolute;
   z-index: 2;
@@ -869,6 +867,85 @@ html[lang="mn"] .chart-value {
   font-weight: 750;
 }
 
+/* === launch pricing / regional discount block === */
+
+.free-paid-price-box {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid #d8e7dc;
+  background: #ffffff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 18px;
+  align-items: center;
+}
+
+.free-paid-price-left {
+  min-width: 0;
+}
+
+.free-paid-price-label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #2f7d57;
+}
+
+.free-paid-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.free-paid-old-price {
+  font-size: 18px;
+  font-weight: 900;
+  color: #8a9a91;
+  text-decoration: line-through;
+  line-height: 1;
+}
+
+.free-paid-new-price {
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: #102018;
+}
+
+.free-paid-price-message {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #4b5d53;
+  font-weight: 800;
+}
+
+.free-paid-price-badge {
+  padding: 14px;
+  background: #f3f8f5;
+  border-left: 4px solid #2f7d57;
+}
+
+.free-paid-price-badge strong {
+  display: block;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 900;
+  color: #102018;
+}
+
+.free-paid-price-badge span {
+  display: block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: #4b5d53;
+  font-weight: 800;
+}
+
 .free-paid-button {
   display: block;
   margin-top: 12px;
@@ -889,53 +966,12 @@ html[lang="mn"] .chart-value {
   font-size: 11px;
   color: #6f7e75;
   font-weight: 800;
-} 
- .free-paid-price-box {
-  margin-top: 16px;
-  padding: 18px;
-  border: 1px solid #d8e7dc;
-  background: #ffffff;
 }
 
-.free-paid-price-label {
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #2f7d57;
-}
-
-.free-paid-price-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.free-paid-old-price {
-  font-size: 18px;
-  font-weight: 800;
-  color: #8a9a91;
-  text-decoration: line-through;
-}
-
-.free-paid-new-price {
-  font-size: 42px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.06em;
-  color: #102018;
-}
-
-.free-paid-price-message {
-  margin-top: 10px;
-  font-size: 11px;
-  line-height: 1.5;
-  color: #4b5d53;
-  font-weight: 800;
-}   
-    .free-paid-cta-page {
-  padding-bottom: 40px !important;
+@media print {
+  .free-paid-price-box {
+    grid-template-columns: minmax(0, 1fr) 190px;
+  }
 }
   </style>
 </head>
