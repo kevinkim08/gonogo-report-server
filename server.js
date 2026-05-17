@@ -5995,46 +5995,42 @@ ${freePart}
       <p>${esc(t(locale, "premium.warningDesc", "Check actual failure points, revenue structure, customer resistance, and execution strategy in the full report."))}</p>
     </div>
 
-<div class="free-paid-price-box ${hasDiscount ? "has-discount" : "no-discount"}">
+${
+  hasDiscount
+    ? `
+<div class="free-paid-price-box has-discount">
   <div class="free-paid-price-left">
     <div class="free-paid-price-label">
       ${esc(pricing.pricingLabel)}
     </div>
 
     <div class="free-paid-price-row">
-      ${
-        hasDiscount
-          ? `<span class="free-paid-old-price">${esc(pricing.originalPrice)}</span>`
-          : ""
-      }
+      <span class="free-paid-old-price">
+        ${esc(pricing.originalPrice)}
+      </span>
 
       <span class="free-paid-new-price">
         ${esc(pricing.currentPrice)}
       </span>
 
-      ${
-        hasDiscount
-          ? `<span class="free-paid-discount-tag">${esc(t(locale, "premium.discountTag", "LIMITED DISCOUNT"))}</span>`
-          : ""
-      }
+      <span class="free-paid-discount-tag">
+        ${esc(t(locale, "premium.discountTag", "LIMITED DISCOUNT"))}
+      </span>
     </div>
 
-    ${
-      hasDiscount
-        ? `<div class="free-paid-price-message">${esc(pricing.pricingMessage)}</div>`
-        : ""
-    }
+    <div class="free-paid-price-message">
+      ${esc(pricing.pricingMessage)}
+    </div>
   </div>
 
-  ${
-    hasDiscount
-      ? `<div class="free-paid-price-badge">
-          <strong>${esc(pricing.discountBadge)}</strong>
-          <span>${esc(pricing.discountNote)}</span>
-        </div>`
-      : ""
-  }
+  <div class="free-paid-price-badge">
+    <strong>${esc(pricing.discountBadge)}</strong>
+    <span>${esc(pricing.discountNote)}</span>
+  </div>
 </div>
+`
+    : ""
+}
 
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
       ${esc(
