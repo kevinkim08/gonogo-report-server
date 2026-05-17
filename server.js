@@ -5921,31 +5921,31 @@ ${freePart}
     </div>
 
 <div class="free-paid-price-box">
+  <div class="free-paid-price-left">
+    <div class="free-paid-price-label">
+      ${esc(report?.freeCta?.pricing?.pricingLabel || "FOUNDER LAUNCH PRICING")}
+    </div>
 
-  <div class="free-paid-price-label">
-    ${esc(
-      report?.freeCta?.pricing?.pricingLabel ||
-      "Founder Launch Pricing"
-    )}
+    <div class="free-paid-price-row">
+      <span class="free-paid-old-price">
+        ${esc(report?.freeCta?.pricing?.originalPrice || "$49")}
+      </span>
+
+      <span class="free-paid-new-price">
+        ${esc(report?.freeCta?.pricing?.currentPrice || formatPriceText(priceInfo))}
+      </span>
+    </div>
+
+    <div class="free-paid-price-message">
+      ${esc(report?.freeCta?.pricing?.pricingMessage || "Regional launch discount is active for a limited time.")}
+    </div>
   </div>
 
-  <div class="free-paid-price-row">
-
-    <span class="free-paid-old-price">
-      ${esc(
-        report?.freeCta?.pricing?.originalPrice ||
-        "$49"
-      )}
-    </span>
-
-    <span class="free-paid-new-price">
-      ${esc(
-        report?.freeCta?.pricing?.currentPrice ||
-        formatPriceText(priceInfo)
-      )}
-    </span>
-
+  <div class="free-paid-price-badge">
+    <strong>${esc(report?.freeCta?.pricing?.discountBadge || "LIMITED LAUNCH DISCOUNT")}</strong>
+    <span>${esc(report?.freeCta?.pricing?.discountNote || "This price may not be available after the launch phase.")}</span>
   </div>
+</div>
 
   <div class="free-paid-price-message">
     ${esc(
