@@ -3224,7 +3224,20 @@ async function generateFreePreviewReportJson(input) {
 // [17-3] NORMALIZE FREE PREVIEW REPORT
 // ---------------------------------------------------------
 
-function normalizeFreePreviewReport(report, input) {
+function normalizeFreePreviewReport(report, input = {}) {
+    const country = normalizeCountryCode(
+        input.country ||
+        report?.country ||
+        ""
+    )
+
+    const priceInfo =
+        report?.priceInfo ||
+        getReportPriceByCountry(country)
+
+    const originalPrice =
+        priceInfo.currency === "KRW" ? "₩69,000" : "$49"
+
     return {
         cover: {
             brandName: report?.cover?.brandName || input.brandName || "",
@@ -3285,21 +3298,23 @@ function normalizeFreePreviewReport(report, input) {
                 report?.freeCta?.message ||
                 "Full report includes customer, market, profit, execution, and risk analysis.",
 
-             pricing: {
-        originalPrice:
-            report?.freeCta?.pricing?.originalPrice || "$49",
+            pricing: {
+                originalPrice:
+                    report?.freeCta?.pricing?.originalPrice ||
+                    originalPrice,
 
-        currentPrice:
-            report?.freeCta?.pricing?.currentPrice || "$29",
+                currentPrice:
+                    report?.freeCta?.pricing?.currentPrice ||
+                    formatPriceText(priceInfo),
 
-        pricingLabel:
-            report?.freeCta?.pricing?.pricingLabel ||
-            "Founder Launch Pricing",
+                pricingLabel:
+                    report?.freeCta?.pricing?.pricingLabel ||
+                    "Founder Launch Pricing",
 
-        pricingMessage:
-            report?.freeCta?.pricing?.pricingMessage ||
-            "Regional pricing adjusts after launch phase.",
-    },
+                pricingMessage:
+                    report?.freeCta?.pricing?.pricingMessage ||
+                    "Regional pricing adjusts after launch phase.",
+            },
 
             lockedItems: safeArray(report?.freeCta?.lockedItems, [
                 "Customer analysis",
@@ -3313,6 +3328,9 @@ function normalizeFreePreviewReport(report, input) {
             buttonText:
                 report?.freeCta?.buttonText || "View full report",
         },
+
+        country,
+        priceInfo,
 
         isPaid: false,
         reportMode: "free-preview",
@@ -5892,6 +5910,42 @@ ${freePart}
       <strong>${esc(t(locale, "premium.warningTitle", "This analysis is not complete yet."))}</strong>
       <p>${esc(t(locale, "premium.warningDesc", "Check actual failure points, revenue structure, customer resistance, and execution strategy in the full report."))}</p>
     </div>
+
+<div class="free-paid-price-box">
+
+  <div class="free-paid-price-label">
+    ${esc(
+      report?.freeCta?.pricing?.pricingLabel ||
+      "Founder Launch Pricing"
+    )}
+  </div>
+
+  <div class="free-paid-price-row">
+
+    <span class="free-paid-old-price">
+      ${esc(
+        report?.freeCta?.pricing?.originalPrice ||
+        "$49"
+      )}
+    </span>
+
+    <span class="free-paid-new-price">
+      ${esc(
+        report?.freeCta?.pricing?.currentPrice ||
+        formatPriceText(priceInfo)
+      )}
+    </span>
+
+  </div>
+
+  <div class="free-paid-price-message">
+    ${esc(
+      report?.freeCta?.pricing?.pricingMessage ||
+      "Regional pricing adjusts after launch phase."
+    )}
+  </div>
+
+</div>
 
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
       ${esc(
