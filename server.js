@@ -5850,11 +5850,13 @@ const pricingCopyByCountry = {
         discountNote: "런칭 기간 이후에는 이 가격이 유지되지 않을 수 있습니다.",
     },
     US: {
-        originalPrice: "$49",
-        pricingLabel: "FOUNDER LAUNCH PRICING",
-        pricingMessage: "Launch pricing is currently active.",
-        discountBadge: "LAUNCH PRICE ACTIVE",
-        discountNote: "This price may change after the launch phase.",
+        US: {
+    originalPrice: "$49",
+    pricingLabel: "STANDARD REPORT PRICE",
+    pricingMessage: "",
+    discountBadge: "",
+    discountNote: "",
+},
     },
     JP: {
         originalPrice: "$49",
@@ -5993,65 +5995,45 @@ ${freePart}
       <p>${esc(t(locale, "premium.warningDesc", "Check actual failure points, revenue structure, customer resistance, and execution strategy in the full report."))}</p>
     </div>
 
-<div class="free-paid-price-box">
-  <div class="free-paid-price-left">
-    <div class="free-paid-price-label">
-     <div class="free-paid-price-box">
+<div class="free-paid-price-box ${hasDiscount ? "has-discount" : "no-discount"}">
   <div class="free-paid-price-left">
     <div class="free-paid-price-label">
       ${esc(pricing.pricingLabel)}
     </div>
 
     <div class="free-paid-price-row">
-      <span class="free-paid-old-price">
-        ${esc(pricing.originalPrice)}
-      </span>
+      ${
+        hasDiscount
+          ? `<span class="free-paid-old-price">${esc(pricing.originalPrice)}</span>`
+          : ""
+      }
 
       <span class="free-paid-new-price">
         ${esc(pricing.currentPrice)}
       </span>
+
+      ${
+        hasDiscount
+          ? `<span class="free-paid-discount-tag">${esc(t(locale, "premium.discountTag", "LIMITED DISCOUNT"))}</span>`
+          : ""
+      }
     </div>
 
-    <div class="free-paid-price-message">
-      ${esc(pricing.pricingMessage)}
-    </div>
+    ${
+      hasDiscount
+        ? `<div class="free-paid-price-message">${esc(pricing.pricingMessage)}</div>`
+        : ""
+    }
   </div>
 
-  <div class="free-paid-price-badge">
-    <strong>${esc(pricing.discountBadge)}</strong>
-    <span>${esc(pricing.discountNote)}</span>
-  </div>
-</div>
-    </div>
-
-    <div class="free-paid-price-row">
-      <span class="free-paid-old-price">
-        ${esc(report?.freeCta?.pricing?.originalPrice || "$49")}
-      </span>
-
-      <span class="free-paid-new-price">
-        ${esc(report?.freeCta?.pricing?.currentPrice || formatPriceText(priceInfo))}
-      </span>
-    </div>
-
-    <div class="free-paid-price-message">
-      ${esc(report?.freeCta?.pricing?.pricingMessage || "Regional launch discount is active for a limited time.")}
-    </div>
-  </div>
-
-  <div class="free-paid-price-badge">
-    <strong>${esc(report?.freeCta?.pricing?.discountBadge || "LIMITED LAUNCH DISCOUNT")}</strong>
-    <span>${esc(report?.freeCta?.pricing?.discountNote || "This price may not be available after the launch phase.")}</span>
-  </div>
-</div>
-
-  <div class="free-paid-price-message">
-    ${esc(
-      report?.freeCta?.pricing?.pricingMessage ||
-      "Regional pricing adjusts after launch phase."
-    )}
-  </div>
-
+  ${
+    hasDiscount
+      ? `<div class="free-paid-price-badge">
+          <strong>${esc(pricing.discountBadge)}</strong>
+          <span>${esc(pricing.discountNote)}</span>
+        </div>`
+      : ""
+  }
 </div>
 
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
