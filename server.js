@@ -5908,6 +5908,10 @@ const pricing = {
         pricingCopy.discountNote,
 }
 
+  const hasDiscount =
+    country !== "US" &&
+    pricing.originalPrice !== pricing.currentPrice  
+
 const checkoutUrl = buildCheckoutUrl(report, locale)
 
 const unlockPriceText = t(
