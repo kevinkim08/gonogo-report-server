@@ -5835,9 +5835,78 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
         report?.brandNaming?.recommendedName?.reason ||
         t(locale, "premium.defaultBrandReason", "This direction connects the offer, target customer, and market position.")
 
-    const priceInfo =
+    const country = normalizeCountryCode(report?.country || "")
+
+const priceInfo =
     report?.priceInfo ||
-    getReportPriceByCountry(report?.country || "")
+    getReportPriceByCountry(country)
+
+const pricingCopyByCountry = {
+    KR: {
+        originalPrice: "₩69,000",
+        pricingLabel: "오픈 런칭 할인",
+        pricingMessage: "한국 사용자 전용 런칭 할인이 적용되었습니다.",
+        discountBadge: "기간 한정 국가 할인",
+        discountNote: "런칭 기간 이후에는 이 가격이 유지되지 않을 수 있습니다.",
+    },
+    US: {
+        originalPrice: "$49",
+        pricingLabel: "FOUNDER LAUNCH PRICING",
+        pricingMessage: "Launch pricing is currently active.",
+        discountBadge: "LAUNCH PRICE ACTIVE",
+        discountNote: "This price may change after the launch phase.",
+    },
+    JP: {
+        originalPrice: "$49",
+        pricingLabel: "創業者向けローンチ価格",
+        pricingMessage: "日本向けのローンチ割引が適用されています。",
+        discountBadge: "期間限定の地域割引",
+        discountNote: "ローンチ期間後、この価格は変更される可能性があります。",
+    },
+    CN: {
+        originalPrice: "$49",
+        pricingLabel: "创始人启动价格",
+        pricingMessage: "当前已应用中国地区启动折扣。",
+        discountBadge: "限时地区优惠",
+        discountNote: "启动阶段结束后，此价格可能不再适用。",
+    },
+    MN: {
+        originalPrice: "$49",
+        pricingLabel: "Үүсгэн байгуулагчийн эхлэх үнэ",
+        pricingMessage: "Монгол хэрэглэгчдэд зориулсан эхлэх үеийн хөнгөлөлт идэвхтэй байна.",
+        discountBadge: "Хязгаартай хугацааны бүсийн хөнгөлөлт",
+        discountNote: "Эхлэх үе дууссаны дараа энэ үнэ өөрчлөгдөж магадгүй.",
+    },
+}
+
+const pricingCopy =
+    pricingCopyByCountry[country] || pricingCopyByCountry.US
+
+const pricing = {
+    originalPrice:
+        report?.freeCta?.pricing?.originalPrice ||
+        pricingCopy.originalPrice,
+
+    currentPrice:
+        report?.freeCta?.pricing?.currentPrice ||
+        formatPriceText(priceInfo),
+
+    pricingLabel:
+        report?.freeCta?.pricing?.pricingLabel ||
+        pricingCopy.pricingLabel,
+
+    pricingMessage:
+        report?.freeCta?.pricing?.pricingMessage ||
+        pricingCopy.pricingMessage,
+
+    discountBadge:
+        report?.freeCta?.pricing?.discountBadge ||
+        pricingCopy.discountBadge,
+
+    discountNote:
+        report?.freeCta?.pricing?.discountNote ||
+        pricingCopy.discountNote,
+}
 
 const checkoutUrl = buildCheckoutUrl(report, locale)
 
@@ -5923,7 +5992,32 @@ ${freePart}
 <div class="free-paid-price-box">
   <div class="free-paid-price-left">
     <div class="free-paid-price-label">
-      ${esc(report?.freeCta?.pricing?.pricingLabel || "FOUNDER LAUNCH PRICING")}
+     <div class="free-paid-price-box">
+  <div class="free-paid-price-left">
+    <div class="free-paid-price-label">
+      ${esc(pricing.pricingLabel)}
+    </div>
+
+    <div class="free-paid-price-row">
+      <span class="free-paid-old-price">
+        ${esc(pricing.originalPrice)}
+      </span>
+
+      <span class="free-paid-new-price">
+        ${esc(pricing.currentPrice)}
+      </span>
+    </div>
+
+    <div class="free-paid-price-message">
+      ${esc(pricing.pricingMessage)}
+    </div>
+  </div>
+
+  <div class="free-paid-price-badge">
+    <strong>${esc(pricing.discountBadge)}</strong>
+    <span>${esc(pricing.discountNote)}</span>
+  </div>
+</div>
     </div>
 
     <div class="free-paid-price-row">
