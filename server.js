@@ -24,24 +24,12 @@ const DEFAULT_REPORT_PRICE = "49.00"
 const DEFAULT_REPORT_CURRENCY = "USD"
 
 const COUNTRY_PRICING = {
-    US: { currency: "USD", price: "49.00", tier: "A" },
-    CA: { currency: "USD", price: "49.00", tier: "A" },
-    GB: { currency: "USD", price: "49.00", tier: "A" },
-    AU: { currency: "USD", price: "49.00", tier: "A" },
-    SG: { currency: "USD", price: "49.00", tier: "A" },
-    JP: { currency: "USD", price: "49.00", tier: "A" },
+    US: { currency: "USD", price: "49.00", tier: "US" },
+    JP: { currency: "USD", price: "39.00", tier: "JP" },
+    CN: { currency: "USD", price: "29.00", tier: "CN" },
+    MN: { currency: "USD", price: "19.00", tier: "MN" },
 
-    BR: { currency: "USD", price: "29.00", tier: "B" },
-    MX: { currency: "USD", price: "29.00", tier: "B" },
-    TR: { currency: "USD", price: "29.00", tier: "B" },
-
-    IN: { currency: "USD", price: "19.00", tier: "C" },
-    PH: { currency: "USD", price: "19.00", tier: "C" },
-    ID: { currency: "USD", price: "19.00", tier: "C" },
-    VN: { currency: "USD", price: "19.00", tier: "C" },
-    TH: { currency: "USD", price: "19.00", tier: "C" },
-    MN: { currency: "USD", price: "19.00", tier: "C" },
-
+    // 한국은 PayPal 사용 금지, TossPayments 전용
     KR: { currency: "KRW", price: "39000", tier: "KR" },
 }
 
@@ -706,6 +694,7 @@ const reportLang = normalizeLanguage(
 
 const language = reportLang
         const reportType = req.query.reportType === "free" ? "free" : "paid"
+        
         const country = getCountryFromRequest(req)
         const priceInfo = getReportPriceByCountry(country)
 
@@ -714,26 +703,6 @@ const language = reportLang
             req.query.productService || "A new product or service idea"
         const targetCustomer =
             req.query.targetCustomer || "Target customers for this business"
-
-        const country = getCountryFromRequest(req)
-const priceInfo = getReportPriceByCountry(country)
-
-if (country === "KR") {
-    const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
-
-    const params = new URLSearchParams({
-        provider: "toss",
-        country: "KR",
-        lang: normalizeLanguage(req.query.lang || "ko"),
-        reportLang: normalizeLanguage(req.query.reportLang || req.query.lang || "ko"),
-        uiLang: normalizeLanguage(req.query.uiLang || "ko"),
-        brandName,
-        productService,
-        targetCustomer,
-    })
-
-    return res.redirect(`${siteUrl}/checkout?${params.toString()}`)
-}
 
         const locale = loadLocale(language)
 
@@ -871,6 +840,49 @@ function buildPayPalStartOrderUrl(report = {}, locale = {}) {
         report?.targetCustomer ||
         "Target customers",
 })
+
+    
+    return `${baseUrl}/api/paypal/start-order?${params.toString()}`
+}
+
+function buildCheckoutUrl(report = {}, locale = {}) {
+    const siteUrl =
+        process.env.PUBLIC_SITE_URL ||
+        "https://gonogo.so"
+
+    const baseUrl =
+        process.env.PUBLIC_BASE_URL ||
+        "https://gonogo-report-server.onrender.com"
+
+    const lang =
+        locale?.lang ||
+        report?.lang ||
+        report?.language ||
+        "en"
+
+    const country = normalizeCountryCode(report?.country || "")
+
+    const params = new URLSearchParams({
+        lang,
+        uiLang: report?.uiLang || lang,
+        reportLang: report?.reportLang || lang,
+        country,
+        brandName:
+            report?.cover?.brandName ||
+            report?.brandName ||
+            "PaidReport",
+        productService:
+            report?.productService ||
+            report?.cover?.subtitle ||
+            "A paid business report",
+        targetCustomer:
+            report?.targetCustomer ||
+            "Target customers",
+    })
+
+    if (country === "KR") {
+        return `${siteUrl}/checkout?provider=toss&${params.toString()}`
+    }
 
     return `${baseUrl}/api/paypal/start-order?${params.toString()}`
 }
@@ -1671,9 +1683,18 @@ const priceInfo = getReportPriceByCountry(country)
 if (country === "KR") {
     const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
 
-    return res.redirect(
-        `${siteUrl}/checkout?provider=toss&country=KR&price=${encodeURIComponent(priceInfo.price)}`
-    )
+    const params = new URLSearchParams({
+        provider: "toss",
+        country: "KR",
+        price: priceInfo.price,
+        currency: priceInfo.currency,
+        lang,
+        brandName,
+        productService,
+        targetCustomer,
+    })
+
+    return res.redirect(`${siteUrl}/checkout?${params.toString()}`)
 }
 
         const accessToken = await getPayPalAccessToken()
