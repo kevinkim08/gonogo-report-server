@@ -20,9 +20,65 @@ import { createClient } from "@supabase/supabase-js"
 const app = express()
 const PORT = process.env.PORT || 3000
 
-const REPORT_PRICE = "1.00"
-const REPORT_CURRENCY = "USD"
+const DEFAULT_REPORT_PRICE = "49.00"
+const DEFAULT_REPORT_CURRENCY = "USD"
 
+const COUNTRY_PRICING = {
+    US: { currency: "USD", price: "49.00", tier: "A" },
+    CA: { currency: "USD", price: "49.00", tier: "A" },
+    GB: { currency: "USD", price: "49.00", tier: "A" },
+    AU: { currency: "USD", price: "49.00", tier: "A" },
+    SG: { currency: "USD", price: "49.00", tier: "A" },
+    JP: { currency: "USD", price: "49.00", tier: "A" },
+
+    BR: { currency: "USD", price: "29.00", tier: "B" },
+    MX: { currency: "USD", price: "29.00", tier: "B" },
+    TR: { currency: "USD", price: "29.00", tier: "B" },
+
+    IN: { currency: "USD", price: "19.00", tier: "C" },
+    PH: { currency: "USD", price: "19.00", tier: "C" },
+    ID: { currency: "USD", price: "19.00", tier: "C" },
+    VN: { currency: "USD", price: "19.00", tier: "C" },
+    TH: { currency: "USD", price: "19.00", tier: "C" },
+    MN: { currency: "USD", price: "19.00", tier: "C" },
+
+    KR: { currency: "KRW", price: "39000", tier: "KR" },
+}
+
+function normalizeCountryCode(value = "") {
+    const code = String(value || "").trim().toUpperCase()
+    return /^[A-Z]{2}$/.test(code) ? code : ""
+}
+
+function getCountryFromRequest(req) {
+    return normalizeCountryCode(
+        req.query.country ||
+        req.headers["cf-ipcountry"] ||
+        req.headers["x-vercel-ip-country"] ||
+        req.headers["x-country-code"] ||
+        ""
+    )
+}
+
+function getReportPriceByCountry(countryCode = "") {
+    const country = normalizeCountryCode(countryCode)
+
+    return (
+        COUNTRY_PRICING[country] || {
+            currency: DEFAULT_REPORT_CURRENCY,
+            price: DEFAULT_REPORT_PRICE,
+            tier: "DEFAULT",
+        }
+    )
+}
+
+function formatPriceText(priceInfo) {
+    if (priceInfo.currency === "KRW") {
+        return `₩${Number(priceInfo.price).toLocaleString("ko-KR")}`
+    }
+
+    return `$${priceInfo.price.replace(".00", "")}`
+}
 app.set("trust proxy", true)
 
 const __filename = fileURLToPath(import.meta.url)
@@ -774,19 +830,20 @@ function buildPayPalStartOrderUrl(report = {}, locale = {}) {
         "ko"
 
     const params = new URLSearchParams({
-        lang,
-        brandName:
-            report?.cover?.brandName ||
-            report?.brandName ||
-            "PaidReport",
-        productService:
-            report?.productService ||
-            report?.cover?.subtitle ||
-            "A paid business report",
-        targetCustomer:
-            report?.targetCustomer ||
-            "Target customers",
-    })
+    lang,
+    country: report?.country || "",
+    brandName:
+        report?.cover?.brandName ||
+        report?.brandName ||
+        "PaidReport",
+    productService:
+        report?.productService ||
+        report?.cover?.subtitle ||
+        "A paid business report",
+    targetCustomer:
+        report?.targetCustomer ||
+        "Target customers",
+})
 
     return `${baseUrl}/api/paypal/start-order?${params.toString()}`
 }
@@ -1581,6 +1638,16 @@ app.get("/api/paypal/start-order", async (req, res) => {
             req.query.productService || "A paid business report"
         const targetCustomer =
             req.query.targetCustomer || "Target customers"
+        const country = getCountryFromRequest(req)
+const priceInfo = getReportPriceByCountry(country)
+
+if (country === "KR") {
+    const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+
+    return res.redirect(
+        `${siteUrl}/checkout?provider=toss&country=KR&price=${encodeURIComponent(priceInfo.price)}`
+    )
+}
 
         const accessToken = await getPayPalAccessToken()
 
@@ -1602,9 +1669,9 @@ app.get("/api/paypal/start-order", async (req, res) => {
                     {
                         description: "GONOGO Business Decision Report",
                         amount: {
-                            currency_code: REPORT_CURRENCY,
-                            value: REPORT_PRICE,
-                        },
+    currency_code: priceInfo.currency,
+    value: priceInfo.price,
+},
                     },
                 ],
                 payment_source: {
@@ -1638,6 +1705,11 @@ app.get("/api/paypal/start-order", async (req, res) => {
     // 기존 호환용
     lang: normalizeLanguage(req.query.reportLang || lang || "en"),
 
+    country,
+price: priceInfo.price,
+currency: priceInfo.currency,
+priceTier: priceInfo.tier,
+            
     brandName,
     productService,
     targetCustomer,
@@ -1745,17 +1817,26 @@ app.post("/api/paypal/capture-order", async (req, res) => {
         const currency = payment?.amount?.currency_code
         const captureId = payment?.id
 
-        if (status !== "COMPLETED" || currency !== "USD" || amount !== "49.00") {
-            return res.status(400).json({
-                ok: false,
-                error: "INVALID_PAYMENT_STATUS_OR_AMOUNT",
-                status,
-                amount,
-                currency,
-            })
-        }
-
         const context = paypalOrderContext.get(orderId) || {}
+
+const expectedPrice = context.price || DEFAULT_REPORT_PRICE
+const expectedCurrency = context.currency || DEFAULT_REPORT_CURRENCY
+
+if (
+    status !== "COMPLETED" ||
+    currency !== expectedCurrency ||
+    amount !== expectedPrice
+) {
+    return res.status(400).json({
+        ok: false,
+        error: "INVALID_PAYMENT_STATUS_OR_AMOUNT",
+        status,
+        amount,
+        currency,
+        expectedPrice,
+        expectedCurrency,
+    })
+}
 
        const reportLang =
     context.reportLang ||
@@ -5665,11 +5746,12 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
 
     const checkoutUrl = buildPayPalStartOrderUrl(report, locale)
 
-   const unlockPriceText = t(
+const priceInfo = getReportPriceByCountry(report?.country || "")
+const unlockPriceText = t(
     locale,
     "premium.unlockPrice",
     t(locale, "unlock_price", "Unlock full report for {price}")
-).replace("{price}", `$${REPORT_PRICE}`)
+).replace("{price}", formatPriceText(priceInfo))
 
     return `
 ${freePart}
