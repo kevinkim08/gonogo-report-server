@@ -334,12 +334,14 @@ const reportLang = normalizeLanguage(
 const lang = uiLang
     const reportType = req.query.reportType === "paid" ? "paid" : "free"
 
-    const params = new URLSearchParams({
+    const country = getCountryFromRequest(req)
+
+const params = new URLSearchParams({
     uiLang,
     reportLang,
 
-    // 보고서 생성 언어는 reportLang 기준
     lang: reportLang,
+    country,
 
     reportType,
     brandName: req.query.brandName || "",
@@ -704,12 +706,34 @@ const reportLang = normalizeLanguage(
 
 const language = reportLang
         const reportType = req.query.reportType === "free" ? "free" : "paid"
+        const country = getCountryFromRequest(req)
+        const priceInfo = getReportPriceByCountry(country)
 
         const brandName = req.query.brandName || "SampleBrand"
         const productService =
             req.query.productService || "A new product or service idea"
         const targetCustomer =
             req.query.targetCustomer || "Target customers for this business"
+
+        const country = getCountryFromRequest(req)
+const priceInfo = getReportPriceByCountry(country)
+
+if (country === "KR") {
+    const siteUrl = process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+
+    const params = new URLSearchParams({
+        provider: "toss",
+        country: "KR",
+        lang: normalizeLanguage(req.query.lang || "ko"),
+        reportLang: normalizeLanguage(req.query.reportLang || req.query.lang || "ko"),
+        uiLang: normalizeLanguage(req.query.uiLang || "ko"),
+        brandName,
+        productService,
+        targetCustomer,
+    })
+
+    return res.redirect(`${siteUrl}/checkout?${params.toString()}`)
+}
 
         const locale = loadLocale(language)
 
@@ -721,10 +745,13 @@ const language = reportLang
         })
 
         const finalReport = {
-            ...paidReport,
-            isPaid: reportType === "paid",
-            reportMode: reportType === "free" ? "free" : "paid",
-        }
+    ...paidReport,
+    isPaid: reportType === "paid",
+    reportMode: reportType === "free" ? "free" : "paid",
+
+    country,
+    priceInfo,
+}
 
         const html = buildHtmlFromTemplate(finalReport, locale)
 
@@ -5744,9 +5771,12 @@ function keepFreeReportOnly(html, locale = {}, report = {}) {
         report?.brandNaming?.recommendedName?.reason ||
         t(locale, "premium.defaultBrandReason", "This direction connects the offer, target customer, and market position.")
 
-    const checkoutUrl = buildPayPalStartOrderUrl(report, locale)
+    const priceInfo =
+    report?.priceInfo ||
+    getReportPriceByCountry(report?.country || "")
 
-const priceInfo = getReportPriceByCountry(report?.country || "")
+const checkoutUrl = buildCheckoutUrl(report, locale)
+
 const unlockPriceText = t(
     locale,
     "premium.unlockPrice",
@@ -5828,9 +5858,9 @@ ${freePart}
 
     <a class="free-paid-button" href="${esc(checkoutUrl)}">
       ${esc(
-          unlockPriceText ||
-          `Unlock full report for $${REPORT_PRICE}`
-      )}
+    unlockPriceText ||
+    `Unlock full report for ${formatPriceText(priceInfo)}`
+)}
     </a>
 
     <div class="free-paid-bottom-note">
