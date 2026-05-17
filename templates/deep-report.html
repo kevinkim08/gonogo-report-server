@@ -875,9 +875,13 @@ html[lang="mn"] .chart-value {
   border: 1px solid #d8e7dc;
   background: #ffffff;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 210px;
+  grid-template-columns: minmax(0, 1fr) 230px;
   gap: 18px;
   align-items: center;
+}
+
+.free-paid-price-box.no-discount {
+  grid-template-columns: 1fr;
 }
 
 .free-paid-price-left {
@@ -895,8 +899,9 @@ html[lang="mn"] .chart-value {
 .free-paid-price-row {
   display: flex;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
   margin-top: 10px;
+  flex-wrap: wrap;
 }
 
 .free-paid-old-price {
@@ -913,6 +918,35 @@ html[lang="mn"] .chart-value {
   line-height: 1;
   letter-spacing: -0.06em;
   color: #102018;
+}
+
+.free-paid-discount-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: #c0392b;
+  color: #ffffff;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1;
+  position: relative;
+}
+
+.free-paid-discount-tag::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid #c0392b;
 }
 
 .free-paid-price-message {
