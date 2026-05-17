@@ -3363,6 +3363,15 @@ function buildFreeReportFromPaidReport(fullReport) {
 
         customerSummary: fullReport.customerSummary,
 
+        brandNaming: fullReport.brandNaming,
+
+        freeCta: fullReport.freeCta,
+
+        country: fullReport.country || "",
+        priceInfo:
+            fullReport.priceInfo ||
+            getReportPriceByCountry(fullReport.country || ""),
+
         isPaid: false,
         reportMode: "free",
 
