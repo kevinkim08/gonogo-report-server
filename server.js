@@ -924,7 +924,11 @@ function buildCheckoutUrl(report = {}, locale = {}) {
             "Target customers",
     })
 
-    return `${siteUrl}/checkout?${params.toString()}`
+    const baseUrl =
+    process.env.PUBLIC_BASE_URL ||
+    "https://gonogo-report-server.onrender.com"
+
+return `${baseUrl}/checkout?${params.toString()}`
 }
 
 // =========================================================
@@ -1977,7 +1981,85 @@ const token = await createPaidDownloadToken({
         })
     }
 })
+app.get("/checkout", (req, res) => {
+    const clientToken = process.env.PADDLE_CLIENT_TOKEN || ""
+    const priceId =
+        process.env.GONOGO_PADDLE_PRICE_ID ||
+        "pri_01kvb51kpb3grfhwgyf25tnex6"
 
+    const purchaseId = `gonogo_${Date.now()}_${crypto
+        .randomBytes(8)
+        .toString("hex")}`
+
+    const uiLang = normalizeLanguage(req.query.uiLang || "en")
+    const reportLang = normalizeLanguage(
+        req.query.reportLang || req.query.lang || "en"
+    )
+
+    const brandName = req.query.brandName || "PaidReport"
+    const productService =
+        req.query.productService || "A paid business report"
+    const targetCustomer =
+        req.query.targetCustomer || "Target customers"
+
+    const successUrl = `${
+        process.env.PUBLIC_SITE_URL || "https://gonogo.so"
+    }/paid-success?purchaseId=${encodeURIComponent(
+        purchaseId
+    )}&uiLang=${encodeURIComponent(
+        uiLang
+    )}&reportLang=${encodeURIComponent(reportLang)}`
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8")
+
+    return res.send(`
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GoNoGo Checkout</title>
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+</head>
+<body style="font-family:Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+<div style="text-align:center;">
+<h1>Opening checkout...</h1>
+<p>Please complete your payment.</p>
+</div>
+
+<script>
+Paddle.Initialize({
+    token: ${JSON.stringify(clientToken)}
+});
+
+Paddle.Checkout.open({
+    items: [
+        {
+            priceId: ${JSON.stringify(priceId)},
+            quantity: 1
+        }
+    ],
+    customData: {
+        purchaseId: ${JSON.stringify(purchaseId)},
+        uiLang: ${JSON.stringify(uiLang)},
+        reportLang: ${JSON.stringify(reportLang)},
+        lang: ${JSON.stringify(reportLang)},
+        brandName: ${JSON.stringify(brandName)},
+        productService: ${JSON.stringify(productService)},
+        targetCustomer: ${JSON.stringify(targetCustomer)},
+        product: "gonogo_full_report"
+    },
+    settings: {
+        displayMode: "overlay",
+        theme: "light",
+        successUrl: ${JSON.stringify(successUrl)}
+    }
+});
+</script>
+</body>
+</html>
+`)
+})
 app.get("/api/paddle/paid-access", async (req, res) => {
     try {
         const purchaseId = String(req.query.purchaseId || "").trim()
