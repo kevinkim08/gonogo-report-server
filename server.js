@@ -67,6 +67,44 @@ function formatPriceText(priceInfo) {
 
     return `$${priceInfo.price.replace(".00", "")}`
 }
+function verifyPaddleSignature(rawBody, signatureHeader, secretKey) {
+    if (!rawBody || !signatureHeader || !secretKey) return false
+
+    const parts = Object.fromEntries(
+        signatureHeader.split(";").map((part) => {
+            const [key, value] = part.split("=")
+            return [key, value]
+        })
+    )
+
+    const timestamp = parts.ts
+    const receivedSignature = parts.h1
+
+    if (!timestamp || !receivedSignature) return false
+
+    const signedPayload = `${timestamp}:${rawBody}`
+
+    const expectedSignature = crypto
+        .createHmac("sha256", secretKey)
+        .update(signedPayload)
+        .digest("hex")
+
+    return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, "hex"),
+        Buffer.from(receivedSignature, "hex")
+    )
+}
+
+function getEmailFromPaddleEvent(event) {
+    return (
+        event?.data?.customer?.email ||
+        event?.data?.customer_email ||
+        event?.data?.billing_details?.email ||
+        event?.data?.custom_data?.email ||
+        event?.data?.transaction?.custom_data?.email ||
+        ""
+    )
+}
 app.set("trust proxy", true)
 
 const __filename = fileURLToPath(import.meta.url)
@@ -76,7 +114,16 @@ const __dirname = path.dirname(__filename)
 // [03] MIDDLEWARE
 // =========================================================
 
-app.use(express.json({ limit: "5mb" }))
+app.use(
+    express.json({
+        limit: "5mb",
+        verify: (req, res, buf) => {
+            if (req.originalUrl === "/api/paddle/webhook") {
+                req.rawBody = buf.toString("utf8")
+            }
+        },
+    })
+)
 app.use(
     "/fonts",
     express.static(path.join(__dirname, "fonts"))
