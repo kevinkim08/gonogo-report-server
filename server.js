@@ -1906,38 +1906,42 @@ app.post("/api/paddle/webhook", async (req, res) => {
         const email = getEmailFromPaddleEvent(event)
 
         const transactionId =
-            event?.data?.id ||
-            event?.data?.transaction_id ||
-            `paddle_${Date.now()}`
+    event?.data?.id ||
+    event?.data?.transaction_id ||
+    `paddle_${Date.now()}`
 
-        const customData = event?.data?.custom_data || {}
+const customData = event?.data?.custom_data || {}
 
-        const reportLang =
-            customData.reportLang ||
-            customData.lang ||
-            "en"
+const purchaseId =
+    customData.purchaseId ||
+    `paddle_${transactionId}`
 
-        const brandName =
-            customData.brandName ||
-            "PaidReport"
+const reportLang =
+    customData.reportLang ||
+    customData.lang ||
+    "en"
 
-        const productService =
-            customData.productService ||
-            "A paid business report"
+const brandName =
+    customData.brandName ||
+    "PaidReport"
 
-        const targetCustomer =
-            customData.targetCustomer ||
-            "Target customers"
+const productService =
+    customData.productService ||
+    "A paid business report"
 
-        const token = await createPaidDownloadToken({
-            source: "paddle",
-            orderId: transactionId,
-            captureId: transactionId,
-            lang: reportLang,
-            brandName,
-            productService,
-            targetCustomer,
-        })
+const targetCustomer =
+    customData.targetCustomer ||
+    "Target customers"
+
+const token = await createPaidDownloadToken({
+    source: "paddle",
+    orderId: purchaseId,
+    captureId: transactionId,
+    lang: reportLang,
+    brandName,
+    productService,
+    targetCustomer,
+})
 
         await sendPaidReportEmail({
             to: email,
@@ -1980,6 +1984,70 @@ app.post("/api/paddle/webhook", async (req, res) => {
         })
     }
 })
+
+app.get("/api/paddle/paid-access", async (req, res) => {
+    try {
+        const purchaseId = String(req.query.purchaseId || "").trim()
+
+        if (!purchaseId) {
+            return res.status(400).json({
+                ok: false,
+                message: "MISSING_PURCHASE_ID",
+            })
+        }
+
+        if (!supabase) {
+            return res.status(500).json({
+                ok: false,
+                message: "SUPABASE_NOT_CONFIGURED",
+            })
+        }
+
+        const { data, error } = await supabase
+            .from("paid_orders")
+            .select("*")
+            .eq("order_id", purchaseId)
+            .eq("status", "paid")
+            .single()
+
+        if (error || !data) {
+            return res.status(404).json({
+                ok: false,
+                message: "PAID_ACCESS_NOT_READY",
+            })
+        }
+
+        const baseUrl =
+            process.env.PUBLIC_BASE_URL ||
+            "https://gonogo-report-server.onrender.com"
+
+        const params = new URLSearchParams({
+            token: data.token,
+            uiLang: req.query.uiLang || data.lang || "en",
+            reportLang: req.query.reportLang || data.lang || "en",
+            lang: req.query.reportLang || data.lang || "en",
+            brandName: data.brand_name || "PaidReport",
+            productService:
+                data.product_service || "A paid business report",
+            targetCustomer:
+                data.target_customer || "Target customers",
+        })
+
+        return res.json({
+            ok: true,
+            token: data.token,
+            downloadUrl: `${baseUrl}/api/download-paid-pdf?${params.toString()}`,
+        })
+    } catch (e) {
+        console.error("[PADDLE_PAID_ACCESS_ERROR]", e)
+
+        return res.status(500).json({
+            ok: false,
+            message: e?.message || "PADDLE_PAID_ACCESS_FAILED",
+        })
+    }
+})
+
 app.post("/api/paypal/capture-order", async (req, res) => {
     try {
         const orderId = req.body?.orderId || req.query?.orderId
