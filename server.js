@@ -1867,7 +1867,119 @@ const params = new URLSearchParams({
         return res.status(500).send("PayPal return failed.")
     }
 })
+app.post("/api/paddle/webhook", async (req, res) => {
+    try {
+        const rawBody = req.rawBody
+        const signatureHeader = req.headers["paddle-signature"]
+        const secretKey = process.env.PADDLE_WEBHOOK_SECRET
 
+        const isValid = verifyPaddleSignature(
+            rawBody,
+            signatureHeader,
+            secretKey
+        )
+
+        if (!isValid) {
+            console.error("[PADDLE_WEBHOOK_INVALID_SIGNATURE]")
+            return res.status(401).json({
+                ok: false,
+                message: "INVALID_PADDLE_SIGNATURE",
+            })
+        }
+
+        const event = req.body || {}
+        const eventType = event.event_type
+
+        console.log("[PADDLE_WEBHOOK_RECEIVED]", {
+            eventType,
+            eventId: event?.event_id || null,
+        })
+
+        if (eventType !== "transaction.completed") {
+            return res.json({
+                ok: true,
+                ignored: true,
+                eventType,
+            })
+        }
+
+        const email = getEmailFromPaddleEvent(event)
+
+        const transactionId =
+            event?.data?.id ||
+            event?.data?.transaction_id ||
+            `paddle_${Date.now()}`
+
+        const customData = event?.data?.custom_data || {}
+
+        const reportLang =
+            customData.reportLang ||
+            customData.lang ||
+            "en"
+
+        const brandName =
+            customData.brandName ||
+            "PaidReport"
+
+        const productService =
+            customData.productService ||
+            "A paid business report"
+
+        const targetCustomer =
+            customData.targetCustomer ||
+            "Target customers"
+
+        const token = await createPaidDownloadToken({
+            source: "paddle",
+            orderId: transactionId,
+            captureId: transactionId,
+            lang: reportLang,
+            brandName,
+            productService,
+            targetCustomer,
+        })
+
+        await sendPaidReportEmail({
+            to: email,
+            token,
+            language: reportLang,
+            brandName,
+        })
+
+        const baseUrl =
+            process.env.PUBLIC_BASE_URL ||
+            "https://gonogo-report-server.onrender.com"
+
+        const params = new URLSearchParams({
+            token,
+            uiLang: customData.uiLang || reportLang,
+            reportLang,
+            lang: reportLang,
+            brandName,
+            productService,
+            targetCustomer,
+        })
+
+        const downloadUrl =
+            `${baseUrl}/api/download-paid-pdf?${params.toString()}`
+
+        return res.json({
+            ok: true,
+            provider: "paddle",
+            eventType,
+            email,
+            token,
+            downloadUrl,
+        })
+    } catch (e) {
+        console.error("[PADDLE_WEBHOOK_ERROR]", e)
+
+        return res.status(500).json({
+            ok: false,
+            message: e?.message || "PADDLE_WEBHOOK_FAILED",
+        })
+    }
+})
 app.post("/api/paypal/capture-order", async (req, res) => {
     try {
         const orderId = req.body?.orderId || req.query?.orderId
