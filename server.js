@@ -897,10 +897,6 @@ function buildCheckoutUrl(report = {}, locale = {}) {
         process.env.PUBLIC_SITE_URL ||
         "https://gonogo.so"
 
-    const baseUrl =
-        process.env.PUBLIC_BASE_URL ||
-        "https://gonogo-report-server.onrender.com"
-
     const lang =
         locale?.lang ||
         report?.lang ||
@@ -910,6 +906,7 @@ function buildCheckoutUrl(report = {}, locale = {}) {
     const country = normalizeCountryCode(report?.country || "")
 
     const params = new URLSearchParams({
+        provider: "paddle",
         lang,
         uiLang: report?.uiLang || lang,
         reportLang: report?.reportLang || lang,
@@ -927,11 +924,7 @@ function buildCheckoutUrl(report = {}, locale = {}) {
             "Target customers",
     })
 
-    if (country === "KR") {
-        return `${siteUrl}/checkout?provider=toss&${params.toString()}`
-    }
-
-    return `${baseUrl}/api/paypal/start-order?${params.toString()}`
+    return `${siteUrl}/checkout?${params.toString()}`
 }
 
 // =========================================================
