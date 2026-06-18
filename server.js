@@ -2033,27 +2033,18 @@ Paddle.Initialize({
 });
 
 Paddle.Checkout.open({
+    settings: {
+        displayMode: "overlay",
+        theme: "light",
+        locale: "en",
+        successUrl: ${JSON.stringify(successUrl)}
+    },
     items: [
         {
             priceId: ${JSON.stringify(priceId)},
             quantity: 1
         }
-    ],
-    customData: {
-        purchaseId: ${JSON.stringify(purchaseId)},
-        uiLang: ${JSON.stringify(uiLang)},
-        reportLang: ${JSON.stringify(reportLang)},
-        lang: ${JSON.stringify(reportLang)},
-        brandName: ${JSON.stringify(brandName)},
-        productService: ${JSON.stringify(productService)},
-        targetCustomer: ${JSON.stringify(targetCustomer)},
-        product: "gonogo_full_report"
-    },
-    settings: {
-        displayMode: "overlay",
-        theme: "light",
-        successUrl: ${JSON.stringify(successUrl)}
-    }
+    ]
 });
 </script>
 </body>
