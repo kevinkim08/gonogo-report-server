@@ -924,11 +924,7 @@ function buildCheckoutUrl(report = {}, locale = {}) {
             "Target customers",
     })
 
-    const baseUrl =
-    process.env.PUBLIC_BASE_URL ||
-    "https://gonogo-report-server.onrender.com"
-
-return `${baseUrl}/checkout?${params.toString()}`
+return `${siteUrl}/checkout?${params.toString()}`
 }
 
 // =========================================================
