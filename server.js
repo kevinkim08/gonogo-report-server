@@ -349,11 +349,50 @@ app.get("/", (req, res) => {
     })
 })
 
-app.get("/api/health", (req, res) => {
-    res.json({
-        ok: true,
-        status: "healthy",
-    })
+app.get("/api/health", async (req, res) => {
+  const startedAt = Date.now();
+
+  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+  let openaiStatus = "unknown";
+  let openaiResponseTimeMs = null;
+  let openaiError = null;
+
+  try {
+    const openaiRes = await fetch(`https://api.openai.com/v1/models/${model}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
+      }
+    });
+
+    openaiResponseTimeMs = Date.now() - startedAt;
+
+    if (openaiRes.ok) {
+      openaiStatus = "online";
+    } else {
+      openaiStatus = "error";
+      openaiError = `HTTP ${openaiRes.status}`;
+    }
+  } catch (error) {
+    openaiResponseTimeMs = Date.now() - startedAt;
+    openaiStatus = "error";
+    openaiError = error.message;
+  }
+
+  res.json({
+    ok: true,
+    service: "gonogo-report-server",
+    status: "healthy",
+
+    aiProvider: "OpenAI",
+    model,
+    aiStatus: openaiStatus,
+    aiResponseTimeMs: openaiResponseTimeMs,
+    aiError: openaiError,
+
+    checkedAt: new Date().toISOString()
+  })
 })
 
 // =========================================================
