@@ -380,34 +380,15 @@ app.get("/api/health", async (req, res) => {
     openaiError = error.message;
   }
 
-    let resendStatus = "unknown"
-let resendError = null
+    const resendStatus =
+  process.env.RESEND_API_KEY?.startsWith("re_")
+    ? "online"
+    : "error"
 
-const resendApiKey = String(process.env.RESEND_API_KEY || "").trim()
-
-try {
-  if (!resendApiKey) {
-    resendStatus = "error"
-    resendError = "MISSING_RESEND_API_KEY"
-  } else {
-    const resendResponse = await fetch("https://api.resend.com/domains", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-      },
-    })
-
-    if (resendResponse.ok) {
-      resendStatus = "online"
-    } else {
-      resendStatus = "error"
-      resendError = `HTTP ${resendResponse.status}`
-    }
-  }
-} catch (error) {
-  resendStatus = "error"
-  resendError = error.message
-}
+const resendError =
+  resendStatus === "online"
+    ? null
+    : "RESEND_API_KEY_MISSING"
     
    res.json({
     ok: true,
