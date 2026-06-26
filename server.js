@@ -380,7 +380,29 @@ app.get("/api/health", async (req, res) => {
     openaiError = error.message;
   }
 
-  res.json({
+      let resendStatus = "unknown"
+  let resendError = null
+
+  try {
+    const resendResponse = await fetch("https://api.resend.com/domains", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      },
+    })
+
+    if (resendResponse.ok) {
+      resendStatus = "online"
+    } else {
+      resendStatus = "error"
+      resendError = `HTTP ${resendResponse.status}`
+    }
+  } catch (error) {
+    resendStatus = "error"
+    resendError = error.message
+  }
+    
+   res.json({
     ok: true,
     service: "gonogo-report-server",
     status: "healthy",
@@ -390,6 +412,12 @@ app.get("/api/health", async (req, res) => {
     aiStatus: openaiStatus,
     aiResponseTimeMs: openaiResponseTimeMs,
     aiError: openaiError,
+
+    resendProvider: "Resend",
+    resendStatus,
+    resendDomain: "mail.gonogo.so",
+    resendEmail: "hello@gonogo.so",
+    resendError,
 
     checkedAt: new Date().toISOString()
   })
