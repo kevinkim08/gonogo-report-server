@@ -2136,13 +2136,26 @@ Paddle.Checkout.open({
         locale: "en",
         successUrl: ${JSON.stringify(successUrl)}
     },
+
     items: [
         {
             priceId: ${JSON.stringify(priceId)},
             quantity: 1
         }
-    ]
+    ],
+
+    customData: {
+        purchaseId: ${JSON.stringify(purchaseId)},
+
+        uiLang: ${JSON.stringify(uiLang)},
+        reportLang: ${JSON.stringify(reportLang)},
+
+        brandName: ${JSON.stringify(brandName)},
+        productService: ${JSON.stringify(productService)},
+        targetCustomer: ${JSON.stringify(targetCustomer)}
+    }
 });
+
 </script>
 </body>
 </html>
@@ -5626,6 +5639,62 @@ small {
 
 const businessDiagnosis = report?.businessDiagnosis || {}
 
+const brandNaming = report?.brandNaming || {}
+
+const brandNameCandidates = Array.isArray(brandNaming.nameCandidates)
+    ? brandNaming.nameCandidates
+    : []
+
+const domainSuggestions = Array.isArray(brandNaming.domainSuggestions)
+    ? brandNaming.domainSuggestions
+    : []
+
+const recommendedBrand = brandNaming.recommendedName || {}
+
+const fallbackBrandName =
+    report?.cover?.brandName ||
+    report?.brandName ||
+    "Recommended Brand"
+
+const safeDomainBase = String(fallbackBrandName)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 24) || "brand"
+
+const normalizedBrandNameCandidates =
+    brandNameCandidates.length > 0
+        ? brandNameCandidates
+        : [
+              {
+                  name: fallbackBrandName,
+                  meaning: "현재 입력된 브랜드명을 기준으로 한 기본 후보",
+                  fit: "입력값과 직접 연결됨",
+                  risk: "차별성이 약할 수 있음",
+                  score: 60,
+              },
+          ]
+
+const normalizedDomainSuggestions =
+    domainSuggestions.length > 0
+        ? domainSuggestions
+        : [
+              {
+                  domain: `${safeDomainBase}.com`,
+                  reason: "가장 기본적인 글로벌 도메인 형태",
+                  availability: "LOW",
+              },
+              {
+                  domain: `get${safeDomainBase}.com`,
+                  reason: "서비스형 브랜드에 자주 쓰이는 대체 도메인",
+                  availability: "MEDIUM",
+              },
+              {
+                  domain: `${safeDomainBase}.co`,
+                  reason: "스타트업형 브랜드에 적합한 짧은 대체 도메인",
+                  availability: "MEDIUM",
+              },
+          ]
+    
 const data = {
     industryType:
         businessDiagnosis.industryType || "",
@@ -5732,7 +5801,36 @@ const data = {
 
     namingStrategy:
         report?.brandNaming?.namingStrategy || "",
+    brandNameCandidateRows:
+    rows(
+        normalizedBrandNameCandidates.map((item) => [
+            item?.name || "",
+            item?.meaning || "",
+            item?.fit || "",
+            item?.risk || "",
+            item?.score ?? "",
+        ])
+    ),
 
+recommendedBrandName:
+    recommendedBrand?.name ||
+    normalizedBrandNameCandidates?.[0]?.name ||
+    fallbackBrandName,
+
+recommendedBrandReason:
+    recommendedBrand?.reason ||
+    recommendedBrand?.positioning ||
+    recommendedBrand?.expansionPotential ||
+    "이 이름은 사업 아이템과 고객층을 가장 잘 연결하는 브랜드 후보입니다.",
+
+brandDomainRows:
+    rows(
+        normalizedDomainSuggestions.map((item) => [
+            item?.domain || "",
+            item?.reason || "",
+            item?.availability || "",
+        ])
+    ),
     marketLevel:
         matrix.MARKET || "",
 
