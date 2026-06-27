@@ -1013,6 +1013,35 @@ html[lang="mn"] .chart-value {
     grid-template-columns: minmax(0, 1fr) 190px;
   }
 }
+
+/* Japanese / long text overflow fix */
+.brand-card,
+.brand-direction-card,
+.naming-card,
+.strategy-card,
+.two-col-card,
+.insight-card {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+
+.brand-card p,
+.brand-direction-card p,
+.naming-card p,
+.strategy-card p,
+.two-col-card p,
+.insight-card p {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    line-height: 1.7;
+}
+    
   </style>
 </head>
 
