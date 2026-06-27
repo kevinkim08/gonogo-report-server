@@ -411,6 +411,35 @@ const resendError =
   })
 })
 
+app.get("/api/openai-usage", async (req, res) => {
+  try {
+    const monthlyBudget = Number(process.env.OPENAI_MONTHLY_BUDGET || 100)
+
+    return res.json({
+      ok: true,
+      provider: "OpenAI",
+      service: "GoNoGo",
+
+      monthlyBudget,
+      alertLevels: [5, 10, 50, 80],
+      status: "monitoring_by_alerts",
+
+      note: "OpenAI spend is currently protected by OpenAI Spend Alerts. Actual API usage integration can be added when Admin Key access is available.",
+
+      checkedAt: new Date().toISOString()
+    })
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      provider: "OpenAI",
+      service: "GoNoGo",
+      status: "error",
+      error: error.message,
+      checkedAt: new Date().toISOString()
+    })
+  }
+})
+
 // =========================================================
 // [07] REPORT LOADING PAGE
 // =========================================================
