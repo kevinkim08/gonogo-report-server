@@ -3788,7 +3788,75 @@ function buildFreeReportFromPaidReport(fullReport) {
 // [19] NORMALIZE REPORT (안정화 핵심)
 // =========================================================
 
-function normalizeDeepReport(report, input) {
+function normalizeDeepReport(report, input) {function normalizeDeepReport(report, input) {
+    const reportLang = normalizeLanguage(
+        input?.language ||
+        report?.language ||
+        "en"
+    )
+
+    const isJa = reportLang === "ja"
+
+    const fallbackFailureRisks = isJa
+        ? [
+              {
+                  risk: "供給不足",
+                  whyItMatters:
+                      "案件や加盟店の供給が止まると、成果報酬モデルはすぐに機能しなくなります。",
+                  earlyWarningSignal:
+                      "新規案件数が増えず、同じ案件だけに依存している。",
+                  counterMove:
+                      "最初は1〜2業種に絞り、供給網を先に確保する。",
+              },
+              {
+                  risk: "成果判定の不一致",
+                  whyItMatters:
+                      "成果定義が曖昧だと、顧客との信頼関係が崩れます。",
+                  earlyWarningSignal:
+                      "成果承認や請求基準について顧客から確認が増える。",
+                  counterMove:
+                      "契約前に成果条件、除外条件、承認基準を固定する。",
+              },
+              {
+                  risk: "粗利崩壊",
+                  whyItMatters:
+                      "報酬コストと運用工数が増えると、売上があっても利益が残りません。",
+                  earlyWarningSignal:
+                      "獲得単価は下がっても、運用時間と報酬負担が増えている。",
+                  counterMove:
+                      "報酬上限と運用範囲を事前に決める。",
+              },
+          ]
+        : [
+              {
+                  risk: "Supply shortage",
+                  whyItMatters:
+                      "If supply or campaign inventory stops, the model cannot deliver results.",
+                  earlyWarningSignal:
+                      "New campaign supply does not grow.",
+                  counterMove:
+                      "Start with one narrow vertical and secure supply first.",
+              },
+              {
+                  risk: "Unclear performance definition",
+                  whyItMatters:
+                      "If success criteria are unclear, customers lose trust quickly.",
+                  earlyWarningSignal:
+                      "Customers keep asking how results are counted.",
+                  counterMove:
+                      "Define success, exclusions, and approval rules before launch.",
+              },
+              {
+                  risk: "Margin collapse",
+                  whyItMatters:
+                      "Reward cost and manual operations can consume all profit.",
+                  earlyWarningSignal:
+                      "More revenue creates more support work and reward cost.",
+                  counterMove:
+                      "Set reward caps and service limits before every pilot.",
+              },
+          ]
+
     return {
         founderDecisionUpgrade: {
     finalDecisionStatement: {
@@ -3818,62 +3886,72 @@ function normalizeDeepReport(report, input) {
             "",
     },
 
-    whyThisMayFail: Array.isArray(
-        report?.founderDecisionUpgrade?.whyThisMayFail
-    )
-        ? report.founderDecisionUpgrade.whyThisMayFail.map((item) => ({
-              risk: item?.risk || "",
-              whyItMatters: item?.whyItMatters || "",
-              earlyWarningSignal:
-                  item?.earlyWarningSignal || "",
-              counterMove: item?.counterMove || "",
-          }))
-        : [],
+    whyThisMayFail: safeArray(
+    withMeaningfulFallback(
+        report?.founderDecisionUpgrade?.whyThisMayFail,
+        fallbackFailureRisks
+    ),
+    fallbackFailureRisks
+)
+    .map((item) => ({
+        risk: item?.risk || "",
+        whyItMatters: item?.whyItMatters || "",
+        earlyWarningSignal:
+            item?.earlyWarningSignal || "",
+        counterMove: item?.counterMove || "",
+    }))
+    .slice(0, 3),
 
     businessStressIndex: {
-        marketSaturation: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex?.marketSaturation || 0
-        ),
+    marketSaturation: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.marketSaturation,
+        68
+    ),
 
-        acquisitionDifficulty: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex
-                ?.acquisitionDifficulty || 0
-        ),
+    acquisitionDifficulty: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.acquisitionDifficulty,
+        72
+    ),
 
-        retentionRisk: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex?.retentionRisk || 0
-        ),
+    retentionRisk: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.retentionRisk,
+        64
+    ),
 
-        executionComplexity: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex
-                ?.executionComplexity || 0
-        ),
+    executionComplexity: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.executionComplexity,
+        70
+    ),
 
-        differentiationStrength: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex
-                ?.differentiationStrength || 0
-        ),
+    differentiationStrength: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.differentiationStrength,
+        52
+    ),
 
-        monetizationStability: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex
-                ?.monetizationStability || 0
-        ),
+    monetizationStability: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.monetizationStability,
+        48
+    ),
 
-        founderFitRisk: Number(
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex?.founderFitRisk || 0
-        ),
+    founderFitRisk: toScore(
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.founderFitRisk,
+        60
+    ),
 
-        summary:
-            report?.founderDecisionUpgrade
-                ?.businessStressIndex?.summary || "",
-    },
+    summary:
+        report?.founderDecisionUpgrade
+            ?.businessStressIndex?.summary ||
+        (isJa
+            ? "顧客獲得、継続率、実行難易度、差別化、収益化、創業者適合性を総合的に評価した指標です。"
+            : "This index summarizes pressure across acquisition, retention, execution, differentiation, monetization, and founder fit."),
+},
 
     marketPositionMap: {
     xAxis:
@@ -3913,18 +3991,25 @@ function normalizeDeepReport(report, input) {
             ?.marketPositionMap?.position || "",
 
     zone:
-        report?.founderDecisionUpgrade
-            ?.marketPositionMap?.zone || "",
+    report?.founderDecisionUpgrade
+        ?.marketPositionMap?.zone ||
+    (isJa
+        ? "獲得難易度が高いゾーン"
+        : "Difficult Acquisition Zone"),
 
-    interpretation:
-        report?.founderDecisionUpgrade
-            ?.marketPositionMap?.interpretation ||
-        "",
+interpretation:
+    report?.founderDecisionUpgrade
+        ?.marketPositionMap?.interpretation ||
+    (isJa
+        ? "競争は存在するが、成果定義と供給品質を標準化できれば差別化の余地があります。"
+        : "Competition exists, but the business can still differentiate by standardizing proof, supply quality, and measurable outcomes."),
 
-    recommendedMove:
-        report?.founderDecisionUpgrade
-            ?.marketPositionMap
-            ?.recommendedMove || "",
+recommendedMove:
+    report?.founderDecisionUpgrade
+        ?.marketPositionMap?.recommendedMove ||
+    (isJa
+        ? "特定業種に集中し、成果定義を固定して、少数の検証案件で再現性を確認する。"
+        : "Focus on one narrow segment, fix the success definition, and validate repeatability through small pilots."),
 },
 },
         cover: {
