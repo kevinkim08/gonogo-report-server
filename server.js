@@ -5807,6 +5807,24 @@ small {
     -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
 }
+
+td {
+    line-height: 1.55 !important;
+    overflow-wrap: anywhere !important;
+}
+
+.soft-panel {
+    min-height: 320px;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+.text-block,
+.mini-note,
+.verdict {
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
 </style>
 </head>`
 )
@@ -6527,13 +6545,24 @@ html = html
     // [24] BACK BUTTON
     // =========================================================
 
-   html = injectReportBackButton(html, locale, {
+  html = injectReportBackButton(html, locale, {
     showBackButton: report?.reportMode === "free",
 })
 
-    html = html.replace(/{{[^}]+}}/g, "")
+html = html
+    .replace(/ifrewards/g, "if rewards")
+    .replace(/ifreward/g, "if reward")
+    .replace(/afterrewards/g, "after rewards")
+    .replace(/ifcustomers/g, "if customers")
+    .replace(/HowtoReadThisReport/g, "How to Read This Report")
+    .replace(/BusinessDecision/g, "Business Decision")
+    .replace(/StructureDiagnosis/g, "Structure Diagnosis")
+    .replace(/Risk&Kill/g, "Risk & Kill")
+    .replace(/(\d(?:\.\d+)?)xto(\d(?:\.\d+)?)x/g, "$1x to $2x")
 
-    return html
+html = html.replace(/{{[^}]+}}/g, "")
+
+return html
 }
 // =========================================================
 // [25] FREE REPORT ONLY / PREMIUM LOCK UI
