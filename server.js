@@ -3788,7 +3788,7 @@ function buildFreeReportFromPaidReport(fullReport) {
 // [19] NORMALIZE REPORT (안정화 핵심)
 // =========================================================
 
-function normalizeDeepReport(report, input) {function normalizeDeepReport(report, input) {
+function normalizeDeepReport(report, input) {
     const reportLang = normalizeLanguage(
         input?.language ||
         report?.language ||
@@ -4278,101 +4278,224 @@ recommendedMove:
 
         finalRule: report?.finalRule || "",
 
-        dataConfidence: {
-            overallLevel: report?.dataConfidence?.overallLevel || "MEDIUM",
-            summary: report?.dataConfidence?.summary || "",
-            sourceQuality: safeArray(
-                report?.dataConfidence?.sourceQuality,
-                [
-                    ["", "", ""],
-                    ["", "", ""],
-                    ["", "", ""],
-                ]
-            ).slice(0, 3),
-            limits: safeArray(report?.dataConfidence?.limits, [
-                "",
-                "",
-                "",
-            ]).slice(0, 3),
-        },
+      dataConfidence: {
+    overallLevel:
+        report?.dataConfidence?.overallLevel || "MEDIUM",
+
+    summary:
+        report?.dataConfidence?.summary ||
+        (isJa
+            ? "この分析は入力情報と市場構造にもとづく推定判断です。実際の価格、転換率、継続率は検証で確認する必要があります。"
+            : "This analysis is an estimated judgment based on input data and market structure. Actual pricing, conversion, and retention must be validated."),
+
+    sourceQuality: safeArray(
+        withMeaningfulFallback(
+            report?.dataConfidence?.sourceQuality,
+            isJa
+                ? [
+                      ["入力情報", "MEDIUM", "事業説明と対象顧客を基準に推定"],
+                      ["市場情報", "MEDIUM", "一般的な市場構造から判断"],
+                      ["財務数値", "LOW", "実測値ではなく仮説ベース"],
+                  ]
+                : [
+                      ["Input data", "MEDIUM", "Estimated from business description and target customer"],
+                      ["Market information", "MEDIUM", "Judged from general market structure"],
+                      ["Financial figures", "LOW", "Hypothesis-based, not measured data"],
+                  ]
+        ),
+        []
+    ).slice(0, 3),
+
+    limits: safeArray(
+        withMeaningfulFallback(
+            report?.dataConfidence?.limits,
+            isJa
+                ? [
+                      "実際の顧客獲得単価は未検証です。",
+                      "継続率と解約率は検証後に更新が必要です。",
+                      "競合比較は公開情報と構造推定にもとづきます。",
+                  ]
+                : [
+                      "Actual CAC has not been validated.",
+                      "Retention and churn must be updated after testing.",
+                      "Competitor comparison is based on public structure and assumptions.",
+                  ]
+        ),
+        []
+    ).slice(0, 3),
+},  
 
         sensitivityAnalysis: {
-            cacLtvTable: safeArray(
-                report?.sensitivityAnalysis?.cacLtvTable,
-                [
-                    ["Low CAC", "", "", ""],
-                    ["Base CAC", "", "", ""],
-                    ["High CAC", "", "", ""],
-                ]
-            ).slice(0, 3),
+    cacLtvTable: safeArray(
+        withMeaningfulFallback(
+            report?.sensitivityAnalysis?.cacLtvTable,
+            isJa
+                ? [
+                      ["Low CAC", "低い", "高い", "拡大候補"],
+                      ["Base CAC", "中程度", "中程度", "小規模検証を継続"],
+                      ["High CAC", "高い", "低い", "再設計または停止"],
+                  ]
+                : [
+                      ["Low CAC", "Low", "High", "Expansion candidate"],
+                      ["Base CAC", "Medium", "Medium", "Continue controlled validation"],
+                      ["High CAC", "High", "Low", "Redesign or stop"],
+                  ]
+        ),
+        []
+    ).slice(0, 3),
 
-            criticalBreakPoint:
-                report?.sensitivityAnalysis?.criticalBreakPoint || "",
+    criticalBreakPoint:
+        report?.sensitivityAnalysis?.criticalBreakPoint ||
+        (isJa
+            ? "報酬コストと営業工数が増えると、LTV/CACが急速に悪化します。"
+            : "LTV/CAC deteriorates quickly when reward cost and manual sales effort rise."),
 
-            founderWarning:
-                report?.sensitivityAnalysis?.founderWarning || "",
-        },
+    founderWarning:
+        report?.sensitivityAnalysis?.founderWarning ||
+        (isJa
+            ? "成長より先に、1業種での再現性と粗利を証明する必要があります。"
+            : "Before growth, prove repeatability and gross margin in one niche."),
+},
 
         profitSimulation: {
-            monthlyScenarioTable: safeArray(
-                report?.profitSimulation?.monthlyScenarioTable,
-                [
-                    ["Conservative", "", "", "", "", ""],
-                    ["Base", "", "", "", "", ""],
-                    ["Aggressive", "", "", "", "", ""],
-                ]
-            ).slice(0, 3),
+    monthlyScenarioTable: safeArray(
+        withMeaningfulFallback(
+            report?.profitSimulation?.monthlyScenarioTable,
+            isJa
+                ? [
+                      ["Conservative", "5社", "50万円", "20万円", "10万円", "小規模検証なら可能"],
+                      ["Base", "15社", "180万円", "55万円", "45万円", "業種特化が必要"],
+                      ["Aggressive", "40社", "600万円", "150万円", "180万円", "供給と運用自動化が必須"],
+                  ]
+                : [
+                      ["Conservative", "5 customers", "$3,000", "$1,200", "$600", "Possible only as a small pilot"],
+                      ["Base", "15 customers", "$10,000", "$3,000", "$2,500", "Requires vertical focus"],
+                      ["Aggressive", "40 customers", "$35,000", "$8,000", "$10,000", "Requires supply and automation"],
+                  ]
+        ),
+        []
+    ).slice(0, 3),
 
-            breakEvenPoint:
-                report?.profitSimulation?.breakEvenPoint || "",
+    breakEvenPoint:
+        report?.profitSimulation?.breakEvenPoint ||
+        (isJa
+            ? "少なくとも15社前後の継続顧客と、報酬コストの上限管理が必要です。"
+            : "Break-even requires roughly 15 retained customers and a controlled reward cost cap."),
 
-            profitJudgment:
-                report?.profitSimulation?.profitJudgment || "",
+    profitJudgment:
+        report?.profitSimulation?.profitJudgment ||
+        (isJa
+            ? "利益は売上規模よりも、成果単価・報酬コスト・運用工数の管理に左右されます。"
+            : "Profitability depends less on revenue size and more on outcome pricing, reward cost, and operational load."),
 
-            cashRisk:
-                report?.profitSimulation?.cashRisk || "",
-        },
+    cashRisk:
+        report?.profitSimulation?.cashRisk ||
+        (isJa
+            ? "成果発生前に営業・運用コストが先行すると、現金回収が遅れます。"
+            : "Cash risk appears when sales and operations costs come before confirmed performance revenue."),
+},
 
         killCriteria: {
-            rules: safeArray(report?.killCriteria?.rules, [
-                ["", "", ""],
-                ["", "", ""],
-                ["", "", ""],
-                ["", "", ""],
-            ]).slice(0, 4),
+    rules: safeArray(
+        withMeaningfulFallback(
+            report?.killCriteria?.rules,
+            isJa
+                ? [
+                      ["CAC", "3回の検証後も既存獲得単価を下回れない", "提案内容または業種を変更"],
+                      ["Conversion", "有効商談からの導入率が20%未満", "訴求・LP・営業資料を修正"],
+                      ["Repeat", "90日以内の継続利用が弱い", "継続理由がある業種へ絞る"],
+                      ["Margin", "報酬後の粗利が50%未満", "報酬設計と運用範囲を制限"],
+                  ]
+                : [
+                      ["CAC", "Cannot beat current acquisition cost after 3 pilots", "Change offer or segment"],
+                      ["Conversion", "Below 20% from qualified conversations", "Fix positioning, landing page, or sales material"],
+                      ["Repeat", "Weak repeat use within 90 days", "Narrow to repeat-heavy verticals"],
+                      ["Margin", "Gross margin below 50% after rewards", "Cap rewards and limit service scope"],
+                  ]
+        ),
+        []
+    ).slice(0, 4),
 
-            stopDecision:
-                report?.killCriteria?.stopDecision || "",
+    stopDecision:
+        report?.killCriteria?.stopDecision ||
+        (isJa
+            ? "3回連続の検証で既存獲得単価を下回れない場合は停止します。"
+            : "Stop if three consecutive pilots fail to beat the customer's current acquisition cost."),
 
-            pivotDecision:
-                report?.killCriteria?.pivotDecision || "",
+    pivotDecision:
+        report?.killCriteria?.pivotDecision ||
+        (isJa
+            ? "導入意欲はあるが継続率と粗利が弱い場合は、業種または提供形式を変更します。"
+            : "Pivot if demand exists but retention and margin remain weak."),
 
-            scaleDecision:
-                report?.killCriteria?.scaleDecision || "",
-        },
+    scaleDecision:
+        report?.killCriteria?.scaleDecision ||
+        (isJa
+            ? "1つの業種で再現性、低い運用負荷、安定粗利が確認できた後にのみ拡大します。"
+            : "Scale only after one niche proves repeatability, low support load, and stable gross margin."),
+},
 
-        appendix: {
-            dataSources: safeArray(report?.appendix?.dataSources, [
-                ["", "", ""],
-                ["", "", ""],
-                ["", "", ""],
-            ]).slice(0, 3),
+     appendix: {
+    dataSources: safeArray(
+        withMeaningfulFallback(
+            report?.appendix?.dataSources,
+            isJa
+                ? [
+                      ["市場構造", "公開市場情報・業界一般知識", "市場規模と競争環境の推定"],
+                      ["顧客仮説", "入力された対象顧客情報", "購買理由と導入障壁の整理"],
+                      ["収益仮説", "CAC/LTV/粗利の仮説値", "検証すべき財務条件の整理"],
+                  ]
+                : [
+                      ["Market structure", "Public market logic and industry knowledge", "Estimate market size and competition"],
+                      ["Customer hypothesis", "User-provided target customer", "Clarify buying reasons and friction"],
+                      ["Revenue hypothesis", "CAC/LTV/margin assumptions", "Define financial conditions to test"],
+                  ]
+        ),
+        []
+    ).slice(0, 3),
 
-            assumptions: safeArray(report?.appendix?.assumptions, [
-                "",
-                "",
-                "",
-                "",
-            ]).slice(0, 4),
-        },
+    assumptions: safeArray(
+        withMeaningfulFallback(
+            report?.appendix?.assumptions,
+            isJa
+                ? [
+                      "初期検証は1〜2業種に限定する前提です。",
+                      "成果定義と請求条件を契約前に固定する前提です。",
+                      "報酬コストには上限を設定する前提です。",
+                      "拡大前に継続率と粗利を検証する前提です。",
+                  ]
+                : [
+                      "Initial validation is limited to one or two verticals.",
+                      "Success definition and billing rules are fixed before contract.",
+                      "Reward cost is capped before pilots.",
+                      "Retention and gross margin are validated before scaling.",
+                  ]
+        ),
+        []
+    ).slice(0, 4),
+},
 
-        referenceLinks: safeArray(report?.referenceLinks, [
-            ["", ""],
-            ["", ""],
-            ["", ""],
-            ["", ""],
-            ["", ""],
-        ]).slice(0, 5),
+referenceLinks: safeArray(
+    withMeaningfulFallback(
+        report?.referenceLinks,
+        isJa
+            ? [
+                  ["中小企業庁", "https://www.chusho.meti.go.jp/"],
+                  ["総務省 統計局", "https://www.stat.go.jp/"],
+                  ["経済産業省", "https://www.meti.go.jp/"],
+                  ["Google Trends", "https://trends.google.com/"],
+                  ["Similarweb", "https://www.similarweb.com/"],
+              ]
+            : [
+                  ["Y Combinator", "https://www.ycombinator.com/library"],
+                  ["Harvard Business Review", "https://hbr.org/"],
+                  ["Google Trends", "https://trends.google.com/"],
+                  ["Statista", "https://www.statista.com/"],
+                  ["Similarweb", "https://www.similarweb.com/"],
+              ]
+    ),
+    []
+).slice(0, 5),   
     }
 }
 
