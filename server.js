@@ -4133,17 +4133,47 @@ function normalizeDeepReport(report, input) {
             modelDeepDive: report?.businessModel?.modelDeepDive || "",
         },
 
-        riskSystem: safeArray(report?.riskSystem, [
-            ["", "", ""],
-            ["", "", ""],
-            ["", "", ""],
-        ]).slice(0, 3),
+        riskSystem: safeArray(
+    withMeaningfulFallback(report?.riskSystem, [
+        [
+            "Reward cost inflation",
+            "Rewards can become hidden CAC and destroy margin.",
+            "Set a fixed reward cap before every pilot.",
+        ],
+        [
+            "Low repeat purchase",
+            "One-time buyers make LTV too weak to support incentives.",
+            "Start with repeat-heavy categories only.",
+        ],
+        [
+            "Operational complexity",
+            "Manual setup can turn the product into an agency service.",
+            "Standardize one offer, one funnel, and one reporting format.",
+        ],
+    ]),
+    []
+).slice(0, 3),
 
-        executionPlan: safeArray(report?.executionPlan, [
-            ["Phase 1", "", ""],
-            ["Phase 2", "", ""],
-            ["Phase 3", "", ""],
-        ]).slice(0, 3),
+     executionPlan: safeArray(
+    withMeaningfulFallback(report?.executionPlan, [
+        [
+            "Phase 1",
+            "Run a small paid pilot with 5 target customers.",
+            "Validate CAC versus current paid acquisition cost.",
+        ],
+        [
+            "Phase 2",
+            "Refine the reward cap, offer structure, and conversion tracking.",
+            "Confirm repeat purchase or reactivation behavior.",
+        ],
+        [
+            "Phase 3",
+            "Scale only one niche where reward cost stays below paid CAC.",
+            "Reach LTV / CAC above 3.0x before broader expansion.",
+        ],
+    ]),
+    []
+).slice(0, 3),   
 
         operatingRule: report?.operatingRule || "",
 
@@ -6815,6 +6845,28 @@ function esc(value) {
 
 function safeArray(value, fallback = []) {
     return Array.isArray(value) ? value : fallback
+}
+
+function hasMeaningfulRows(rowsData = []) {
+    if (!Array.isArray(rowsData)) return false
+
+    return rowsData.some((row) => {
+        if (Array.isArray(row)) {
+            return row.some((cell) => String(cell || "").trim() !== "")
+        }
+
+        if (row && typeof row === "object") {
+            return Object.values(row).some(
+                (value) => String(value || "").trim() !== ""
+            )
+        }
+
+        return String(row || "").trim() !== ""
+    })
+}
+
+function withMeaningfulFallback(value, fallback) {
+    return hasMeaningfulRows(value) ? value : fallback
 }
 
 function toScore(value, fallback = 50) {
