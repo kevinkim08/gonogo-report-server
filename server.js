@@ -105,6 +105,27 @@ function getEmailFromPaddleEvent(event) {
         ""
     )
 }
+
+async function notifyAOIOONEvent(payload) {
+    const url = process.env.AOIOON_EVENT_WEBHOOK_URL
+
+    if (!url) return
+
+    try {
+        await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        })
+
+        console.log("[AOIOON_EVENT_SENT]", payload)
+    } catch (error) {
+        console.error("[AOIOON_EVENT_FAILED]", error.message)
+    }
+}
+
 app.set("trust proxy", true)
 
 const __filename = fileURLToPath(import.meta.url)
@@ -2049,6 +2070,16 @@ const token = await createPaidDownloadToken({
             brandName,
         })
 
+await notifyAOIOONEvent({
+    service: "GoNoGo",
+    eventType: "payment_success",
+    email,
+    plan: "paid_report",
+    amount: 49,
+    currency: "USD",
+    status: "completed",
+})
+        
         const baseUrl =
             process.env.PUBLIC_BASE_URL ||
             "https://gonogo-report-server.onrender.com"
